@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Der vertraute Griff – Rethink the Routine</title>
+  <link rel="stylesheet" href="styles/fonts.css">
+  <link rel="stylesheet" href="styles/player.css">
+</head>
+<body>
+  <main class="player" id="player">
+    <div class="stage" id="stage">
+      <canvas id="film" width="1920" height="1080" aria-label="Animationsfilm: Der vertraute Griff – Rethink the Routine"></canvas>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="row">
+        <button id="btnPlay" class="btn primary" title="Abspielen/Pause (Leertaste)" aria-label="Abspielen">
+          <svg viewBox="0 0 24 24" class="i-play"><path d="M7 5l12 7-12 7z"/></svg>
+          <svg viewBox="0 0 24 24" class="i-pause"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+        </button>
+        <button id="btnRestart" class="btn" title="Neustart (Pos1)" aria-label="Neustart">
+          <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+        </button>
+        <div class="time"><span id="tNow">00:00.0</span> <span class="sep">/</span> <span id="tDur">01:30.0</span></div>
+        <div class="scene" id="sceneLabel"></div>
+        <div class="spacer"></div>
+        <button id="btnMute" class="btn sound" title="Ton an/aus (M)" aria-pressed="false">
+          <svg viewBox="0 0 24 24" class="i-on"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5c1.2 1 1.8 2.2 1.8 3.5s-.6 2.5-1.8 3.5M18.5 6c2 1.6 3 3.6 3 6s-1 4.4-3 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" class="i-off"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="muteLabel">Ton an</span>
+        </button>
+        <button id="btnFull" class="btn" title="Vollbild (F)" aria-label="Vollbild">
+          <svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zM14 4h6v6h-2V6h-4zM4 14h2v4h4v2H4zM18 14h2v6h-6v-2h4z"/></svg>
+        </button>
+        <button id="btnExport" class="btn" title="Film in Echtzeit aufnehmen und herunterladen">Export</button>
+      </div>
+      <div class="timeline">
+        <div class="marks" id="marks"></div>
+        <input type="range" id="scrub" min="0" max="90" step="0.0333333" value="0" aria-label="Zeitleiste">
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <script src="src/config.js"></script>
+  <script src="src/core.js"></script>
+  <script src="src/figures.js"></script>
+  <script src="src/props.js"></script>
+  <script src="src/typography.js"></script>
+  <script src="src/scenes.js"></script>
+  <script src="src/timeline.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/player.js"></script>
+</body>
+</html>
