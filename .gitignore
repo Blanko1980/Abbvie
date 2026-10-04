@@ -1,0 +1,3 @@
+# Aufbereitete KI-Einzelbilder: stecken vollständig in assets/ki/bilder.js (neu erzeugen: python3 tools/ki_prepare.py)
+assets/ki/*.jpg
+assets/ki/*.webp

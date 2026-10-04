@@ -190,5 +190,67 @@ window.FILM_KI = {
     "h": 1536
    }
   }
+ },
+ "practice": {
+  "src": "assets/ki/practice.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "tuer": {
+    "src": "assets/ki/practice-tuer.webp",
+    "x": 651,
+    "y": 255,
+    "w": 1390,
+    "h": 1158
+   }
+  }
+ },
+ "greet": {
+  "src": "assets/ki/greet.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "hand": {
+    "src": "assets/ki/greet-hand.webp",
+    "x": 751,
+    "y": 126,
+    "w": 1496,
+    "h": 1410
+   }
+  }
+ },
+ "handle": {
+  "src": "assets/ki/handle.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "griff": {
+    "src": "assets/ki/handle-griff.webp",
+    "x": 1775,
+    "y": 520,
+    "w": 977,
+    "h": 563
+   }
+  }
+ },
+ "carhandle": {
+  "src": "assets/ki/carhandle.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {}
+ },
+ "boarding": {
+  "src": "assets/ki/boarding.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "sitzt": {
+    "src": "assets/ki/boarding-sitzt.webp",
+    "x": 943,
+    "y": 294,
+    "w": 1329,
+    "h": 1164
+   }
+  }
  }
 };

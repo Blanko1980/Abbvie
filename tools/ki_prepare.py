@@ -136,6 +136,12 @@ SHOTS = {
     "door": ("door-a.jpg", {"einsteigen": "door-b.jpg"}),
     "belt": ("belt-a.jpg", {"zu": "belt-b.jpg"}),
     "beltCoat": ("belt-coat-a.jpg", {"zu": "belt-coat-b.jpg"}),
+    "practice": ("practice-a.jpg", {"tuer": "practice-b.jpg"}),
+    "greet": ("greet-a.jpg", {"hand": "greet-b.jpg"}),
+    "handle": ("handle-a.jpg", {"griff": "handle-b.jpg"}),
+    "carhandle": ("carhandle-b.jpg", {}),
+    # gespiegelt: Auto zeigt nach rechts, man sieht die Beifahrerseite (passt zur Sitzordnung im Innenraum)
+    "boarding": ("boarding-a.jpg", {"sitzt": "boarding-b.jpg"}, {"flip": True}),
 }
 
 
@@ -180,14 +186,16 @@ def main():
     }
 
     # --- Einstellungen nach dem allgemeinen Schema: Grundbild + Pose-Varianten (gemeinsame Maske)
-    for key, (base, variants) in SHOTS.items():
+    for key, (base, variants, *opt) in SHOTS.items():
+        opt = opt[0] if opt else {}
         if not all(os.path.exists(os.path.join(RAW, f)) for f in [base, *variants.values()]):
             print("übersprungen (Bilder fehlen):", key)
             continue
-        A = rgb(base)
+        load = (lambda f: rgb(f)[:, ::-1].copy()) if opt.get("flip") else rgb
+        A = load(base)
         save_jpg(A, f"{key}.jpg")
         meta[key] = {"src": f"assets/ki/{key}.jpg", "w": A.shape[1], "h": A.shape[0],
-                     "pose": overlay_group(A, {k: rgb(f) for k, f in variants.items()}, key, (0, A.shape[1]))}
+                     "pose": overlay_group(A, {k: load(f) for k, f in variants.items()}, key, (0, A.shape[1])) if variants else {}}
 
     # Bilddaten einbetten: Bilder per file:// würden den Canvas für Export/Render sperren
     import base64

@@ -210,7 +210,8 @@
     const prev = i > 0 ? seq[i - 1][1] : null;
     const a = ease.inOutSine(seg(lt, t0, t0 + fade));
     const z = lerp(cam.z[0], cam.z[1], ease.inOutSine(Math.min(1, lt / dur)));
-    const f = cam.f ? [cv.ox + cam.f[0] * cv.s, cv.oy + cam.f[1] * cv.s] : [W / 2, H / 2];
+    const fs = cam.f2 ? [lerp(cam.f[0], cam.f2[0], ease.inOutSine(Math.min(1, lt / dur))), lerp(cam.f[1], cam.f2[1], ease.inOutSine(Math.min(1, lt / dur)))] : cam.f;
+    const f = fs ? [cv.ox + fs[0] * cv.s, cv.oy + fs[1] * cv.s] : [W / 2, H / 2];
     ctx.save();
     camera(ctx, z, f[0], f[1], cv, m);
     ctx.drawImage(img[m.src], cv.ox, cv.oy, m.w * cv.s, m.h * cv.s);
@@ -279,9 +280,28 @@
     poseShot(ctx, m, lt, dur, seq, { z: [1.0, 1.05], f: [1376, 900] }, dayOf(p), 0.55);
   }
 
+  // ------------------------------------------------------------ Praxis
+  const day0 = () => dayOf({ day: 0 });
+  function shotPractice(ctx, lt, dur) {
+    poseShot(ctx, META.practice, lt, dur, [[0, null], [1.2, 'tuer', 0.4]], { z: [1.0, 1.08], f: [1500, 820] }, day0(), 0.5);
+  }
+  function shotGreet(ctx, lt, dur) {
+    poseShot(ctx, META.greet, lt, dur, [[0, null], [1.7, 'hand', 0.35]], { z: [1.04, 1.1], f: [1250, 760] }, day0(), 0.5);
+  }
+  function shotHandle(ctx, lt, dur) {
+    poseShot(ctx, META.handle, lt, dur, [[0, null], [0.35, 'griff', 0.14]], { z: [1.02, 1.05], f: [1700, 800] }, day0(), 0.5);
+  }
+  function shotCarHandle(ctx, lt, dur) {
+    // Match Cut: Hand liegt exakt wie im Praxisbild; kleiner Kamerazug nach rechts = Tür wird aufgezogen
+    poseShot(ctx, META.carhandle, lt, dur, [[0, null]], { z: [1.05, 1.07], f: [1700, 800], f2: [1780, 790] }, day0(), 0.5);
+  }
+  function shotBoarding(ctx, lt, dur) {
+    poseShot(ctx, META.boarding, lt, dur, [[0, null], [1.8, 'sitzt', 0.45]], { z: [1.04, 1.1], f: [1376, 900] }, day0(), 0.5);
+  }
+
   // ------------------------------------------------------------ Einhängen
   const orig = {};
-  ['navi', 'cabin', 'cup', 'key', 'bag', 'door', 'belt'].forEach((k) => (orig[k] = F.scenes[k]));
+  ['navi', 'cabin', 'cup', 'key', 'bag', 'door', 'belt', 'practice', 'greet', 'handle', 'carhandle', 'boarding'].forEach((k) => (orig[k] = F.scenes[k]));
   const use = (name, fn) => (ctx, lt, dur, p, t) => (F.ki.active ? fn : orig[name])(ctx, lt, dur, p, t);
   F.scenes.navi = use('navi', shotNavi);
   F.scenes.cabin = use('cabin', shotCabin);
@@ -290,5 +310,10 @@
   opt('key', shotKey, 'key');
   opt('bag', shotBag, 'bag');
   opt('door', shotDoor, 'door');
+  opt('practice', shotPractice, 'practice');
+  opt('greet', shotGreet, 'greet');
+  opt('handle', shotHandle, 'handle');
+  opt('carhandle', shotCarHandle, 'carhandle');
+  opt('boarding', shotBoarding, 'boarding');
   if (META.belt && META.beltCoat) F.scenes.belt = use('belt', shotBelt);
 })();
