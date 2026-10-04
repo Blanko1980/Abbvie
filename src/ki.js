@@ -269,10 +269,10 @@
     poseShot(ctx, META.key, lt, dur, seq, { z: [1.32, 1.38], f: [1390, 930] }, dayOf(p), 0.6);
   }
   function shotBag(ctx, lt, dur, p, t) {
-    poseShot(ctx, META.bag, lt, dur, [[0, null], [0.7, 'tragen', 0.32]], { z: [1.04, 1.1], f: [1500, 820] }, dayOf({ day: 1 }), 0.5);
+    poseShot(ctx, META.bag, lt, dur, [[0, null], [0.7, 'tragen', 0.18]], { z: [1.04, 1.1], f: [1500, 820] }, dayOf({ day: 1 }), 0.5);
   }
   function shotDoor(ctx, lt, dur, p, t) {
-    poseShot(ctx, META.door, lt, dur, [[0, null], [1.0, 'einsteigen', 0.36]], { z: [1.12, 1.2], f: [1950, 1150] }, dayOf({ day: 1 }), 0.5);
+    poseShot(ctx, META.door, lt, dur, [[0, null], [1.0, 'einsteigen', 0.2]], { z: [1.12, 1.2], f: [1950, 1150] }, dayOf({ day: 1 }), 0.5);
   }
   function shotBelt(ctx, lt, dur, p, t) {
     const m = p.mode === 'coat' ? META.beltCoat : META.belt;
@@ -286,7 +286,7 @@
     poseShot(ctx, META.practice, lt, dur, [[0, null], [1.2, 'tuer', 0.4]], { z: [1.0, 1.08], f: [1500, 820] }, day0(), 0.5);
   }
   function shotGreet(ctx, lt, dur) {
-    poseShot(ctx, META.greet, lt, dur, [[0, null], [1.7, 'hand', 0.35]], { z: [1.04, 1.1], f: [1250, 760] }, day0(), 0.5);
+    poseShot(ctx, META.greet, lt, dur, [[0, null], [1.7, 'hand', 0.25]], { z: [1.04, 1.1], f: [1250, 760] }, day0(), 0.5);
   }
   function shotHandle(ctx, lt, dur) {
     poseShot(ctx, META.handle, lt, dur, [[0, null], [0.35, 'griff', 0.14]], { z: [1.02, 1.05], f: [1700, 800] }, day0(), 0.5);
@@ -296,7 +296,7 @@
     poseShot(ctx, META.carhandle, lt, dur, [[0, null]], { z: [1.05, 1.07], f: [1700, 800], f2: [1780, 790] }, day0(), 0.5);
   }
   function shotBoarding(ctx, lt, dur) {
-    poseShot(ctx, META.boarding, lt, dur, [[0, null], [1.8, 'sitzt', 0.45]], { z: [1.04, 1.1], f: [1376, 900] }, day0(), 0.5);
+    poseShot(ctx, META.boarding, lt, dur, [[0, null], [1.8, 'sitzt', 0.22]], { z: [1.04, 1.1], f: [1376, 900] }, day0(), 0.5);
   }
 
   // ------------------------------------------------------------ Losfahren
