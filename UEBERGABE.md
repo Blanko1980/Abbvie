@@ -125,4 +125,14 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 - `tools/gen_styleframes.sh [modell]`: erzeugt alles nach `ki-styleframes/`. Die Figurenblätter werden als Referenz an die Styleframes übergeben.
 - Kosten laut Google: ca. 0,134 USD je Bild mit `gemini-3-pro-image` (1K und 2K kosten gleich). Ein Durchlauf (6 Bilder) kostet also unter 1 USD.
 
-**Nächster Schritt:** Nach Aktivierung der Abrechnung `bash tools/gen_styleframes.sh` ausführen, Ergebnisse prüfen und der Nutzerin zeigen.
+**Erster Bilddurchlauf (Abrechnung aktiv, Kunde hat KI-Material freigegeben)**
+- Ergebnisse in `ki-styleframes/`, Vergleich in `00-uebersicht.jpg`. Kosten bisher unter 2 USD.
+- Die Figuren bleiben über die Bilder hinweg sehr konsistent, wenn die Figurenblätter als Referenz mitgehen.
+- Stil A (12): gezeichnet mit Konturen, weich schattiert. Das Modell setzt Konturen, obwohl der Prompt sie nicht verlangt.
+- Stil B (13): klarer Flat-Stil wie Referenz 2.
+- Stil C (16): Vektor ohne Konturen, mit Verläufen und Unschärfe. Kommt Referenz 1 am nächsten. Funktioniert nur ohne Figurenblätter als Referenz, denn mit ihnen übernimmt das Modell deren Konturen. Für Konsistenz in Stil C braucht es deshalb neue Figurenblätter in Stil C.
+- `15-…-3d-zufall`: Der Stil-C-Versuch mit Referenz ist ungewollt im 3D-Look gelandet. Er wird nur als Option gezeigt.
+- Bekannte Kleinigkeiten: winzige Schrift auf der Kaffeemaschine (10), grünes Notausgangsschild (11), Hände auf dem Patientinnen-Blatt hellhäutig (02). Das wird beim Bausteine-Erzeugen korrigiert.
+- Die API liefert JPEG. Bilder werden deshalb als `.jpg` gespeichert.
+
+**Nächster Schritt:** Stilentscheidung der Nutzerin abwarten. Danach Figurenblätter im gewählten Stil neu erzeugen, dann Bausteine (Schritt 4).

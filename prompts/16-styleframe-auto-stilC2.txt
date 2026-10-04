@@ -1,0 +1,11 @@
+ALTERNATIVE STYLE C (overrides the style notes above where they differ):
+Flat 2D VECTOR illustration (not 3D, not painterly, not comic line art), as made in Adobe Illustrator for a premium corporate explainer video.
+Absolutely NO outlines or contour lines: every shape is a clean vector shape with smooth linear/radial gradients.
+Stylised, simplified characters: small simple dark eyes, tiny nose shape, simple mouth, slight cheek blush, smooth hair shapes with a few highlight strands, hands simplified.
+Atmosphere built with gradients: soft light bloom, background objects blurred (gaussian blur on the background vector layers), subtle noise texture.
+
+STYLEFRAME "The pause", 16:9, cinematic composition.
+View from outside through the windshield into a light grey car: the DOCTOR (man about 45, short dark hair greying at the temples, short grey-brown stubble beard, rectangular dark glasses, white coat over grey shirt) in the driver's seat on the right side of the image; the PATIENT (woman mid-30s, dark skin, curly black hair in a soft bun, olive jacket, cream top) in the passenger seat on the left. Both buckled up.
+In the centre of the dashboard a blank navigation screen glowing warm white.
+His index finger hovers just before the screen without touching it; he pauses and looks thoughtfully at her; she looks back calmly.
+Blurred street with trees behind the car, soft reflections on the windshield.

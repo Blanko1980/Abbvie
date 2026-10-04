@@ -67,8 +67,17 @@ def main():
             blob = p.get("inline_data") or p.get("inlineData")
             if blob and not p.get("thought"):
                 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-                with open(a.out, "wb") as f:
-                    f.write(base64.b64decode(blob["data"]))
+                raw = base64.b64decode(blob["data"])
+                is_png = raw.startswith(b"\x89PNG")
+                want_png = a.out.lower().endswith(".png")
+                if is_png != want_png:  # Format an die Dateiendung anpassen
+                    from io import BytesIO
+                    from PIL import Image  # pip install pillow
+                    im = Image.open(BytesIO(raw)).convert("RGB")
+                    im.save(a.out, "PNG") if want_png else im.save(a.out, "JPEG", quality=95)
+                else:
+                    with open(a.out, "wb") as f:
+                        f.write(raw)
                 saved = True
             elif p.get("text") and not p.get("thought"):
                 print("Modell:", p["text"][:300])
