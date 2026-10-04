@@ -59,26 +59,51 @@ def soft_mask(diff_bool, grow=28, blur=22):
     return np.asarray(im, np.float32) / 255
 
 
-def overlay(base, var, name, split=None, thresh=22):
-    """Ebene mit den Bereichen, in denen sich var von base unterscheidet."""
+def diff_mask(base, var, split=None, thresh=22):
     d = np.abs(base - var).max(axis=2)
     d = np.asarray(Image.fromarray(d.astype(np.uint8)).filter(ImageFilter.GaussianBlur(2)), np.float32)
     keep = d > thresh
     if split:
-        x0, x1 = split
-        keep[:, :x0] = False
-        keep[:, x1:] = False
-    # Rauschen entfernen: nur zusammenhängende größere Bereiche behalten (grob über Öffnen)
+        keep[:, :split[0]] = False
+        keep[:, split[1]:] = False
+    # Rauschen entfernen (Öffnen), nur größere Bereiche bleiben
     k = Image.fromarray((keep * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MaxFilter(5))
-    keep = np.asarray(k) > 0
+    return np.asarray(k) > 0
+
+
+def color_match(base, var, region):
+    """Farbe/Kontrast der Variante an das Grundbild angleichen (lineare Anpassung je Kanal,
+    gemessen an unveränderten Pixeln im Bereich der Ebene)."""
+    same = region & (np.abs(base - var).max(axis=2) < 14)
+    out = var.copy()
+    if same.sum() < 500:
+        return out
+    for c in range(3):
+        x, y = var[..., c][same], base[..., c][same]
+        a, b = np.polyfit(x, y, 1)
+        out[..., c] = np.clip(var[..., c] * a + b, 0, 255)
+    return out
+
+
+def overlay_group(base, variants, prefix, split, thresh=22):
+    """Mehrere Pose-Varianten einer Figur mit GEMEINSAMER weicher Maske
+    (Vereinigung aller Änderungen) – so lassen sie sich sauber ineinander überblenden."""
+    keep = np.zeros(base.shape[:2], bool)
+    for v in variants.values():
+        keep |= diff_mask(base, v, split, thresh)
     alpha = soft_mask(keep)
-    if split:
-        alpha[:, :split[0]] = 0
-        alpha[:, split[1]:] = 0
+    alpha[:, :split[0]] = 0
+    alpha[:, split[1]:] = 0
     x0, y0, x1, y1 = bbox(alpha > 0.004)
-    rgba = np.dstack([var, alpha * 255])[y0:y1, x0:x1]
-    save_webp(rgba, name)
-    return {"src": "assets/ki/" + name, "x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
+    region = np.zeros_like(keep)
+    region[y0:y1, x0:x1] = True
+    out = {}
+    for key, v in variants.items():
+        v = color_match(base, v, region)
+        name = f"{prefix}-{key}.webp"
+        save_webp(np.dstack([v, alpha * 255])[y0:y1, x0:x1], name)
+        out[key] = {"src": "assets/ki/" + name, "x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
+    return out
 
 
 def hand(raw, name):
@@ -128,15 +153,16 @@ def main():
         if os.path.exists(os.path.join(RAW, raw)):
             meta[key] = hand(raw, raw.replace(".png", ".webp"))
 
-    # --- Innenraum: Grundbild A (Blick aufs Navi) + Kopf-Ebenen B (Blickkontakt) + Blinzeln
-    A, B, BL = rgb("cabin-a.jpg"), rgb("cabin-b.jpg"), rgb("cabin-b-blink.jpg")
+    # --- Innenraum: Grundbild (Arzt schaut aufs Navi, Patientin nach vorn) + Pose-Ebenen je Figur
+    A = rgb("cabin-a2.jpg")
     save_jpg(A, "cabin-a.jpg")
     W = A.shape[1]
+    B = rgb("cabin-b.jpg")
     meta["cabin"] = {
         "src": "assets/ki/cabin-a.jpg", "w": W, "h": A.shape[0],
-        "patB": overlay(A, B, "cabin-b-patientin.webp", split=(0, W // 2)),
-        "docB": overlay(A, B, "cabin-b-arzt.webp", split=(W // 2, W)),
-        "docBlink": overlay(B, BL, "cabin-b-arzt-blinzeln.webp", split=(W // 2, W), thresh=18),
+        "doc": overlay_group(A, {"mitte": rgb("cabin-arzt-mitte.jpg"), "b": B, "blinzeln": rgb("cabin-b-blink.jpg")},
+                             "cabin-arzt", (W // 2, W)),
+        "pat": overlay_group(A, {"mitte": rgb("cabin-patientin-mitte.jpg"), "b": B}, "cabin-patientin", (0, W // 2)),
     }
 
     # Bilddaten einbetten: Bilder per file:// würden den Canvas für Export/Render sperren

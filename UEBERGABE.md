@@ -157,4 +157,9 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 - Render-Werkzeug kann Ausschnitte: `node tools/render.cjs video datei.mp4 --from 43 --to 71`.
 - Prompts der Bausteine: `prompts/bausteine/`.
 
-**Nächster Schritt:** Feedback zur Testsequenz einholen, dann die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).
+**Feedback der Nutzerin zur Testsequenz (umgesetzt bzw. vorgemerkt)**
+- Kopfdrehung der Patientin weicher, Arzt deutlicher vom Navi aufschauen. Umgesetzt mit Zwischenposen (`cabin-*-mitte`), neuem Grundbild mit gesenktem Kopf (`cabin-a2`), gemeinsamen Masken je Figur und Farbangleich der Ebenen (`tools/ki_prepare.py`).
+- Navi-Grafik gefällt. **So reduziert lassen**, die Botschaft ist Blau (Wettbewerber, vertraute Route) → Gold (Rinvoq).
+- **Musik später flotter machen.** Sie klingt bisher zu lahm. Erst angehen, wenn das Bild fertig ist.
+
+**Nächster Schritt:** Übrige Einstellungen umstellen: die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).

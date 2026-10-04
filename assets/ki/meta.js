@@ -53,26 +53,44 @@ window.FILM_KI = {
   "src": "assets/ki/cabin-a.jpg",
   "w": 2752,
   "h": 1536,
-  "patB": {
-   "src": "assets/ki/cabin-b-patientin.webp",
-   "x": 438,
-   "y": 308,
-   "w": 615,
-   "h": 640
+  "doc": {
+   "mitte": {
+    "src": "assets/ki/cabin-arzt-mitte.webp",
+    "x": 1563,
+    "y": 227,
+    "w": 1189,
+    "h": 961
+   },
+   "b": {
+    "src": "assets/ki/cabin-arzt-b.webp",
+    "x": 1563,
+    "y": 227,
+    "w": 1189,
+    "h": 961
+   },
+   "blinzeln": {
+    "src": "assets/ki/cabin-arzt-blinzeln.webp",
+    "x": 1563,
+    "y": 227,
+    "w": 1189,
+    "h": 961
+   }
   },
-  "docB": {
-   "src": "assets/ki/cabin-b-arzt.webp",
-   "x": 1781,
-   "y": 409,
-   "w": 341,
-   "h": 436
-  },
-  "docBlink": {
-   "src": "assets/ki/cabin-b-arzt-blinzeln.webp",
-   "x": 1777,
-   "y": 405,
-   "w": 332,
-   "h": 365
+  "pat": {
+   "mitte": {
+    "src": "assets/ki/cabin-patientin-mitte.webp",
+    "x": 437,
+    "y": 308,
+    "w": 616,
+    "h": 641
+   },
+   "b": {
+    "src": "assets/ki/cabin-patientin-b.webp",
+    "x": 437,
+    "y": 308,
+    "w": 616,
+    "h": 641
+   }
   }
  }
 };

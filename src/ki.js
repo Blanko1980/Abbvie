@@ -163,28 +163,39 @@
   }
 
   // ------------------------------------------------------------ Innenraum (Frontansicht)
-  // Pose-zu-Pose: Grundbild A (Blick aufs Navi), darüber weich maskierte Kopf-Ebenen B
+  // Pose-zu-Pose: Grundbild (Arzt schaut aufs Navi, Patientin nach vorn), darüber je Figur
+  // Pose-Ebenen mit gemeinsamer Maske: mitte (Zwischenpose) → b (Blickkontakt).
+  // pose: 0 = Grundbild, 1 = Zwischenpose, 2 = Endpose (stufenlos, je Stufe weich überblendet)
+  function poses(ctx, g, cv, pose, extra) {
+    if (pose <= 0) return;
+    layer(ctx, g.mitte, cv, Math.min(1, pose));
+    if (pose > 1) layer(ctx, g.b, cv, pose - 1);
+    if (extra) layer(ctx, extra, cv, 1);
+  }
   function shotCabin(ctx, lt, dur, p, t) {
     const m = META.cabin;
     const cv = cover(m);
-    const turn = (a, b) => ease.inOutSine(seg(lt, a, b));
-    let doc, pat, blink = 0, z;
+    // Übergang über zwei Stufen; a..b = Gesamtdauer, Zwischenpose wird kurz gehalten
+    const twoStep = (a, b, hold = 0.12) => {
+      const h = (b - a - hold) / 2;
+      return ease.inOutSine(seg(lt, a, a + h)) + ease.inOutSine(seg(lt, a + h + hold, b));
+    };
+    let doc, pat, blink = false, z;
     if (p.mode === 'pause') {
-      doc = turn(1.0, 1.3);
-      pat = turn(1.5, 1.8);
-      blink = lt > 2.75 && lt < 2.87 ? 1 : 0;
+      doc = twoStep(0.75, 1.21, 0.14); // deutlich vom Navi aufschauen (kurze Wechsel: großer Weg des Kopfes)
+      pat = twoStep(1.45, 2.25, 0.16); // Patientin wendet sich ruhig zu
+      blink = lt > 2.8 && lt < 2.92;
       z = lerp(1.06, 1.13, ease.inOutSine(lt / dur));
     } else {
-      doc = turn(0.9, 1.2) * (1 - turn(2.2, 2.5));
-      pat = turn(0.9, 1.2);
+      doc = twoStep(0.8, 1.26, 0.14) - twoStep(2.15, 2.61, 0.14);
+      pat = twoStep(0.85, 1.65, 0.16);
       z = lerp(1.08, 1.1, lt / dur);
     }
     ctx.save();
     camera(ctx, z, W / 2, H / 2 + 20, cv, m);
     ctx.drawImage(img[m.src], cv.ox, cv.oy, m.w * cv.s, m.h * cv.s);
-    layer(ctx, m.patB, cv, pat);
-    layer(ctx, m.docB, cv, doc);
-    if (blink && doc > 0.99) layer(ctx, m.docBlink, cv, 1);
+    poses(ctx, m.pat, cv, pat);
+    poses(ctx, m.doc, cv, doc, blink && doc >= 2 ? m.doc.blinzeln : null);
     ctx.restore();
     finish(ctx, dayOf({ day: 0 }), 0.6);
   }
