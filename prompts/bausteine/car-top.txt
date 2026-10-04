@@ -1,0 +1,2 @@
+Draw ONLY a small light grey compact hatchback car seen EXACTLY from directly above (orthographic top-down view, like an icon on a map): symmetrical, the roof in the centre, windshield toward the right, short rear window toward the left, small side mirrors, nose pointing to the RIGHT. Flat vector illustration with soft gradients, no outlines. No people, no road, no ground, no shadow.
+Background: ONE perfectly flat, uniform pure magenta colour (#FF00FF) filling the entire image. The car is centred and about 50% of the image width.

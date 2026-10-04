@@ -299,9 +299,52 @@
     poseShot(ctx, META.boarding, lt, dur, [[0, null], [1.8, 'sitzt', 0.45]], { z: [1.04, 1.1], f: [1376, 900] }, day0(), 0.5);
   }
 
+  // ------------------------------------------------------------ Losfahren
+  function shotDrive(ctx, lt, dur) {
+    const m = META.drive;
+    const tt = Math.max(0, lt - 0.5);
+    const disp = 0.5 * 150 * tt * tt; // sanftes Anfahren, kein Rennen
+    const camX = disp * 0.8;
+    // Kulisse: bildhoch, scrollt mit der Kamera nach links
+    const bs = H / m.bg.h;
+    const bw = m.bg.w * bs;
+    const bx = -Math.min(camX * 0.9, bw - W);
+    ctx.drawImage(img[m.bg.src], bx, 0, bw, H);
+    // Auto
+    const c = m.car;
+    const cs = 980 / c.w;
+    const cx = 470 + disp - camX, gy = 1018; // gy = Unterkante der Reifen
+    const top = gy - (c.wheels[0].y + c.wheels[0].r) * cs;
+    const bob = Math.sin(lt * 9) * 0.8 * Math.min(1, tt);
+    // weicher Schatten
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.filter = 'blur(14px)';
+    ctx.fillStyle = '#2A2C2E';
+    ctx.beginPath();
+    ctx.ellipse(cx + c.w * cs * 0.5, gy - 4, c.w * cs * 0.48, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.drawImage(img[c.src], cx, top + bob, c.w * cs, c.h * cs);
+    // Räder drehen: Felge kreisförmig ausschneiden und um die Radmitte rotieren
+    const rot = disp / (c.wheels[0].r * cs);
+    c.wheels.forEach((wh) => {
+      const wx = cx + wh.x * cs, wy = top + wh.y * cs;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(wx, wy, wh.r * cs * 0.7, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.translate(wx, wy);
+      ctx.rotate(rot);
+      ctx.drawImage(img[c.src], -wh.x * cs, -wh.y * cs, c.w * cs, c.h * cs);
+      ctx.restore();
+    });
+    finish(ctx, day0(), 0.5);
+  }
+
   // ------------------------------------------------------------ Einhängen
   const orig = {};
-  ['navi', 'cabin', 'cup', 'key', 'bag', 'door', 'belt', 'practice', 'greet', 'handle', 'carhandle', 'boarding'].forEach((k) => (orig[k] = F.scenes[k]));
+  ['navi', 'cabin', 'cup', 'key', 'bag', 'door', 'belt', 'practice', 'greet', 'handle', 'carhandle', 'boarding', 'drive'].forEach((k) => (orig[k] = F.scenes[k]));
   const use = (name, fn) => (ctx, lt, dur, p, t) => (F.ki.active ? fn : orig[name])(ctx, lt, dur, p, t);
   F.scenes.navi = use('navi', shotNavi);
   F.scenes.cabin = use('cabin', shotCabin);
@@ -315,5 +358,27 @@
   opt('handle', shotHandle, 'handle');
   opt('carhandle', shotCarHandle, 'carhandle');
   opt('boarding', shotBoarding, 'boarding');
+  opt('drive', shotDrive, 'drive');
+  // Draufsicht: Karte und Routen bleiben Code-Grafik, nur das Auto wird das gezeichnete Auto von oben
+  if (META.carTop) {
+    const origTop = F.props.drawCarTop;
+    F.props.drawCarTop = (ctx, x, y, ang, sc) => {
+      if (!F.ki.active) return origTop(ctx, x, y, ang, sc);
+      const m = META.carTop, L = 150 * sc, k = L / m.w;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(ang);
+      ctx.globalAlpha = 0.16;
+      ctx.fillStyle = '#000';
+      ctx.filter = 'blur(4px)';
+      ctx.beginPath();
+      ctx.ellipse(3, 4, L * 0.5, m.h * k * 0.46, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.filter = 'none';
+      ctx.globalAlpha = 1;
+      ctx.drawImage(img[m.src], -L / 2, -m.h * k / 2, L, m.h * k);
+      ctx.restore();
+    };
+  }
   if (META.belt && META.beltCoat) F.scenes.belt = use('belt', shotBelt);
 })();

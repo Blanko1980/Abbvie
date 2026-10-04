@@ -185,6 +185,67 @@ def main():
         "pat": overlay_group(A, {"mitte": rgb("cabin-patientin-mitte.jpg"), "b": B}, "cabin-patientin", (0, W // 2)),
     }
 
+    # --- Losfahren: Straßenkulisse (breit, wird gescrollt) + Auto seitlich freigestellt mit Radpositionen
+    if os.path.exists(os.path.join(RAW, "drive-car.png")):
+        bg = rgb("drive-bg.jpg")
+        save_jpg(bg, "drive-bg.jpg")
+        a = rgb("drive-car.png")
+        col, alpha = key_magenta(a)
+        # Scheiben: KI malt sie halbtransparent über Magenta → lila Reste. Als neutrale, getönte Scheibe füllen.
+        mg = np.minimum(a[..., 0], a[..., 2]) - a[..., 1]
+        glass = (mg > 22) & (alpha > 0.02) & (alpha < 0.995)
+        inner = np.asarray(Image.fromarray((alpha > 0.5).astype(np.uint8) * 255).filter(ImageFilter.MinFilter(15))) > 0
+        glass &= ~inner | (mg > 22)
+        lumg = a.mean(axis=2)
+        tint = np.stack([lumg * 0.38 + 52, lumg * 0.38 + 56, lumg * 0.38 + 60], axis=2)
+        # nur innerhalb der Karosserie-Silhouette (Löcher schließen) einfärben
+        sil = Image.fromarray((alpha > 0.5).astype(np.uint8) * 255)
+        for _ in range(6):
+            sil = sil.filter(ImageFilter.MaxFilter(15))
+        for _ in range(6):
+            sil = sil.filter(ImageFilter.MinFilter(15))
+        sil = np.asarray(sil) > 0
+        win = sil & (alpha < 0.98)
+        col[win] = tint[win] * (1 - alpha[win, None]) + col[win] * alpha[win, None]
+        alpha = np.where(win, 1.0, alpha)
+        # deckend lila gemalte Scheibenflächen (Magenta-Stich) ebenfalls neutral tönen
+        purple = np.clip((mg - 12) / 40, 0, 1) * sil
+        col = col * (1 - purple[..., None]) + tint * purple[..., None]
+        x0, y0, x1, y1 = bbox(alpha > 0.5, pad=4)
+        car = np.dstack([col, alpha * 255])[y0:y1, x0:x1]
+        save_webp(car, "drive-car.webp")
+        # Räder: Kreis robust an die dunklen Reifenpixel anpassen (algebraischer Kreisfit, Ausreißer verwerfen)
+        lum = car[..., :3].mean(axis=2)
+        dark = (lum < 75) & (car[..., 3] > 200)
+        h, w = dark.shape
+        dark[: int(h * 0.5)] = False
+        def fit(xs, ys):
+            A = np.c_[2 * xs, 2 * ys, np.ones(len(xs))]
+            b = xs ** 2 + ys ** 2
+            cx, cy, c = np.linalg.lstsq(A, b, rcond=None)[0]
+            return cx, cy, np.sqrt(c + cx ** 2 + cy ** 2)
+        wheels = []
+        for xa, xb in ((0, w // 2), (w // 2, w)):
+            ys, xs = np.where(dark[:, xa:xb])
+            xs = (xs + xa).astype(float); ys = ys.astype(float)
+            # nur äußerer Reifenrand: je Spalte der unterste dunkle Pixel + je Zeile äußerste
+            cx, cy, r = fit(xs, ys)
+            for _ in range(6):
+                d = np.abs(np.hypot(xs - cx, ys - cy) - r)
+                keep = d < max(8, np.percentile(d, 60))
+                cx, cy, r = fit(xs[keep], ys[keep])
+            wheels.append({"x": round(float(cx), 1), "y": round(float(cy), 1), "r": round(float(r), 1)})
+        meta["drive"] = {"bg": {"src": "assets/ki/drive-bg.jpg", "w": bg.shape[1], "h": bg.shape[0]},
+                         "car": {"src": "assets/ki/drive-car.webp", "w": int(x1 - x0), "h": int(y1 - y0), "wheels": wheels}}
+    # --- Draufsicht: Auto von oben (Scheiben entsättigt: kein Blau außerhalb der vertrauten Route)
+    if os.path.exists(os.path.join(RAW, "car-top.png")):
+        col, alpha = key_magenta(rgb("car-top.png"))
+        grey = col.mean(axis=2, keepdims=True)
+        col = grey + (col - grey) * 0.15
+        x0, y0, x1, y1 = bbox(alpha > 0.5, pad=4)
+        save_webp(np.dstack([col, alpha * 255])[y0:y1, x0:x1], "car-top.webp")
+        meta["carTop"] = {"src": "assets/ki/car-top.webp", "w": int(x1 - x0), "h": int(y1 - y0)}
+
     # --- Einstellungen nach dem allgemeinen Schema: Grundbild + Pose-Varianten (gemeinsame Maske)
     for key, (base, variants, *opt) in SHOTS.items():
         opt = opt[0] if opt else {}

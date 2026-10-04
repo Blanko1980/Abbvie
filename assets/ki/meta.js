@@ -93,6 +93,35 @@ window.FILM_KI = {
    }
   }
  },
+ "drive": {
+  "bg": {
+   "src": "assets/ki/drive-bg.jpg",
+   "w": 3168,
+   "h": 1344
+  },
+  "car": {
+   "src": "assets/ki/drive-car.webp",
+   "w": 2211,
+   "h": 985,
+   "wheels": [
+    {
+     "x": 337.4,
+     "y": 769.7,
+     "r": 180.3
+    },
+    {
+     "x": 1808.8,
+     "y": 767.2,
+     "r": 183.0
+    }
+   ]
+  }
+ },
+ "carTop": {
+  "src": "assets/ki/car-top.webp",
+  "w": 2040,
+  "h": 1108
+ },
  "cup": {
   "src": "assets/ki/cup.jpg",
   "w": 2752,
