@@ -135,4 +135,13 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 - Bekannte Kleinigkeiten: winzige Schrift auf der Kaffeemaschine (10), grünes Notausgangsschild (11), Hände auf dem Patientinnen-Blatt hellhäutig (02). Das wird beim Bausteine-Erzeugen korrigiert.
 - Die API liefert JPEG. Bilder werden deshalb als `.jpg` gespeichert.
 
-**Nächster Schritt:** Stilentscheidung der Nutzerin abwarten. Danach Figurenblätter im gewählten Stil neu erzeugen, dann Bausteine (Schritt 4).
+**Stilentscheidung: Stil C** (Nutzerin, 04.10.2026)
+- `prompts/stil-c.txt` wird nach `prompts/stil.txt` angehängt und hat Vorrang.
+- Neue Figurenblätter `c01-…` (Arzt) und `c02-…` (Patientin). Die Patientin brauchte zwei Anläufe. Erst mit dem Arzt-Blatt als Stil- und Layoutreferenz und dem Auto-Bild als Identitätsreferenz passte es.
+- Styleframes in Stil C: `c10-…-morgen`, `c11-…-praxis`, `16-…-auto-stilC2`. Übersicht: `c00-uebersicht-stil-c.jpg`.
+- **Referenz-Regel für alle weiteren Bilder:** Figurenblätter c01 und c02 plus ein Stil-C-Szenenbild (16) mitgeben. Die alten Blätter 01 und 02 nicht mehr verwenden, sonst kommen Konturen zurück.
+- Kleinigkeit: Die Glaswände in c11 haben einen leichten Blaustich. Bei Bausteinen auf neutrales Grau achten.
+
+**ElevenLabs:** Nach Rechte-Erweiterung funktionieren Sound Effects (Test: HTTP 200, MP3). `/v1/user` und `/v1/models` bleiben gesperrt, das ist ohne Belang.
+
+**Nächster Schritt:** Schritt 4, Bausteine. Shotliste aus `src/config.js` auf Ebenen abbilden (Hintergrund ohne Figuren, Figuren freigestellt, Vordergrund) und erzeugen.

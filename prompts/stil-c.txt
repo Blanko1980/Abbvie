@@ -1,0 +1,6 @@
+STYLE C (binding for every image; overrides any other style notes):
+Flat 2D VECTOR illustration (not 3D, not painterly, not comic line art), as made in Adobe Illustrator for a premium corporate explainer video.
+Absolutely NO outlines or contour lines: every shape is a clean vector shape with smooth linear/radial gradients.
+Stylised, simplified characters: small simple dark eyes, tiny nose shape, simple mouth, slight cheek blush, smooth hair shapes with a few highlight strands, simplified hands.
+Atmosphere built with gradients: soft light bloom, background objects blurred, gentle rim light, subtle noise texture.
+If a STYLE REFERENCE image is attached, match its rendering style, colours and character design exactly.
