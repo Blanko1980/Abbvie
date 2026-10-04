@@ -2,7 +2,7 @@
 /* Lokales Render-Werkzeug (optional). Nutzt einen lokal installierten Headless-Chromium
    über Playwright und ffmpeg. Erzeugt bildgenau (nicht in Echtzeit):
      node tools/render.cjs stills 0,5.5,12.3 [ausgabeordner]   → PNG-Kontrollbilder
-     node tools/render.cjs video [datei.mp4] [--crf 18]          → MP4 (H.264 + AAC), 30 fps
+     node tools/render.cjs video [datei.mp4] [--crf 18] [--from s --to s] → MP4 (H.264 + AAC), 30 fps
      node tools/render.cjs audio [datei.wav]                     → nur Tonspur (WAV)
    Der Film selbst benötigt dieses Werkzeug nicht – index.html läuft direkt im Browser. */
 const path = require('path');
@@ -71,24 +71,26 @@ async function audioWav(page, file) {
   return res.peak;
 }
 
-async function video(out, crf) {
+async function video(out, crf, from = 0, to = null) {
   const { browser, page, errors } = await openPage();
   const fps = await page.evaluate(() => window.FILM.config.fps);
   const dur = await page.evaluate(() => window.FILM.config.duration);
   const tmpWav = out.replace(/\.mp4$/, '') + '.audio.wav';
   const peak = await audioWav(page, tmpWav);
   console.log('Tonspur gerendert, Spitzenpegel', peak.toFixed(3));
-  const n = Math.round(dur * fps);
+  const end = to == null ? dur : Math.min(to, dur);
+  const f0 = Math.round(from * fps);
+  const n = Math.round(end * fps) - f0;
   const ff = spawn('ffmpeg', [
     '-y', '-loglevel', 'error',
     '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'png', '-i', '-',
-    '-i', tmpWav,
+    '-ss', String(f0 / fps), '-i', tmpWav,
     '-c:v', 'libx264', '-preset', 'slow', '-crf', String(crf), '-pix_fmt', 'yuv420p',
     '-tune', 'animation', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out,
   ], { stdio: ['pipe', 'inherit', 'inherit'] });
   const t0 = Date.now();
   for (let i = 0; i < n; i++) {
-    const buf = await frameData(page, i / fps);
+    const buf = await frameData(page, (f0 + i) / fps);
     if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once('drain', r));
     if (i % 150 === 0) console.log(`Frame ${i}/${n} (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
   }
@@ -108,7 +110,8 @@ async function video(out, crf) {
   } else if (mode === 'video') {
     const crfIdx = process.argv.indexOf('--crf');
     const crf = crfIdx > 0 ? Number(process.argv[crfIdx + 1]) : 18;
-    await video(a && !a.startsWith('--') ? a : path.join(ROOT, 'export', 'der-vertraute-griff.mp4'), crf);
+    const opt = (k) => { const i = process.argv.indexOf(k); return i > 0 ? Number(process.argv[i + 1]) : null; };
+    await video(a && !a.startsWith('--') ? a : path.join(ROOT, 'export', 'der-vertraute-griff.mp4'), crf, opt('--from') || 0, opt('--to'));
   } else if (mode === 'audio') {
     const { browser, page } = await openPage();
     const peak = await audioWav(page, a || path.join(ROOT, 'export', 'tonspur.wav'));

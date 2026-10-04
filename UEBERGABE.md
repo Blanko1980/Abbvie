@@ -144,4 +144,17 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 
 **ElevenLabs:** Nach Rechte-Erweiterung funktionieren Sound Effects (Test: HTTP 200, MP3). `/v1/user` und `/v1/models` bleiben gesperrt, das ist ohne Belang.
 
-**Nächster Schritt:** Schritt 4, Bausteine. Shotliste aus `src/config.js` auf Ebenen abbilden (Hintergrund ohne Figuren, Figuren freigestellt, Vordergrund) und erzeugen.
+**Schritt 4 – Testsequenz (Pilot) fertig:** Navi-Einstellungen (alle Modi) und Innenraum „Innehalten/Abwägen“ laufen mit KI-Bausteinen. Test-Video: `export/test-ki-innehalten.mp4` (00:43–01:11).
+
+**Verfahren (bewährt, so weiter machen)**
+1. **Platte** erzeugen: `prompts/stil.txt` + `prompts/stil-c.txt` + Shot-Prompt, Referenzen c01, c02 und ein Stil-C-Bild.
+2. **Pose-Varianten** per KI-Bearbeitung derselben Platte („Keep EVERYTHING identical … change ONLY …“). Ergebnis liegt pixelgenau (Versatz 0 px, geprüft mit `tools/ki_align.py`).
+   Achtung: Frisuren driften. Im Prompt ausdrücklich festhalten.
+3. **Freistellen** über Magenta-Hintergrund (#FF00FF). Bildschirme als Magenta-Fläche erzeugen, dann wird die Grafik im Code eingesetzt (Trapez-Entzerrung in `src/ki.js`).
+4. `python3 tools/ki_prepare.py`: macht aus `assets/ki/roh/` die Filmdateien, schneidet veränderte Bereiche als weich maskierte Ebenen aus und schreibt `assets/ki/meta.js` (Koordinaten) sowie `assets/ki/bilder.js` (eingebettete Bilddaten, nötig, weil `file://`-Bilder den Canvas für Export und Render sperren).
+5. `src/ki.js` ersetzt einzelne Szenen-Funktionen, sobald alle Bilder geladen sind. Mit `index.html?code` sieht man die alte Code-Version.
+6. Animationsprinzip: Pose-zu-Pose (gehaltene Zeichnungen, kurze Überblendungen von 0,3 s), dazu durchgehende Kamerabewegung. Die Hand ist eine freigestellte Ebene und wird frei bewegt.
+- Render-Werkzeug kann Ausschnitte: `node tools/render.cjs video datei.mp4 --from 43 --to 71`.
+- Prompts der Bausteine: `prompts/bausteine/`.
+
+**Nächster Schritt:** Feedback zur Testsequenz einholen, dann die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).

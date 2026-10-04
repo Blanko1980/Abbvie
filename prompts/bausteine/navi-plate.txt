@@ -1,0 +1,4 @@
+Attached: a scene in the binding STYLE.
+SHOT "dashboard close-up", 16:9, the camera looks straight at the centre console of the same light grey car from the passenger's seat height, front-on and level.
+A large landscape navigation screen fills the middle of the frame (about 60% of the image width), perfectly front-facing, rectangular with slightly rounded corners, set in a dark bezel. The screen surface is filled with ONE perfectly flat, uniform pure magenta colour (#FF00FF) — no gradient, no reflection, no interface — because graphics will be keyed in later.
+Around it: dark charcoal dashboard with soft gradients, two air vents below the screen, a hint of the windshield and a blurred street with trees at the very top. Soft daylight from above. No hands, no people, no text.

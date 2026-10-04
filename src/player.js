@@ -228,7 +228,7 @@
   // Einzelbild zu festem Zeitpunkt: index.html?t=42.5 (optional &clean)
   const startT = params.has('t') ? parseFloat(params.get('t')) : 0;
   const ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  Promise.all([ready, document.fonts ? document.fonts.load("700 40px 'FilmSans'") : null, document.fonts ? document.fonts.load("400 40px 'FilmSans'") : null])
+  Promise.all([ready, document.fonts ? document.fonts.load("700 40px 'FilmSans'") : null, document.fonts ? document.fonts.load("400 40px 'FilmSans'") : null, F.ki && F.ki.ready])
     .catch(() => {})
     .then(() => {
       state.t = isFinite(startT) ? startT : 0;
