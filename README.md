@@ -1,8 +1,9 @@
 # Der vertraute Griff – Rethink the Routine
 
-Ein vollständig programmatisch erzeugter Animationsfilm (Entwurf, ca. 90 s, 1920 × 1080, 30 fps).
-Alle Bilder, Figuren, Bewegungen, Texte und Klänge entstehen im Code: HTML5 Canvas 2D und Web Audio API.
-Es gibt keine externen Assets, kein CDN und keinen Build-Schritt.
+Animationsfilm (Entwurf, ca. 90 s, 1920 × 1080, 30 fps) im gezeichneten Erklärvideo-Stil.
+Die Illustrationen sind KI-generiert (Google Gemini, Stil C, siehe `ki-styleframes/`).
+Animation, Kamera, Navi-Grafik, Texte und Klänge entstehen im Code: HTML5 Canvas 2D und Web Audio API.
+Es gibt kein CDN und keinen Build-Schritt. Die Bilder sind in `assets/ki/bilder.js` eingebettet.
 
 ## Starten
 
@@ -66,7 +67,23 @@ MP4 entsteht nur, wenn der Browser es selbst anbietet (z. B. Safari).
 | `src/typography.js` | Texttafeln, deterministischer Pinselstrich, Schlusskarte |
 | `src/audio.js` | Synthetische Musik und Geräusche: live (mit Springen) und offline (für den Video-Export) |
 | `src/player.js` | Vorschau-Player und Echtzeit-Export |
+| `src/ki.js` | KI-Bausteine: ersetzt die Szenen-Zeichnungen durch gezeichnete Platten und Pose-Ebenen, animiert sie (Pose-zu-Pose, Kamera, Hand, Räder) |
+| `assets/ki/` | `roh/` = KI-Rohbilder, `meta.js` = Koordinaten, `bilder.js` = eingebettete Bilddaten |
+| `prompts/` | Stilvorgaben (`stil.txt`, `stil-c.txt`) und Bildanweisungen aller Bausteine |
+| `tools/` | `gen_image.py` (Gemini-Aufruf), `ki_prepare.py` (Aufbereitung), `ki_align.py` (Passgenauigkeit), `render.cjs` (Video) |
 
+## KI-Bausteine neu erzeugen
+
+```bash
+export GEMINI_API_KEY=…                     # nie committen
+python3 tools/gen_image.py --prompt-file p.txt --out assets/ki/roh/x.jpg --ref vorlage.jpg
+python3 tools/ki_prepare.py                 # Rohbilder → assets/ki (meta.js, bilder.js)
+node tools/render.cjs video export/der-vertraute-griff.mp4
+```
+
+Die frühere, rein programmatische Version ist weiterhin abrufbar: `index.html?code`.
+
+Pose-Varianten sind KI-Bearbeitungen desselben Grundbilds und liegen pixelgenau darauf. `tools/ki_prepare.py` schneidet nur die veränderten Bereiche als weich maskierte Ebenen aus, die im Film überblendet werden.
 Zufallswerte (Pinseltextur, Regen, Schlüsselklang) sind deterministisch geseedet.
 Es gibt keine frameabhängigen Fortschreibungen und keine `setTimeout`-Animationsketten.
 

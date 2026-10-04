@@ -162,4 +162,13 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 - Navi-Grafik gefällt. **So reduziert lassen**, die Botschaft ist Blau (Wettbewerber, vertraute Route) → Gold (Rinvoq).
 - **Musik später flotter machen.** Sie klingt bisher zu lahm. Erst angehen, wenn das Bild fertig ist.
 
-**Nächster Schritt:** Übrige Einstellungen umstellen: die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).
+**Stand 04.10.2026 (Ende dieser Runde): Alle Einstellungen umgestellt.** Morgen, Montage (Tag 2–4 über Farbgrading), Praxis inkl. Match Cut, Innenraum, Navi, Losfahren, Draufsicht (Karte bleibt Code, Auto gezeichnet). Texttafeln und Schlusskarte bleiben Code.
+Gesamtfilm: `export/der-vertraute-griff.mp4`. Bildkosten bisher ca. 8–9 USD.
+
+**Offene Punkte / Ideen**
+- Musik flotter (Wunsch der Nutzerin), am besten über ElevenLabs Music. Geräusche ggf. ebenfalls über ElevenLabs.
+- Montage Tag 3 (Regen) hat keinen Regen mehr, nur Farbgrading. Bei Bedarf Regen-Overlay aus `scenes.js` (`rainOn`) übernehmen.
+- Einsteigen-Bild ist gespiegelt (Beifahrerseite). Im Seitenblick beim Losfahren sitzt der Arzt optisch vorn rechts (KI-Bild). Fällt kaum auf, ggf. neu erzeugen.
+- Gelegentlich leichte Bildfehler der KI (z. B. Hand-/Lenkradbereich in Masken) – bei Abnahme prüfen.
+
+**Ursprünglicher Plan (erledigt):** Übrige Einstellungen umstellen: die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).
