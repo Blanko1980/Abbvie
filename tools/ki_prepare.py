@@ -80,7 +80,10 @@ def color_match(base, var, region):
         return out
     for c in range(3):
         x, y = var[..., c][same], base[..., c][same]
-        a, b = np.polyfit(x, y, 1)
+        if x.std() < 4:  # zu wenig Spreizung für eine stabile Anpassung
+            continue
+        a = float(np.clip(np.cov(x, y)[0, 1] / x.var(), 0.8, 1.25))
+        b = float(y.mean() - a * x.mean())
         out[..., c] = np.clip(var[..., c] * a + b, 0, 255)
     return out
 
@@ -125,6 +128,17 @@ def hand(raw, name):
     return {"src": "assets/ki/" + name, "w": int(x1 - x0), "h": int(y1 - y0), "tip": tip, "angle": round(ang, 4)}
 
 
+# Einstellung: (Grundbild, {Pose: Variante}) – alle Varianten sind KI-Bearbeitungen des Grundbilds
+SHOTS = {
+    "cup": ("cup-a.jpg", {"greifen": "cup-b.jpg", "heben": "cup-c.jpg"}),
+    "key": ("key-a.jpg", {"greifen": "key-b.jpg", "leer": "key-c.jpg"}),
+    "bag": ("bag-a.jpg", {"tragen": "bag-b.jpg"}),
+    "door": ("door-a.jpg", {"einsteigen": "door-b.jpg"}),
+    "belt": ("belt-a.jpg", {"zu": "belt-b.jpg"}),
+    "beltCoat": ("belt-coat-a.jpg", {"zu": "belt-coat-b.jpg"}),
+}
+
+
 def main():
     meta = {}
 
@@ -164,6 +178,16 @@ def main():
                              "cabin-arzt", (W // 2, W)),
         "pat": overlay_group(A, {"mitte": rgb("cabin-patientin-mitte.jpg"), "b": B}, "cabin-patientin", (0, W // 2)),
     }
+
+    # --- Einstellungen nach dem allgemeinen Schema: Grundbild + Pose-Varianten (gemeinsame Maske)
+    for key, (base, variants) in SHOTS.items():
+        if not all(os.path.exists(os.path.join(RAW, f)) for f in [base, *variants.values()]):
+            print("übersprungen (Bilder fehlen):", key)
+            continue
+        A = rgb(base)
+        save_jpg(A, f"{key}.jpg")
+        meta[key] = {"src": f"assets/ki/{key}.jpg", "w": A.shape[1], "h": A.shape[0],
+                     "pose": overlay_group(A, {k: rgb(f) for k, f in variants.items()}, key, (0, A.shape[1]))}
 
     # Bilddaten einbetten: Bilder per file:// würden den Canvas für Export/Render sperren
     import base64

@@ -200,9 +200,95 @@
     finish(ctx, dayOf({ day: 0 }), 0.6);
   }
 
+  // ------------------------------------------------------------ Allgemein: Posen-Fahrplan
+  // seq: [[Zeit, Pose|null, Überblenddauer], …]; null = Grundbild. cam: {z:[von,bis], f:[x,y] (Quellpixel)}
+  function poseShot(ctx, m, lt, dur, seq, cam, d, vig = 0.55, extra) {
+    const cv = cover(m);
+    let i = 0;
+    for (let k = 0; k < seq.length; k++) if (lt >= seq[k][0]) i = k;
+    const [t0, cur, fade = 0.25] = seq[i];
+    const prev = i > 0 ? seq[i - 1][1] : null;
+    const a = ease.inOutSine(seg(lt, t0, t0 + fade));
+    const z = lerp(cam.z[0], cam.z[1], ease.inOutSine(Math.min(1, lt / dur)));
+    const f = cam.f ? [cv.ox + cam.f[0] * cv.s, cv.oy + cam.f[1] * cv.s] : [W / 2, H / 2];
+    ctx.save();
+    camera(ctx, z, f[0], f[1], cv, m);
+    ctx.drawImage(img[m.src], cv.ox, cv.oy, m.w * cv.s, m.h * cv.s);
+    if (cur) {
+      if (prev && prev !== cur) layer(ctx, m.pose[prev], cv, 1);
+      layer(ctx, m.pose[cur], cv, a);
+    } else if (prev) {
+      layer(ctx, m.pose[prev], cv, 1 - a);
+    }
+    if (extra) extra(ctx, cv, { cur, prev, a });
+    ctx.restore();
+    finish(ctx, d, vig);
+  }
+  const daySeq = (p, full, beat) => (p.mode === 'full' || p.mode === 'coat' || !p.mode ? full : beat);
+
+  // Kaffeedampf (Code): weiche, aufsteigende Schwaden über der Tasse
+  function steam(ctx, cv, x, y, t, amt) {
+    if (amt <= 0) return;
+    ctx.save();
+    ctx.filter = 'blur(10px)';
+    ctx.lineCap = 'round';
+    for (let k = 0; k < 3; k++) {
+      const ph = t * 0.55 + k * 0.33;
+      const u = ph % 1;
+      const bx = cv.ox + (x + (k - 1) * 70) * cv.s, by = cv.oy + y * cv.s;
+      ctx.globalAlpha = amt * 0.55 * Math.sin(Math.PI * u);
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 26 * cv.s * 1.4;
+      ctx.beginPath();
+      for (let j = 0; j <= 12; j++) {
+        const v = j / 12;
+        const yy = by - (u * 160 + v * 260) * cv.s;
+        const xx = bx + Math.sin(v * 5 + t * 1.7 + k * 2) * 26 * cv.s * (0.4 + v);
+        j ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function shotCup(ctx, lt, dur, p, t) {
+    const seq = daySeq(p,
+      [[0, null], [1.45, 'greifen', 0.28], [2.05, 'heben', 0.22], [2.6, 'greifen', 0.22]],
+      [[0, 'heben'], [dur * 0.45, 'greifen', Math.min(0.18, dur * 0.25)]]);
+    const cam = p.mode === 'full' ? { z: [1.0, 1.07], f: [1150, 900] } : { z: [1.04, 1.06], f: [1150, 900] };
+    poseShot(ctx, META.cup, lt, dur, seq, cam, dayOf(p), 0.6, (c, cv, st) => {
+      const amt = st.cur ? 1 - (st.prev ? 1 : st.a) : 1;
+      steam(c, cv, 820, 840, t, p.mode === 'full' ? amt * Math.min(1, lt / 0.4) : 0);
+    });
+  }
+  function shotKey(ctx, lt, dur, p, t) {
+    const seq = daySeq(p,
+      [[0, null], [0.45, 'greifen', 0.22], [1.0, 'leer', 0.25]],
+      [[0, 'greifen'], [dur * 0.55, 'leer', Math.min(0.2, dur * 0.3)]]);
+    poseShot(ctx, META.key, lt, dur, seq, { z: [1.32, 1.38], f: [1390, 930] }, dayOf(p), 0.6);
+  }
+  function shotBag(ctx, lt, dur, p, t) {
+    poseShot(ctx, META.bag, lt, dur, [[0, null], [0.7, 'tragen', 0.32]], { z: [1.04, 1.1], f: [1500, 820] }, dayOf({ day: 1 }), 0.5);
+  }
+  function shotDoor(ctx, lt, dur, p, t) {
+    poseShot(ctx, META.door, lt, dur, [[0, null], [1.0, 'einsteigen', 0.36]], { z: [1.12, 1.2], f: [1950, 1150] }, dayOf({ day: 1 }), 0.5);
+  }
+  function shotBelt(ctx, lt, dur, p, t) {
+    const m = p.mode === 'coat' ? META.beltCoat : META.belt;
+    const seq = daySeq(p, [[0, null], [0.7, 'zu', 0.25]], [[0, null], [dur * 0.4, 'zu', Math.min(0.2, dur * 0.3)]]);
+    poseShot(ctx, m, lt, dur, seq, { z: [1.0, 1.05], f: [1376, 900] }, dayOf(p), 0.55);
+  }
+
   // ------------------------------------------------------------ Einhängen
-  const orig = { navi: F.scenes.navi, cabin: F.scenes.cabin };
+  const orig = {};
+  ['navi', 'cabin', 'cup', 'key', 'bag', 'door', 'belt'].forEach((k) => (orig[k] = F.scenes[k]));
   const use = (name, fn) => (ctx, lt, dur, p, t) => (F.ki.active ? fn : orig[name])(ctx, lt, dur, p, t);
   F.scenes.navi = use('navi', shotNavi);
   F.scenes.cabin = use('cabin', shotCabin);
+  const opt = (name, fn, key) => (META[key] ? (F.scenes[name] = use(name, fn)) : null);
+  opt('cup', shotCup, 'cup');
+  opt('key', shotKey, 'key');
+  opt('bag', shotBag, 'bag');
+  opt('door', shotDoor, 'door');
+  if (META.belt && META.beltCoat) F.scenes.belt = use('belt', shotBelt);
 })();

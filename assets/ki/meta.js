@@ -92,5 +92,103 @@ window.FILM_KI = {
     "h": 641
    }
   }
+ },
+ "cup": {
+  "src": "assets/ki/cup.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "greifen": {
+    "src": "assets/ki/cup-greifen.webp",
+    "x": 387,
+    "y": 337,
+    "w": 2365,
+    "h": 1199
+   },
+   "heben": {
+    "src": "assets/ki/cup-heben.webp",
+    "x": 387,
+    "y": 337,
+    "w": 2365,
+    "h": 1199
+   }
+  }
+ },
+ "key": {
+  "src": "assets/ki/key.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "greifen": {
+    "src": "assets/ki/key-greifen.webp",
+    "x": 1037,
+    "y": 459,
+    "w": 1659,
+    "h": 1077
+   },
+   "leer": {
+    "src": "assets/ki/key-leer.webp",
+    "x": 1037,
+    "y": 459,
+    "w": 1659,
+    "h": 1077
+   }
+  }
+ },
+ "bag": {
+  "src": "assets/ki/bag.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "tragen": {
+    "src": "assets/ki/bag-tragen.webp",
+    "x": 727,
+    "y": 4,
+    "w": 1254,
+    "h": 1532
+   }
+  }
+ },
+ "door": {
+  "src": "assets/ki/door.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "einsteigen": {
+    "src": "assets/ki/door-einsteigen.webp",
+    "x": 899,
+    "y": 323,
+    "w": 1219,
+    "h": 1136
+   }
+  }
+ },
+ "belt": {
+  "src": "assets/ki/belt.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "zu": {
+    "src": "assets/ki/belt-zu.webp",
+    "x": 741,
+    "y": 26,
+    "w": 1317,
+    "h": 1510
+   }
+  }
+ },
+ "beltCoat": {
+  "src": "assets/ki/beltCoat.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "zu": {
+    "src": "assets/ki/beltCoat-zu.webp",
+    "x": 0,
+    "y": 0,
+    "w": 2752,
+    "h": 1536
+   }
+  }
  }
 };
