@@ -1,0 +1,21 @@
+STYLE (applies to every image):
+High-end 2D explainer-video illustration, the kind made by a professional motion-design studio.
+Semi-flat vector look with soft gradient shading, gentle rim light and subtle paper grain.
+Clean, confident shapes; no harsh black outlines (only very thin, slightly darker lines of the same hue where needed).
+Natural, well-proportioned adult figures (about 7 heads tall), friendly but not cartoonish, expressive faces with simple eyes, soft blush, readable emotions.
+Atmospheric depth: background softly blurred (shallow depth of field), foreground crisp, light bloom from windows.
+Calm, warm, trustworthy mood.
+
+COLOUR RULES (strict):
+World palette: warm off-white, light warm greys, muted sage and sand tones, natural skin tones, charcoal #25282A for dark accents.
+Do NOT use saturated yellow/gold and do NOT use blue-teal anywhere in the picture (both colours are reserved for later graphic overlays).
+Clothing and car stay neutral (white, grey, beige, charcoal, muted olive).
+
+CONTENT RULES (strict):
+No text, no letters, no numbers, no logos, no brand names anywhere in the image.
+No medicine packs, pills or syringes. No visible skin disease or rashes. No warning symbols.
+Screens are shown blank (soft glowing neutral grey surface) so graphics can be added later.
+
+CHARACTERS (keep identical in every image):
+DOCTOR: man around 45, slim-athletic, light skin, short dark-brown hair greying at the temples, short neatly trimmed stubble beard with a little grey, rectangular thin dark glasses, kind attentive eyes. Wears a white doctor's coat over a light grey shirt, dark grey trousers, dark shoes. (At home in the morning: beige knit sweater instead of the coat.)
+PATIENT: woman in her mid-30s, dark skin, natural curly black hair tied up in a soft bun with a few loose curls, small stud earrings, calm open smile. Wears a muted olive jacket over a cream top, dark trousers.

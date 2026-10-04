@@ -97,12 +97,32 @@ Claude plant, schreibt Bildanweisungen, ruft die Dienste per API auf, prüft die
 ## 5. Offene Punkte
 
 - **Kundenfreigabe:** Darf KI-generiertes Bild- und Tonmaterial verwendet werden? Im kostenlosen Google-Kontingent können Eingaben zur Produktverbesserung genutzt werden. Keine vertraulichen Inhalte in Prompts.
-- **Stil-Referenzen:** Noch ausstehend.
+- **Stil-Referenzen:** Liegen vor (Screenshots im Chat vom 04.10.). Maßstab ist der Detailgrad, keine 1:1-Kopie. Umgesetzt in `prompts/stil.txt`.
 - **Markenschriften und Logo:** Graphik, Neue Haas Grotesk und Rinvoq-Handschrift kommen später.
 - **Bekannte Schwächen von Version 1:** Siehe Abschlussbericht im Chat, unter anderem steife Figuren und die Überblendung statt Kamerafahrt in die Draufsicht.
 
 ## 6. Arbeitsweise und Repository
 
-- Branch: `claude/busy-carson-3u6m58`. Committen und pushen, keinen Pull Request ohne Auftrag.
+- Branch: `claude/sweet-hypatia-1nvimi` (enthält den Stand von `claude/busy-carson-3u6m58`). Committen und pushen, keinen Pull Request ohne Auftrag.
 - Die Nutzerin hat keine GitHub-Erfahrung. Bei Bedarf Schritt für Schritt anleiten.
 - Antworten auf Deutsch, knapp, mit klarer Empfehlung.
+
+## 7. Fortschritt Weg 1 (Sitzung 04.10.2026, zweite Runde)
+
+**Setup-Test**
+- `GEMINI_API_KEY`: Der Schlüssel gilt. Alle Bildmodelle melden im kostenlosen Kontingent aber „limit: 0“ (HTTP 429). Bildgenerierung braucht Abrechnung im AI-Studio-Projekt. Ohne Abrechnung geht nichts.
+- `ELEVENLABS_API_KEY`: Der Schlüssel gilt, ist aber eingeschränkt („missing the permission user_read“). Für Schritt 6 müssen mindestens die Berechtigungen für Sound Effects und Music freigegeben sein, am einfachsten alle Rechte.
+
+**Stil-Referenzen der Nutzerin (Zusammenfassung)**
+1. Semi-flaches 2D mit weichen Verläufen, Tiefenunschärfe, Lichtstimmung und natürlichen Proportionen. Das ist der angestrebte Detailgrad.
+2. Klarer Flat-Vektorstil mit Konturen (E-Learning-Look).
+3. Einfacher Flat-Stil. Das ist das untere Ende.
+
+**Vorbereitet**
+- `tools/gen_image.py`: Gemini-Bildaufruf mit Referenzbildern, Seitenverhältnis und Größe.
+- `prompts/stil.txt`: Stilvorgaben, Farb- und Inhaltsregeln, Figurenbeschreibungen. Wird jedem Bild vorangestellt.
+- `prompts/0x-*.txt`, `prompts/1x-*.txt`: Figurenblätter (Arzt, Patientin) und Styleframes (Morgen, Praxis, Auto; Auto zusätzlich in Stil B als Gegenprobe).
+- `tools/gen_styleframes.sh [modell]`: erzeugt alles nach `ki-styleframes/`. Die Figurenblätter werden als Referenz an die Styleframes übergeben.
+- Kosten laut Google: ca. 0,134 USD je Bild mit `gemini-3-pro-image` (1K und 2K kosten gleich). Ein Durchlauf (6 Bilder) kostet also unter 1 USD.
+
+**Nächster Schritt:** Nach Aktivierung der Abrechnung `bash tools/gen_styleframes.sh` ausführen, Ergebnisse prüfen und der Nutzerin zeigen.
