@@ -1,0 +1,26 @@
+{
+  "name": "zwei-routinen",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render ZweiRoutinen out/zwei-routinen.mp4 --codec=h264 --crf=18",
+    "render:muted": "remotion render ZweiRoutinen out/zwei-routinen-muted.mp4 --codec=h264 --crf=18 --muted",
+    "assets": "node scripts/generate-assets.mjs",
+    "postprocess": "node scripts/postprocess.mjs",
+    "audio": "node scripts/build-audio.mjs",
+    "contact": "node scripts/contact-sheet.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.533",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.533"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "sharp": "^0.35.5",
+    "typescript": "^7.0.2"
+  }
+}
