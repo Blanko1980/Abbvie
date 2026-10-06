@@ -172,3 +172,21 @@ Gesamtfilm: `export/der-vertraute-griff.mp4`. Bildkosten bisher ca. 8–9 USD.
 - Gelegentlich leichte Bildfehler der KI (z. B. Hand-/Lenkradbereich in Masken) – bei Abnahme prüfen.
 
 **Ursprünglicher Plan (erledigt):** Übrige Einstellungen umstellen: die übrigen Einstellungen nach demselben Verfahren umstellen (Morgen: Tasse, Schlüssel, Tasche, Autotür, Gurt; Praxis: Außen, Begrüßung, Türgriff, Autotürgriff, Einsteigen; Losfahren, Draufsicht). Danach Ton (ElevenLabs).
+
+## 8. Korrekturrunde (06.10.2026)
+
+Das Feedback der Nutzerin zum ersten Gesamtfilm ist umgesetzt, Details stehen in `DREHBUCH.md` (Fassung 2, Abschnitt „Änderungen“).
+
+**Neue Festlegungen (ersetzen ältere Briefing-Punkte)**
+- Die vertraute Route hat jetzt die Wettbewerber-Farbe `#1D7D7E` (statt Deep Teal `#366B8F`) und ist deutlich länger. Gold ist kürzer.
+- Neue Navi-Texte: „Verfügbare Routen“ sowie der Dialog an Tag 4. Die Schaltfläche „Routen“ entfällt.
+- Texttafel 1 in `#1D7D7E`. Schlussfrage: „Doch welcher passt wirklich?“
+- Timing: Navi-Dialog 00:24–00:27, Texttafel 1 00:27–00:30.
+
+**Technik**
+- Tasse: Die eng maskierte Ebene „Hand + Tasse“ (`cupLift`, aus `cup-leer` + `cup-b`) wird im Code angehoben. Die alte Pose `cup-c` wird nicht mehr verwendet.
+- Gurt: neue Bilder `belt2-*` (nur ein Arm).
+- Autotürgriff: Posen `carhandle-mitte` und `carhandle-ende` (Hand dreht sich).
+- Innenraum: Grundbild `cabin-a3` (Arzt schaut mit offenen Augen aufs Navi) und Zwischenpose `cabin-arzt-mitte2`.
+- `tools/ki_prepare.py` kennt jetzt je Einstellung `grow` und `blur` für die Maske.
+- Musik bleibt vorerst unverändert (Wunsch der Nutzerin).

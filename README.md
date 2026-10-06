@@ -92,8 +92,8 @@ Es gibt keine frameabhängigen Fortschreibungen und keine `setTimeout`-Animation
 | Zeit | Szene |
 |---|---|
 | 00:00–00:14 | Der vertraute Morgen |
-| 00:14–00:25 | Wiederholung wird Routine (Tag 2–4, Schnitte von 1,0 s über 0,7 s auf 0,5 s) |
-| 00:25–00:30 | „Was sich bewährt, wird selbstverständlich.“ |
+| 00:14–00:27 | Wiederholung wird Routine (Tag 2–4, Schnitte von 1,0 s über 0,7 s auf 0,5 s; an Tag 4 Navi-Dialog „neue Route gefunden“) |
+| 00:27–00:30 | „Was sich bewährt, wird selbstverständlich.“ |
 | 00:30–00:43 | Der konkrete Patient (Match Cut: Praxis-Türgriff → Autotürgriff) |
 | 00:43–00:53 | Der automatische Griff |
 | 00:53–00:59 | „Passt der vertraute Weg auch diesmal?“ |
@@ -104,14 +104,13 @@ Es gibt keine frameabhängigen Fortschreibungen und keine `setTimeout`-Animation
 
 ## Farben und Markenregeln
 
-- **Rinvoq Gold** `#FFD100`: alternative Route, Bestätigen-Button nach der bewussten Wahl, Schlusskarte
+- **Rinvoq Gold** `#FFD100`: neue, kürzere Route, Bestätigen-Button nach der bewussten Wahl, Schlusskarte
+- **Wettbewerber-Farbe (Dupixent)** `#1D7D7E`: ausschließlich für die gespeicherte, vertraute Route und die Texttafel „Was sich bewährt, wird selbstverständlich.“
 - **Charcoal** `#25282A` und **Weiß**: Hintergründe
-- **Deep Teal 2** `#366B8F`: ausschließlich für die vertraute (gespeicherte) Route
-- **Plum**: bewusst nicht verwendet
 - **Figuren und Auto:** neutral, keiner Produktfarbe zugeordnet
 
-Beide Routen haben denselben Start und dasselbe Ziel bei nahezu gleicher Länge (Kartenraum: 899 zu 906 Einheiten).
-Sie sind zusätzlich über ihre Lage unterscheidbar: Teal verläuft unten rechts, Gold oben links.
+Beide Routen haben denselben Start und dasselbe Ziel. Die gespeicherte Route ist deutlich länger (großer Bogen unten rechts herum), die goldene ist kürzer und direkter.
+Das vollständige Drehbuch steht in `DREHBUCH.md`.
 
 ## Schrift-Ersatz
 
