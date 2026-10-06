@@ -3,3 +3,5 @@ out/*.mp4
 !out/zwei-routinen.mp4
 !out/zwei-routinen-muted.mp4
 
+out/stills/
+out/.frames-*/
