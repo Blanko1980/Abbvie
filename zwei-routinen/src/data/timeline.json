@@ -1,0 +1,76 @@
+{
+  "_info": "Alle Frame-Nummern (30 fps) und Texte. Szenen-Frames sind lokal (0 = Szenenbeginn). Schnitte in S1–S4 liegen auf dem 9-Frame-Raster (Achtel bei 100 BPM, 1 Schlag = 18 Frames); die Briefing-Werte 75/195/140/260/320 sind auf das Raster gerundet.",
+  "fps": 30,
+  "durationInFrames": 2400,
+  "bpm": 100,
+  "beatFrames": 18,
+  "texts": {
+    "naviHeader": "Zuhause → Praxis",
+    "tealMinutes": "35 min",
+    "goldMinutes": "23 min",
+    "confirm": "Bestätigen",
+    "departure": "Abfahrt 08:20",
+    "chipYesterday": "Gestern, Abfahrt 08:20",
+    "chipToday": "Heute, Abfahrt 08:20",
+    "clockLate": "08:55",
+    "clockEarly": "08:43",
+    "office": "Sprechstunde 09:00",
+    "panel1": "Was sich bewährt, wird Routine.",
+    "panel2a": "Bewährte Wege geben Sicherheit.",
+    "panel2b": "Doch manchmal bringen uns neue Wege schneller ans Ziel.",
+    "callout": "Rethink the Routine"
+  },
+  "pause": {"duckIn": 3, "hold": 30, "release": 6},
+  "scenes": [
+    {"id": "S1", "title": "Der erste Morgen", "from": 0, "to": 360,
+      "shots": [
+        {"id": "cup", "from": 0, "to": 72, "fill": [6, 66], "pour": [2, 60], "zoom": [1.0, 1.06]},
+        {"id": "keys", "from": 72, "to": 135},
+        {"id": "bag", "from": 135, "to": 162},
+        {"id": "belt", "from": 162, "to": 198, "click": 189},
+        {"id": "naviWide", "from": 198, "to": 234, "screenOn": [198, 210]},
+        {"id": "navi", "from": 234, "to": 360, "routeDraw": [234, 246], "fingerIn": [252, 270], "approach": [270, 324], "tap": 333}
+      ]},
+    {"id": "S2", "title": "Ankunft unter Zeitdruck", "from": 360, "to": 600,
+      "clock": "clockLate", "clockFlip": [0, 8], "officeIn": [6, 24],
+      "walk": {"pose": "C3", "from": 63, "to": 180, "x": [520, 3250], "step": 6, "flip": true}},
+    {"id": "S3", "title": "Die zweite Routine", "from": 600, "to": 900, "patient": "C6C11", "patientHand": "C12",
+      "shots": [
+        {"id": "wide", "from": 0, "to": 90, "zoom": [1.0, 1.06]},
+        {"id": "hand", "from": 90, "to": 126},
+        {"id": "notes", "from": 126, "to": 162},
+        {"id": "look", "from": 162, "to": 180},
+        {"id": "slip", "from": 180, "to": 300, "push": [0, 54], "withdraw": [54, 72], "patientIn": [60, 84], "takeOut": [84, 108]}
+      ]},
+    {"id": "S4", "title": "Die Routinen wiederholen sich", "from": 900, "to": 1320,
+      "days": [
+        {"patient": "C13", "shots": [["cup", 0, 18], ["keys", 18, 27], ["navi", 27, 45], ["clock", 45, 63], ["coat", 63, 81], ["patient", 81, 99], ["notes", 99, 108], ["slip", 108, 135]]},
+        {"patient": "C14", "shots": [["cup", 135, 153], ["keys", 153, 162], ["navi", 162, 180], ["clock", 180, 189], ["coat", 189, 198], ["patient", 198, 216], ["notes", 216, 225], ["slip", 225, 252]]}
+      ],
+      "matchCut": {"from": 252, "cut": 288, "to": 324, "speed": 15, "dir": [0.97, 0.24], "point": [1010, 640]},
+      "panel": {"from": 324, "to": 420, "underline": [6, 30]}},
+    {"id": "S5", "title": "Das Innehalten am Navi", "from": 1320, "to": 1620,
+      "shots": [["cup", 0, 20], ["keys", 20, 40], ["belt", 40, 60]],
+      "navi": {"from": 60, "fingerIn": [60, 66], "approach": [66, 120], "pause": [120, 150], "hoverPx": 12,
+        "goldExpand": [150, 180], "goldDraw": [168, 210], "chips": [210, 230], "tapMove": [262, 282], "tap": 286}},
+    {"id": "S6", "title": "Eine andere Ankunft", "from": 1620, "to": 1830,
+      "clock": "clockEarly", "clockFlip": [0, 8], "officeIn": [0, 1],
+      "walk": {"pose": "C4w", "from": 12, "to": 112, "x": [520, 2030], "step": 9, "flip": true},
+      "hook": [112, 162], "coat": [162, 210], "blend": 8},
+    {"id": "S7", "title": "Das Innehalten im Behandlungsraum", "from": 1830, "to": 2160, "patient": "C15",
+      "shots": [
+        {"id": "wide", "from": 0, "to": 75, "zoom": [1.0, 1.05]},
+        {"id": "hand", "from": 75, "to": 100},
+        {"id": "notes", "from": 100, "to": 120},
+        {"id": "push", "from": 120, "to": 165, "move": [0, 15], "pause": [15, 45]},
+        {"id": "hesitate", "from": 165, "to": 190},
+        {"id": "explain", "from": 190, "to": 245, "blend": 8},
+        {"id": "react", "from": 245, "to": 275, "blend": 8},
+        {"id": "complete", "from": 275, "to": 310, "move": [0, 26]},
+        {"id": "take", "from": 310, "to": 330, "patientIn": [0, 14]}
+      ]},
+    {"id": "S8", "title": "Abschluss", "from": 2160, "to": 2400,
+      "panel": {"from": 0, "to": 120, "line1": 0, "underline1": [6, 30], "line2": 36, "underline2": [42, 66]},
+      "brush": [120, 150], "write": [150, 190], "end": 240}
+  ]
+}

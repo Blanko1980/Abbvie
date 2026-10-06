@@ -28,12 +28,12 @@ const PLAN = [
   {screen: 'B3'},
   {group: 'B2', base: 'B1', members: ['B2']},
   {group: 'C1', base: 'B3', members: ['C1']},
-  {group: 'C3', base: 'B4', members: ['C3', 'C3b'], tight: true},
-  {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true},
+  {group: 'C3', base: 'B4', members: ['C3', 'C3b'], tight: true, inner: [5, 12], dropGreen: true},
+  {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true},
   {group: 'C4', base: 'B4', members: ['C4', 'C5']},
   {group: 'C15doc', base: 'C15', members: ['C10', 'C9'], split: [0, 0.5]},
   {group: 'C15pat', base: 'C15', members: ['C15b'], split: [0.5, 1]},
-  {group: 'C8', base: 'DESK', members: ['C8'], tight: true},
+  {group: 'C8', base: 'DESK', members: ['C8'], tight: true, thresh: 9, woodChroma: true, handOnly: true}, // heller Ärmel vor hellem Grund
   {group: 'C12', base: 'DESK', members: ['C12'], tight: true},
   {group: 'C16', base: 'DESK', members: ['C16'], tight: true},
   {group: 'C7', base: 'DESK', members: ['C7']},
@@ -186,19 +186,26 @@ function largestComponent(mask, w, h) {
   for (let c = 1; c <= cur; c++) {
     const b = boxes[c];
     const inside = b.x0 >= B.x0 - mx && b.x1 <= B.x1 + mx && b.y0 >= B.y0 - my && b.y1 <= B.y1 + my;
-    if (c === best || (inside && b.n > 30)) keepLab[c] = 1;
+    if (c === best || (inside && b.n > bestN * 0.02)) keepLab[c] = 1;
   }
   return Float32Array.from(lab, (l) => (l && keepLab[l] ? 1 : 0));
 }
 
-async function diffKeep(base, v, w, h, split) {
+async function diffKeep(base, v, w, h, split, thresh = 22, woodChroma = false) {
   let d = new Float32Array(w * h);
   for (let i = 0; i < w * h; i++) {
+    const br = base.data[i * 3], bgc = base.data[i * 3 + 1], bb = base.data[i * 3 + 2];
+    if (woodChroma && br - bb > 30) {
+      // Holzfläche: nur Farbunterschiede zählen (Licht-/Helligkeitsänderungen der KI ignorieren)
+      const vr = v.data[i * 3], vg = v.data[i * 3 + 1], vb = v.data[i * 3 + 2];
+      d[i] = Math.max(Math.abs((br - bgc) - (vr - vg)), Math.abs((br + bgc - 2 * bb) - (vr + vg - 2 * vb)) / 2) / 255;
+      continue;
+    }
     d[i] = Math.max(Math.abs(base.data[i * 3] - v.data[i * 3]), Math.abs(base.data[i * 3 + 1] - v.data[i * 3 + 1]), Math.abs(base.data[i * 3 + 2] - v.data[i * 3 + 2])) / 255;
   }
   d = await blurMask(d, w, h, 1.5);
   const keep = new Float32Array(w * h);
-  for (let i = 0; i < w * h; i++) if (d[i] > 22 / 255) keep[i] = 1;
+  for (let i = 0; i < w * h; i++) if (d[i] > thresh / 255) keep[i] = 1;
   if (split) {
     const xa = Math.round(split[0] * w), xb = Math.round(split[1] * w);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < xa || x >= xb) keep[y * w + x] = 0;
@@ -211,8 +218,8 @@ async function maskFrom(keep, w, h, g) {
   let k = await blurMask(keep, w, h, 2);
   k = k.map((v) => (v > 0.6 ? 1 : 0));
   if (g.tight) k = largestComponent(k, w, h);
-  k = await dilate(k, w, h, g.tight ? 6 : 26);
-  const alpha = await blurMask(k, w, h, g.tight ? 2 : 14);
+  k = await dilate(k, w, h, g.tight ? 2 : 26);
+  const alpha = await blurMask(k, w, h, g.tight ? 1.2 : 14);
   if (g.split) {
     const xa = Math.round(g.split[0] * w), xb = Math.round(g.split[1] * w);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < xa || x >= xb) alpha[y * w + x] = 0;
@@ -253,11 +260,39 @@ async function group(g) {
   let shared = null;
   if (!g.tight) {
     const keep = new Float32Array(w * h);
-    for (const v of Object.values(vars)) { const k = await diffKeep(base, v, w, h, g.split); for (let i = 0; i < w * h; i++) if (k[i]) keep[i] = 1; }
+    for (const v of Object.values(vars)) { const k = await diffKeep(base, v, w, h, g.split, g.thresh, g.woodChroma); for (let i = 0; i < w * h; i++) if (k[i]) keep[i] = 1; }
     shared = await maskFrom(keep, w, h, g);
   }
   for (const [id, v] of Object.entries(vars)) {
-    const alpha = shared || await maskFrom(await diffKeep(base, v, w, h, g.split), w, h, g);
+    let alpha = shared || await maskFrom(await diffKeep(base, v, w, h, g.split, g.thresh, g.woodChroma), w, h, g);
+    if (g.inner) {
+      // Innerhalb der Figur: Pixel, die dem Hintergrund (fast) gleichen, durchsichtig machen –
+      // sonst wandern Hintergrundstücke aus Lücken (zwischen Arm und Körper) mit der bewegten Figur mit
+      const [lo, hi] = g.inner;
+      let d = new Float32Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        d[i] = Math.max(Math.abs(base.data[i * 3] - v.data[i * 3]), Math.abs(base.data[i * 3 + 1] - v.data[i * 3 + 1]), Math.abs(base.data[i * 3 + 2] - v.data[i * 3 + 2]));
+      }
+      d = await blurMask(d.map((x) => x / 255), w, h, 1);
+      alpha = alpha.map((a, i) => a * Math.min(1, Math.max(0, (d[i] * 255 - lo) / (hi - lo))));
+    }
+    const ramp = (x) => Math.min(1, Math.max(0, x));
+    if (g.dropGreen) {
+      // Pflanzenreste aus dem Hintergrund entfernen (die Figur trägt kein Grün)
+      alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return a * (1 - ramp((gg - Math.max(r, b) - 4) / 10)); });
+    }
+    if (g.handOnly) {
+      // Nur Haut, heller Ärmel und dunkle Manschette behalten – heller Tisch-Saum unter den Fingern fällt weg
+      alpha = alpha.map((a, i) => {
+        const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2];
+        const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), sat = mx ? (mx - mn) / mx : 0;
+        const skin = ramp((r - gg - 30) / 12);
+        const sleeve = ramp((0.14 - sat) / 0.05);
+        const cuff = ramp((0.45 - mx / 255) / 0.1);
+        return a * Math.max(skin, sleeve, cuff);
+      });
+      alpha = await blurMask(alpha, w, h, 0.8);
+    }
     const crop = bbox(alpha, w, h);
     const data = colorMatch(base, v, w, h, crop);
     const {out, cw, ch} = rgba(data, alpha, w, h, crop);
