@@ -19,7 +19,7 @@ if (fi >= 0) {
   // Gleichmäßig verteilte Einzelbilder eines Videos (Stumm-Prüfung)
   const video = path.join(ROOT, args[fi + 1]);
   const n = Number(args[fi + 2] || 24);
-  const frames = Number(execFileSync('ffprobe', ['-v', 'error', '-count_packets', '-select_streams', 'v:0', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', video]).toString().trim());
+  const frames = parseInt(execFileSync('ffprobe', ['-v', 'error', '-count_packets', '-select_streams', 'v:0', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', video]).toString().trim(), 10);
   const tmp = fs.mkdtempSync(path.join(ROOT, 'out/.frames-'));
   for (let k = 0; k < n; k++) {
     const f = Math.round((k + 0.5) * frames / n);

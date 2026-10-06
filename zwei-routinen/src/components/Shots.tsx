@@ -93,8 +93,10 @@ export const approachFinger = (f: number, [a, b]: number[], hoverPx: number): Fi
 // ------------------------------------------------------------ Praxis-Eingangshalle
 export const HallShot: React.FC<{clock?: string; flip?: number; office?: number; cam?: Cam; children?: React.ReactNode}> = ({clock, flip = 1, office = 1, cam = {z: 1}, children}) => (
   <ParallaxImage id="B4" cam={cam}>
-    {clock ? <ClockBadge time={clock} flip={flip} office={office} /> : null}
+    {clock ? <ClockBadge time={clock} flip={flip} office={office} part="hands" /> : null}
     {children}
+    {/* Plakette als Einblendung vor der Figur – Uhrzeit bleibt immer lesbar */}
+    {clock ? <ClockBadge time={clock} flip={flip} office={office} part="badge" /> : null}
   </ParallaxImage>
 );
 export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy + 170};
