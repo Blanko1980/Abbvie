@@ -749,13 +749,11 @@
   function naviState(p, lt, dur) {
     const cr = props.confirmRect();
     const cC = [cr.x + cr.w * 0.38, cr.y + cr.h * 0.5];
-    const rrct = props.routesRect();
-    const rC = [rrct.x + rrct.w * 0.5, rrct.y + rrct.h * 0.5];
-    const st = { on: 1, ambient: 1 };
+    const st = { on: 1, ambient: 1, title: 'saved', goldVis: 0 };
     let finger = null; // {tgt:[x,y] (Screen), lift: px, appear 0..1}
     const m = p.mode;
-    const tapCurve = (t0) => kf(lt, [[t0 - 0.35, 70], [t0, 0, 'inOutQuad'], [t0 + 0.16, 0], [t0 + 0.5, 60, 'inOutCubic']]);
     if (m === 'morning') {
+      // Erste Fahrt: nur die gespeicherte (lange) Route
       st.on = kf(lt, [[0, 0.4], [0.35, 1, 'outCubic']]);
       const app = ease.outCubic(seg(lt, 1.35, 2.15));
       const lift = kf(lt, [[2.15, 70], [2.42, 0, 'inOutQuad'], [2.56, 0], [2.95, 90, 'inOutCubic']]);
@@ -769,22 +767,42 @@
       const t0 = dur * 0.42;
       st.press = lt > t0 && lt < t0 + 0.14 ? 1 : 0;
       finger = { tgt: cC, lift: kf(lt, [[0, 60], [t0, 0, 'inOutQuad'], [t0 + 0.12, 0], [dur, 50, 'inOutCubic']]), appear: 1 };
+    } else if (m === 'dialog') {
+      // Tag 4: Das Navi findet eine neue, kürzere Route – die Hand wählt routiniert die gespeicherte
+      const tTap = 2.3;
+      st.on = ease.outCubic(seg(lt, 0, 0.25));
+      st.goldVis = ease.inOutCubic(seg(lt, 0.3, 0.75)) * (1 - ease.inOutCubic(seg(lt, tTap + 0.25, tTap + 0.65)));
+      st.dialog = ease.inOutCubic(seg(lt, 0.35, 0.8)) * (1 - ease.inOutCubic(seg(lt, tTap + 0.2, tTap + 0.6)));
+      st.dialogPress = lt > tTap && lt < tTap + 0.16 ? 1 : 0;
+      st.puck = { route: 'teal', u: ease.inOutSine(seg(lt, tTap + 0.5, dur)) * 0.03 };
+      const R = props.dialogRects();
+      const tgt = [R.saved.x + R.saved.w * 0.42, R.saved.y + R.saved.h * 0.5];
+      const lift = kf(lt, [[1.25, 160], [1.9, 70, 'outCubic'], [tTap, 0, 'inOutQuad'], [tTap + 0.15, 0], [tTap + 0.55, 110, 'inOutCubic']]);
+      finger = { tgt, lift, appear: ease.outCubic(seg(lt, 1.2, 1.8)), exit: ease.inOutCubic(seg(lt, tTap + 0.35, dur - 0.05)) };
     } else if (m === 'approach') {
+      // Mit Patientin: „Verfügbare Routen“, beide sichtbar, die gespeicherte ist vorausgewählt
+      st.title = 'available';
+      st.goldVis = 1;
       st.on = kf(lt, [[0, 0.3], [0.4, 1, 'outCubic']]);
       const app = ease.inOutCubic(seg(lt, 0.7, 2.0));
       finger = { tgt: cC, lift: lerp(220, 80, app), appear: ease.outCubic(seg(lt, 0.6, 1.3)) };
     } else if (m === 'hover') {
+      st.title = 'available';
+      st.goldVis = 1;
       const lift = kf(lt, [[0, 64], [0.8, 58], [1.9, 120, 'inOutSine'], [3, 124, 'inOutSine']]);
       finger = { tgt: cC, lift, appear: 1 };
     } else if (m === 'overview') {
-      st.routesPress = lt > 1.05 && lt < 1.3 ? 1 : 0;
-      st.ov = ease.inOutCubic(seg(lt, 1.3, 2.2));
-      st.confirmDisabled = st.ov;
-      const app = ease.inOutCubic(seg(lt, 0.3, 1.0));
-      const lift = kf(lt, [[0.75, 60], [1.05, 0, 'inOutQuad'], [1.22, 0], [1.8, 170, 'inOutCubic'], [3.4, 190]]);
-      finger = { tgt: [lerp(rC[0] + 120, rC[0], app), rC[1]], lift: lt < 0.75 ? lerp(220, 60, app) : lift, appear: ease.outCubic(seg(lt, 0.2, 0.8)) };
+      // Innehalten: Die Hand zieht sich zurück, beide Routen werden gleichwertig betrachtet
+      st.title = 'available';
+      st.goldVis = 1;
+      st.eq = ease.inOutCubic(seg(lt, 0.9, 1.9));
+      st.confirmDisabled = st.eq;
+      const lift = kf(lt, [[0, 124], [1.2, 260, 'inOutCubic']]);
+      finger = { tgt: cC, lift, appear: 1, exit: ease.inOutCubic(seg(lt, 0.6, 1.8)) };
     } else if (m === 'select') {
-      st.ov = 1;
+      st.title = 'available';
+      st.goldVis = 1;
+      st.eq = 1;
       const tealP = props.routePoint('teal', 0.42), goldP = props.routePoint('gold', 0.48);
       const tealP2 = props.routePoint('teal', 0.56);
       const tSel = 2.25, tConf = 3.85;

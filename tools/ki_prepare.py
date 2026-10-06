@@ -88,13 +88,13 @@ def color_match(base, var, region):
     return out
 
 
-def overlay_group(base, variants, prefix, split, thresh=22):
+def overlay_group(base, variants, prefix, split, thresh=22, grow=28, blur=22):
     """Mehrere Pose-Varianten einer Figur mit GEMEINSAMER weicher Maske
     (Vereinigung aller Änderungen) – so lassen sie sich sauber ineinander überblenden."""
     keep = np.zeros(base.shape[:2], bool)
     for v in variants.values():
         keep |= diff_mask(base, v, split, thresh)
-    alpha = soft_mask(keep)
+    alpha = soft_mask(keep, grow, blur)
     alpha[:, :split[0]] = 0
     alpha[:, split[1]:] = 0
     x0, y0, x1, y1 = bbox(alpha > 0.004)
@@ -130,16 +130,19 @@ def hand(raw, name):
 
 # Einstellung: (Grundbild, {Pose: Variante}) – alle Varianten sind KI-Bearbeitungen des Grundbilds
 SHOTS = {
-    "cup": ("cup-a.jpg", {"greifen": "cup-b.jpg", "heben": "cup-c.jpg"}),
+    "cup": ("cup-a.jpg", {"greifen": "cup-b.jpg"}),
+    # Anheben: Hand + Tasse als eng maskierte Ebene über der leeren Arbeitsplatte, im Code bewegt
+    "cupLift": ("cup-leer.jpg", {"greifen": "cup-b.jpg"}, {"grow": 8, "blur": 4}),
     "key": ("key-a.jpg", {"greifen": "key-b.jpg", "leer": "key-c.jpg"}),
     "bag": ("bag-a.jpg", {"tragen": "bag-b.jpg"}),
     "door": ("door-a.jpg", {"einsteigen": "door-b.jpg"}),
-    "belt": ("belt-a.jpg", {"zu": "belt-b.jpg"}),
-    "beltCoat": ("belt-coat-a.jpg", {"zu": "belt-coat-b.jpg"}),
+    "belt": ("belt2-a.jpg", {"zu": "belt2-b.jpg"}),
+    "beltCoat": ("belt2-coat-a.jpg", {"zu": "belt2-coat-b.jpg"}),
     "practice": ("practice-a.jpg", {"tuer": "practice-b.jpg"}),
     "greet": ("greet-a.jpg", {"hand": "greet-b.jpg"}),
     "handle": ("handle-a.jpg", {"griff": "handle-b.jpg"}),
-    "carhandle": ("carhandle-b.jpg", {}),
+    # Hand dreht sich nach dem Match Cut vom senkrechten Türgriff in den waagerechten Autotürgriff
+    "carhandle": ("carhandle-b.jpg", {"mitte": "carhandle-mitte.jpg", "ende": "carhandle-ende.jpg"}),
     # gespiegelt: Auto zeigt nach rechts, man sieht die Beifahrerseite (passt zur Sitzordnung im Innenraum)
     "boarding": ("boarding-a.jpg", {"sitzt": "boarding-b.jpg"}, {"flip": True}),
 }
@@ -174,13 +177,13 @@ def main():
             meta[key] = hand(raw, raw.replace(".png", ".webp"))
 
     # --- Innenraum: Grundbild (Arzt schaut aufs Navi, Patientin nach vorn) + Pose-Ebenen je Figur
-    A = rgb("cabin-a2.jpg")
+    A = rgb("cabin-a3.jpg")  # Arzt schaut mit offenen Augen aufmerksam aufs Navi
     save_jpg(A, "cabin-a.jpg")
     W = A.shape[1]
     B = rgb("cabin-b.jpg")
     meta["cabin"] = {
         "src": "assets/ki/cabin-a.jpg", "w": W, "h": A.shape[0],
-        "doc": overlay_group(A, {"mitte": rgb("cabin-arzt-mitte.jpg"), "b": B, "blinzeln": rgb("cabin-b-blink.jpg")},
+        "doc": overlay_group(A, {"mitte": rgb("cabin-arzt-mitte2.jpg"), "b": B, "blinzeln": rgb("cabin-b-blink.jpg")},
                              "cabin-arzt", (W // 2, W)),
         "pat": overlay_group(A, {"mitte": rgb("cabin-patientin-mitte.jpg"), "b": B}, "cabin-patientin", (0, W // 2)),
     }
@@ -256,7 +259,8 @@ def main():
         A = load(base)
         save_jpg(A, f"{key}.jpg")
         meta[key] = {"src": f"assets/ki/{key}.jpg", "w": A.shape[1], "h": A.shape[0],
-                     "pose": overlay_group(A, {k: load(f) for k, f in variants.items()}, key, (0, A.shape[1])) if variants else {}}
+                     "pose": overlay_group(A, {k: load(f) for k, f in variants.items()}, key, (0, A.shape[1]),
+                                           grow=opt.get("grow", 28), blur=opt.get("blur", 22)) if variants else {}}
 
     # Bilddaten einbetten: Bilder per file:// würden den Canvas für Export/Render sperren
     import base64

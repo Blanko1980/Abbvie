@@ -68,8 +68,8 @@
       }
     });
     // Rhythmische Verdichtung der Montage: weicher Puls + feine Ticks
-    for (let t = 14; t < 25 - 0.01; t += beat) ev.push({ t, type: 'pulse', g: t < 19 ? 0.6 : t < 22.5 ? 0.8 : 1 });
-    for (let t = 19; t < 25 - 0.01; t += beat / 2) ev.push({ t, type: 'tick', g: t < 22.5 ? 0.5 : 0.8 });
+    for (let t = 14; t < 24 - 0.01; t += beat) ev.push({ t, type: 'pulse', g: t < 19 ? 0.6 : t < 22.5 ? 0.8 : 1 });
+    for (let t = 19; t < 24 - 0.01; t += beat / 2) ev.push({ t, type: 'tick', g: t < 22.5 ? 0.5 : 0.8 });
     for (let t = 43; t < 47.6 - 0.01; t += beat) ev.push({ t, type: 'pulse', g: 0.6 });
     // Leichter Puls in der Fahrt (Variation)
     for (let t = 71.5; t < 78 - 0.01; t += beat * 2) ev.push({ t, type: 'pulse', g: 0.35 });
@@ -91,7 +91,7 @@
         case 'navi':
           if (p.mode === 'morning') at(2.42, 'tap');
           if (p.mode === 'tap') at(0.42 * d, 'tap');
-          if (p.mode === 'overview') at(1.05, 'tap');
+          if (p.mode === 'dialog') { at(0.45, 'select'); at(2.3, 'tap'); }
           if (p.mode === 'select') { at(2.25, 'select'); at(3.85, 'tap'); }
           break;
         case 'handle': at(0.62, 'latch', { g: 0.6 }); break;

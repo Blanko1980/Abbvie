@@ -56,24 +56,24 @@ window.FILM_KI = {
   "doc": {
    "mitte": {
     "src": "assets/ki/cabin-arzt-mitte.webp",
-    "x": 1563,
-    "y": 227,
-    "w": 1189,
-    "h": 961
+    "x": 1774,
+    "y": 332,
+    "w": 978,
+    "h": 723
    },
    "b": {
     "src": "assets/ki/cabin-arzt-b.webp",
-    "x": 1563,
-    "y": 227,
-    "w": 1189,
-    "h": 961
+    "x": 1774,
+    "y": 332,
+    "w": 978,
+    "h": 723
    },
    "blinzeln": {
     "src": "assets/ki/cabin-arzt-blinzeln.webp",
-    "x": 1563,
-    "y": 227,
-    "w": 1189,
-    "h": 961
+    "x": 1774,
+    "y": 332,
+    "w": 978,
+    "h": 723
    }
   },
   "pat": {
@@ -81,15 +81,15 @@ window.FILM_KI = {
     "src": "assets/ki/cabin-patientin-mitte.webp",
     "x": 437,
     "y": 308,
-    "w": 616,
-    "h": 641
+    "w": 815,
+    "h": 935
    },
    "b": {
     "src": "assets/ki/cabin-patientin-b.webp",
     "x": 437,
     "y": 308,
-    "w": 616,
-    "h": 641
+    "w": 815,
+    "h": 935
    }
   }
  },
@@ -129,17 +129,24 @@ window.FILM_KI = {
   "pose": {
    "greifen": {
     "src": "assets/ki/cup-greifen.webp",
-    "x": 387,
+    "x": 969,
     "y": 337,
-    "w": 2365,
-    "h": 1199
-   },
-   "heben": {
-    "src": "assets/ki/cup-heben.webp",
-    "x": 387,
-    "y": 337,
-    "w": 2365,
-    "h": 1199
+    "w": 1783,
+    "h": 1008
+   }
+  }
+ },
+ "cupLift": {
+  "src": "assets/ki/cupLift.jpg",
+  "w": 2752,
+  "h": 1536,
+  "pose": {
+   "greifen": {
+    "src": "assets/ki/cupLift-greifen.webp",
+    "x": 447,
+    "y": 395,
+    "w": 2305,
+    "h": 1141
    }
   }
  },
@@ -199,10 +206,10 @@ window.FILM_KI = {
   "pose": {
    "zu": {
     "src": "assets/ki/belt-zu.webp",
-    "x": 741,
-    "y": 26,
-    "w": 1317,
-    "h": 1510
+    "x": 764,
+    "y": 85,
+    "w": 1448,
+    "h": 1451
    }
   }
  },
@@ -213,9 +220,9 @@ window.FILM_KI = {
   "pose": {
    "zu": {
     "src": "assets/ki/beltCoat-zu.webp",
-    "x": 0,
+    "x": 36,
     "y": 0,
-    "w": 2752,
+    "w": 2176,
     "h": 1536
    }
   }
@@ -266,7 +273,22 @@ window.FILM_KI = {
   "src": "assets/ki/carhandle.jpg",
   "w": 2752,
   "h": 1536,
-  "pose": {}
+  "pose": {
+   "mitte": {
+    "src": "assets/ki/carhandle-mitte.webp",
+    "x": 1737,
+    "y": 377,
+    "w": 1015,
+    "h": 879
+   },
+   "ende": {
+    "src": "assets/ki/carhandle-ende.webp",
+    "x": 1737,
+    "y": 377,
+    "w": 1015,
+    "h": 879
+   }
+  }
  },
  "boarding": {
   "src": "assets/ki/boarding.jpg",

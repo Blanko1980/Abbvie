@@ -20,7 +20,7 @@
       gold: '#FFD100', // Rinvoq Gold – alternative Route, Callout
       charcoal: '#25282A', // Rinvoq Charcoal
       white: '#FFFFFF',
-      teal: '#366B8F', // Deep Teal 2 – vertraute (gespeicherte) Route
+      teal: '#1D7D7E', // Wettbewerber-Farbe (Dupixent) – vertraute, gespeicherte Route
       plum: '#90124A', // optional – in diesem Film bewusst nicht verwendet
 
       // Neutrale Welt (Figuren, Auto, Räume)
@@ -69,21 +69,30 @@
       card2: ['Passt der vertraute Weg', 'auch diesmal?'],
       final: {
         lead: ['Bewährte Wege geben Sicherheit.'],
-        main: ['Doch welcher passt wirklich', 'zu diesem Patienten?'],
+        main: ['Doch welcher passt wirklich?'],
       },
+      // Textfarbe je Tafel (Standard: Charcoal bzw. Weiß)
+      cardColor: { card1: '#1D7D7E' },
       callout: { line1: 'Rethink', line2: 'the Routine' },
       navi: {
         saved: 'Gespeicherte Route',
+        available: 'Verfügbare Routen',
         confirm: 'Bestätigen',
         routes: 'Routen',
+        dialog: {
+          line1: 'Es wurde eine neue Route gefunden.',
+          line2: 'Möchten Sie die neue Route verwenden?',
+          useSaved: 'Gespeicherte Route verwenden',
+          useNew: 'Neue Route verwenden',
+        },
       },
     },
 
     /* Szenen (für Zeitleiste/README) */
     scenes: [
       { id: 'morgen', label: 'Der vertraute Morgen', start: 0, end: 14 },
-      { id: 'montage', label: 'Wiederholung wird Routine', start: 14, end: 25 },
-      { id: 'card1', label: 'Texttafel 1', start: 25, end: 30 },
+      { id: 'montage', label: 'Wiederholung wird Routine', start: 14, end: 27 },
+      { id: 'card1', label: 'Texttafel 1', start: 27, end: 30 },
       { id: 'patient', label: 'Der konkrete Patient', start: 30, end: 43 },
       { id: 'griff', label: 'Der automatische Griff', start: 43, end: 53 },
       { id: 'card2', label: 'Die Frage', start: 53, end: 59 },
@@ -104,7 +113,7 @@
       { start: 8.8, end: 10.4, draw: 'belt', p: { day: 1, mode: 'full' } },
       { start: 10.4, end: 14.0, draw: 'navi', p: { day: 1, mode: 'morning' } },
 
-      // 00:14–00:25 Wiederholung – Tag 2 (1,0 s), Tag 3 (0,7 s), Tag 4 (0,5 s)
+      // 00:14–00:27 Wiederholung – Tag 2 (1,0 s), Tag 3 (0,7 s), Tag 4 (0,5 s) + Navi-Dialog „neue Route“
       { start: 14.0, end: 15.0, draw: 'cup', p: { day: 2, mode: 'beat' } },
       { start: 15.0, end: 16.0, draw: 'key', p: { day: 2, mode: 'beat' } },
       { start: 16.0, end: 17.0, draw: 'belt', p: { day: 2, mode: 'beat' } },
@@ -118,11 +127,10 @@
       { start: 22.5, end: 23.0, draw: 'cup', p: { day: 4, mode: 'beat' } },
       { start: 23.0, end: 23.5, draw: 'key', p: { day: 4, mode: 'beat' } },
       { start: 23.5, end: 24.0, draw: 'belt', p: { day: 4, mode: 'beat' } },
-      { start: 24.0, end: 24.5, draw: 'navi', p: { day: 4, mode: 'route' } },
-      { start: 24.5, end: 25.0, draw: 'navi', p: { day: 4, mode: 'tap' } },
+      { start: 24.0, end: 27.0, draw: 'navi', p: { day: 4, mode: 'dialog' } },
 
-      // 00:25–00:30 Texttafel 1
-      { start: 25.0, end: 30.0, draw: 'card', p: { key: 'card1', theme: 'light' } },
+      // 00:27–00:30 Texttafel 1
+      { start: 27.0, end: 30.0, draw: 'card', p: { key: 'card1', theme: 'light' } },
 
       // 00:30–00:43 Der konkrete Patient
       { start: 30.0, end: 33.0, draw: 'practice', p: {}, fade: 0.7, dip: '#FFFFFF' },

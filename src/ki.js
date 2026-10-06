@@ -123,6 +123,10 @@
       fx = W / 2 - 120; fy = H / 2 + 90;
     } else if (p.mode === 'route') {
       z = lerp(1.0, 1.03, lt / dur);
+    } else if (p.mode === 'dialog') {
+      // näher heran, damit der Dialogtext gut lesbar ist
+      z = lerp(1.02, 1.14, ease.inOutSine(Math.min(1, lt / 1.2)));
+      fy = H / 2 + 70;
     } else {
       z = lerp(1.0, 1.02, ease.inOutSine(Math.min(1, lt / Math.max(dur, 0.1))));
     }
@@ -252,15 +256,32 @@
     ctx.restore();
   }
 
+  // Tasse: Hand greift (Pose-Überblendung), dann heben Hand und Tasse gemeinsam ab (echte Bewegung:
+  // eng maskierte Ebene „Hand + Tasse“ über der leeren Arbeitsplatte)
   function shotCup(ctx, lt, dur, p, t) {
-    const seq = daySeq(p,
-      [[0, null], [1.45, 'greifen', 0.28], [2.05, 'heben', 0.22], [2.6, 'greifen', 0.22]],
-      [[0, 'heben'], [dur * 0.45, 'greifen', Math.min(0.18, dur * 0.25)]]);
-    const cam = p.mode === 'full' ? { z: [1.0, 1.07], f: [1150, 900] } : { z: [1.04, 1.06], f: [1150, 900] };
-    poseShot(ctx, META.cup, lt, dur, seq, cam, dayOf(p), 0.6, (c, cv, st) => {
-      const amt = st.cur ? 1 - (st.prev ? 1 : st.a) : 1;
-      steam(c, cv, 820, 840, t, p.mode === 'full' ? amt * Math.min(1, lt / 0.4) : 0);
-    });
+    const m = META.cup, ml = META.cupLift;
+    const cv = cover(m);
+    const full = p.mode === 'full';
+    const grab = full ? ease.inOutSine(seg(lt, 1.45, 1.73)) : 1;
+    // Hubhöhe in Quellpixeln (negativ = nach oben)
+    const lift = full
+      ? kf(lt, [[2.0, 0], [2.36, -120, 'inOutCubic'], [2.46, -120], [2.8, 0, 'inOutQuad']])
+      : kf(lt / dur, [[0, -110], [0.5, 0, 'inOutCubic']]);
+    const cam = full ? { z: [1.0, 1.07] } : { z: [1.04, 1.06] };
+    const z = lerp(cam.z[0], cam.z[1], ease.inOutSine(Math.min(1, lt / dur)));
+    ctx.save();
+    camera(ctx, z, cv.ox + 1150 * cv.s, cv.oy + 900 * cv.s, cv, m);
+    if (grab < 1 || (full && lt < 2.0)) {
+      ctx.drawImage(img[m.src], cv.ox, cv.oy, m.w * cv.s, m.h * cv.s);
+      layer(ctx, m.pose.greifen, cv, grab);
+      steam(ctx, cv, 820, 840, t, full ? (1 - grab) * Math.min(1, lt / 0.4) : 0);
+    } else {
+      ctx.drawImage(img[ml.src], cv.ox, cv.oy, ml.w * cv.s, ml.h * cv.s);
+      const o = ml.pose.greifen;
+      ctx.drawImage(img[o.src], cv.ox + o.x * cv.s, cv.oy + (o.y + lift) * cv.s, o.w * cv.s, o.h * cv.s);
+    }
+    ctx.restore();
+    finish(ctx, dayOf(p), 0.6);
   }
   function shotKey(ctx, lt, dur, p, t) {
     const seq = daySeq(p,
@@ -293,7 +314,8 @@
   }
   function shotCarHandle(ctx, lt, dur) {
     // Match Cut: Hand liegt exakt wie im Praxisbild; kleiner Kamerazug nach rechts = Tür wird aufgezogen
-    poseShot(ctx, META.carhandle, lt, dur, [[0, null]], { z: [1.05, 1.07], f: [1700, 800], f2: [1780, 790] }, day0(), 0.5);
+    // danach dreht sich die Hand in zwei Stufen in den waagerechten Autotürgriff
+    poseShot(ctx, META.carhandle, lt, dur, [[0, null], [0.28, 'mitte', 0.12], [0.5, 'ende', 0.12]], { z: [1.05, 1.07], f: [1700, 800], f2: [1780, 790] }, day0(), 0.5);
   }
   function shotBoarding(ctx, lt, dur) {
     poseShot(ctx, META.boarding, lt, dur, [[0, null], [1.8, 'sitzt', 0.22]], { z: [1.04, 1.1], f: [1376, 900] }, day0(), 0.5);
@@ -381,4 +403,5 @@
     };
   }
   if (META.belt && META.beltCoat) F.scenes.belt = use('belt', shotBelt);
+  if (!META.cupLift) F.scenes.cup = orig.cup;
 })();

@@ -42,6 +42,7 @@
       main.forEach((l) => { ctx.fillText(l, W / 2, y + sMain * 0.75); y += sMain * lh; });
     } else {
       const lines = T[key];
+      if (T.cardColor && T.cardColor[key]) ctx.fillStyle = T.cardColor[key];
       const size = 88, lh = 1.14;
       setFont(ctx, size, 700, -1.6);
       const blockH = lines.length * size * lh;
