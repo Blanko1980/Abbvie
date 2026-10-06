@@ -20,6 +20,18 @@ Stand: 06.10.2026. Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbil
 - [x] **prompts.json:** `assets/prompts.json` enthält Modell, Prompt, Referenzen und den gewählten Kandidaten jedes Bildes.
 - [x] **Bericht:** Schriften-TODOs, Neuerzeugungen und Ausfälle stehen unten.
 
+## Messwerte
+
+| Datei | Video | Ton |
+|---|---|---|
+| `out/zwei-routinen.mp4` (24 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | AAC 48 kHz Stereo, −16,0 LUFS integriert, Spitze −1,3 dB |
+| `out/zwei-routinen-muted.mp4` (21 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | keine Tonspur |
+
+Zusätzlich gemessen:
+- Geräusche liegen 7,3 dB über dem Musikbett.
+- In beiden Pausen sinkt der Pegel auf etwa −50 dBFS (nur Raumton), davor liegt er bei −23 bis −27 dBFS.
+- Nach Frame 2370 ist nur noch Raumton zu hören (−46 dBFS).
+
 ## Markenschriften (TODO brand font)
 
 - `src/theme.ts` → `sans`: Source Sans 3 (OFL) ersetzt die Markenschriften (Graphik / Neue Haas Grotesk) für Tafeln, Navi und Uhr.
