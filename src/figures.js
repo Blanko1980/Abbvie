@@ -13,7 +13,9 @@
   function drawHead(ctx, x, y, s, who, o = {}) {
     const st = F.config.people[who];
     const yaw = o.yaw || 0, pitch = o.pitch || 0;
-    const smile = o.smile || 0, blink = o.blink || 0, gaze = o.gaze || 0;
+    const smile = o.smile || 0, blink = o.blink || 0;
+    // ohne explizite Blickrichtung schauen die Augen in Kopfrichtung
+    const gaze = o.gaze ? o.gaze : Math.sin(o.yaw || 0) * 0.6;
     const RX = 54, RY = 64;
     const sy = Math.sin(yaw), cy = Math.cos(yaw);
     ctx.save();
@@ -115,16 +117,32 @@
       ctx.lineWidth = 4.5;
       ctx.beginPath();
       const w = 11 * Math.max(0.45, e.c);
-      ctx.moveTo(e.x - w, eyeY - 17 + smile * -1);
-      ctx.quadraticCurveTo(e.x, eyeY - 21 - smile * 1.5, e.x + w, eyeY - 18);
+      const br = (o.brow || 0) * 4;
+      ctx.moveTo(e.x - w, eyeY - 17 + smile * -1 - br);
+      ctx.quadraticCurveTo(e.x, eyeY - 21 - smile * 1.5 - br * 1.3, e.x + w, eyeY - 18 - br);
       ctx.stroke();
     });
     // Augen
+    // Augen mit Augenweiß, damit die Blickrichtung (gaze, gazeY) eindeutig lesbar ist
+    const gazeY = o.gazeY || 0;
     eyes.forEach((e) => {
       const rxE = 5.2 * Math.max(0.5, e.c);
       const ryE = 6.2 * (1 - blink * 0.9) * (1 - smile * 0.25);
-      fillEllipse(ctx, e.x + gaze * 2.5, eyeY, rxE, Math.max(0.8, ryE), '#2A2421');
-      if (blink < 0.5) circle(ctx, e.x + gaze * 2.5 + 1.5, eyeY - 2, 1.4, 'rgba(255,255,255,0.7)');
+      if (blink < 0.5) {
+        fillEllipse(ctx, e.x, eyeY, rxE * 1.9, Math.max(1, ryE * 1.05), '#F3EEE8');
+        const px = e.x + clamp(gaze, -1, 1) * rxE * 0.85;
+        const py = eyeY + clamp(gazeY, -1, 1) * ryE * 0.35;
+        fillEllipse(ctx, px, py, rxE * 0.95, Math.max(0.8, ryE * 0.95), '#2A2421');
+        circle(ctx, px + 1.4, py - 1.8, 1.3, 'rgba(255,255,255,0.75)');
+        // Oberlid
+        ctx.strokeStyle = '#2A2421';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.ellipse(e.x, eyeY + 0.5, rxE * 1.95, ryE * 1.1, 0, Math.PI * 1.08, Math.PI * 1.92);
+        ctx.stroke();
+      } else {
+        fillEllipse(ctx, e.x, eyeY, rxE * 1.6, 1.2, '#2A2421');
+      }
     });
     // Nase
     const nA = yaw;
@@ -441,7 +459,7 @@
     drawHead(ctx, 0, 0, 1, who, {
       yaw: p.headYaw != null ? p.headYaw : 1.15,
       pitch: p.headPitch || 0, smile: p.smile || 0, blink: p.blink || 0, gaze: p.gaze || 0,
-      tilt: p.headTilt || 0,
+      gazeY: p.gazeY || 0, tilt: p.headTilt || 0, brow: p.brow || 0,
     });
     ctx.restore();
     ctx.restore();
@@ -545,7 +563,7 @@
 
     drawHead(ctx, 0, -448, 1, who, {
       yaw: p.headYaw || 0, pitch: p.headPitch || 0, smile: p.smile || 0,
-      blink: p.blink || 0, gaze: p.gaze || 0, tilt: p.headTilt || 0,
+      blink: p.blink || 0, gaze: p.gaze || 0, gazeY: p.gazeY || 0, tilt: p.headTilt || 0, brow: p.brow || 0,
     });
     ctx.restore();
     return hands;

@@ -11,7 +11,7 @@
     width: 1920,
     height: 1080,
     fps: 30,
-    duration: 90,
+    duration: 92.5,
     safe: 90, // Mindest-Außenabstand für Texte (px)
 
     font: "'FilmSans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
@@ -20,7 +20,7 @@
       gold: '#FFD100', // Rinvoq Gold – alternative Route, Callout
       charcoal: '#25282A', // Rinvoq Charcoal
       white: '#FFFFFF',
-      teal: '#366B8F', // Deep Teal 2 – vertraute (gespeicherte) Route
+      teal: '#1D7D7E', // Dupixent-Farbe – gespeicherte (vertraute) Route und erste Texttafel
       plum: '#90124A', // optional – in diesem Film bewusst nicht verwendet
 
       // Neutrale Welt (Figuren, Auto, Räume)
@@ -69,34 +69,39 @@
       card2: ['Passt der vertraute Weg', 'auch diesmal?'],
       final: {
         lead: ['Bewährte Wege geben Sicherheit.'],
-        main: ['Doch welcher passt wirklich', 'zu diesem Patienten?'],
+        main: ['Doch welcher passt wirklich?'],
       },
       callout: { line1: 'Rethink', line2: 'the Routine' },
       navi: {
         saved: 'Gespeicherte Route',
         confirm: 'Bestätigen',
         routes: 'Routen',
+        available: 'Verfügbare Routen',
+        dialogTitle: 'Es wurde eine neue Route gefunden.',
+        dialogQuestion: 'Möchten Sie die neue Route verwenden?',
+        useSaved: 'Gespeicherte Route verwenden',
+        useNew: 'Neue Route verwenden',
       },
     },
 
     /* Szenen (für Zeitleiste/README) */
     scenes: [
       { id: 'morgen', label: 'Der vertraute Morgen', start: 0, end: 14 },
-      { id: 'montage', label: 'Wiederholung wird Routine', start: 14, end: 25 },
-      { id: 'card1', label: 'Texttafel 1', start: 25, end: 30 },
-      { id: 'patient', label: 'Der konkrete Patient', start: 30, end: 43 },
-      { id: 'griff', label: 'Der automatische Griff', start: 43, end: 53 },
-      { id: 'card2', label: 'Die Frage', start: 53, end: 59 },
-      { id: 'auswahl', label: 'Bewusste Auswahl', start: 59, end: 71 },
-      { id: 'fahrt', label: 'Gemeinsam losfahren', start: 71, end: 78 },
-      { id: 'final', label: 'Schlussgedanke', start: 78, end: 85 },
-      { id: 'callout', label: 'Rethink the Routine', start: 85, end: 90 },
+      { id: 'montage', label: 'Wiederholung wird Routine', start: 14, end: 27.5 },
+      { id: 'card1', label: 'Texttafel 1', start: 27.5, end: 32.5 },
+      { id: 'patient', label: 'Der konkrete Patient', start: 32.5, end: 45.5 },
+      { id: 'griff', label: 'Der automatische Griff', start: 45.5, end: 55.5 },
+      { id: 'card2', label: 'Die Frage', start: 55.5, end: 61.5 },
+      { id: 'auswahl', label: 'Bewusste Auswahl', start: 61.5, end: 73.5 },
+      { id: 'fahrt', label: 'Gemeinsam losfahren', start: 73.5, end: 80.5 },
+      { id: 'final', label: 'Schlussgedanke', start: 80.5, end: 87.5 },
+      { id: 'callout', label: 'Rethink the Routine', start: 87.5, end: 92.5 },
     ],
 
     /* Einstellungen. fade = Überblendung (s) aus der vorherigen Einstellung;
        dip = Abblende über diese Farbe (für Übergänge mit Texttafeln). */
     shots: [
-      // 00:00–00:14 Der vertraute Morgen
+      // 00:00–00:14 Der vertraute Morgen (Navi zeigt nur die gespeicherte Route)
       { start: 0.0, end: 3.0, draw: 'cup', p: { day: 1, mode: 'full' } },
       { start: 3.0, end: 4.6, draw: 'key', p: { day: 1, mode: 'full' } },
       { start: 4.6, end: 6.4, draw: 'bag', p: { day: 1 } },
@@ -104,7 +109,7 @@
       { start: 8.8, end: 10.4, draw: 'belt', p: { day: 1, mode: 'full' } },
       { start: 10.4, end: 14.0, draw: 'navi', p: { day: 1, mode: 'morning' } },
 
-      // 00:14–00:25 Wiederholung – Tag 2 (1,0 s), Tag 3 (0,7 s), Tag 4 (0,5 s)
+      // 00:14–00:27,5 Wiederholung – Tag 2 (1,0 s), Tag 3 (0,7 s), Tag 4 (0,5 s) + Dialog „Neue Route gefunden“
       { start: 14.0, end: 15.0, draw: 'cup', p: { day: 2, mode: 'beat' } },
       { start: 15.0, end: 16.0, draw: 'key', p: { day: 2, mode: 'beat' } },
       { start: 16.0, end: 17.0, draw: 'belt', p: { day: 2, mode: 'beat' } },
@@ -118,42 +123,41 @@
       { start: 22.5, end: 23.0, draw: 'cup', p: { day: 4, mode: 'beat' } },
       { start: 23.0, end: 23.5, draw: 'key', p: { day: 4, mode: 'beat' } },
       { start: 23.5, end: 24.0, draw: 'belt', p: { day: 4, mode: 'beat' } },
-      { start: 24.0, end: 24.5, draw: 'navi', p: { day: 4, mode: 'route' } },
-      { start: 24.5, end: 25.0, draw: 'navi', p: { day: 4, mode: 'tap' } },
+      { start: 24.0, end: 27.5, draw: 'navi', p: { day: 4, mode: 'dialog' } },
 
-      // 00:25–00:30 Texttafel 1
-      { start: 25.0, end: 30.0, draw: 'card', p: { key: 'card1', theme: 'light' } },
+      // 00:27,5–00:32,5 Texttafel 1 (Schrift in Dupixent-Farbe)
+      { start: 27.5, end: 32.5, draw: 'card', p: { key: 'card1', theme: 'light', color: 'teal' } },
 
-      // 00:30–00:43 Der konkrete Patient
-      { start: 30.0, end: 33.0, draw: 'practice', p: {}, fade: 0.7, dip: '#FFFFFF' },
-      { start: 33.0, end: 37.0, draw: 'greet', p: {} },
-      { start: 37.0, end: 38.0, draw: 'handle', p: {} },
-      { start: 38.0, end: 39.0, draw: 'carhandle', p: {} },
-      { start: 39.0, end: 43.0, draw: 'boarding', p: {} },
+      // 00:32,5–00:45,5 Der konkrete Patient
+      { start: 32.5, end: 35.5, draw: 'practice', p: {}, fade: 0.7, dip: '#FFFFFF' },
+      { start: 35.5, end: 39.5, draw: 'greet', p: {} },
+      { start: 39.5, end: 40.5, draw: 'handle', p: {} },
+      { start: 40.5, end: 41.5, draw: 'carhandle', p: {} },
+      { start: 41.5, end: 45.5, draw: 'boarding', p: {} },
 
-      // 00:43–00:53 Der automatische Griff
-      { start: 43.0, end: 44.6, draw: 'belt', p: { day: 0, mode: 'coat' } },
-      { start: 44.6, end: 46.6, draw: 'navi', p: { day: 0, mode: 'approach' } },
-      { start: 46.6, end: 50.0, draw: 'cabin', p: { mode: 'pause' } },
-      { start: 50.0, end: 53.0, draw: 'navi', p: { day: 0, mode: 'hover' } },
+      // 00:45,5–00:55,5 Der automatische Griff (Navi: „Verfügbare Routen“)
+      { start: 45.5, end: 47.1, draw: 'belt', p: { day: 0, mode: 'coat' } },
+      { start: 47.1, end: 49.1, draw: 'navi', p: { day: 0, mode: 'approach' } },
+      { start: 49.1, end: 52.5, draw: 'cabin', p: { mode: 'pause' } },
+      { start: 52.5, end: 55.5, draw: 'navi', p: { day: 0, mode: 'hover' } },
 
-      // 00:53–00:59 Die Frage
-      { start: 53.0, end: 59.0, draw: 'card', p: { key: 'card2', theme: 'dark' }, fade: 0.9, dip: '#25282A' },
+      // 00:55,5–01:01,5 Die Frage
+      { start: 55.5, end: 61.5, draw: 'card', p: { key: 'card2', theme: 'dark' }, fade: 0.9, dip: '#25282A' },
 
-      // 00:59–01:11 Bewusste Auswahl
-      { start: 59.0, end: 62.4, draw: 'navi', p: { day: 0, mode: 'overview' }, fade: 0.7, dip: '#25282A' },
-      { start: 62.4, end: 65.4, draw: 'cabin', p: { mode: 'consider' } },
-      { start: 65.4, end: 71.0, draw: 'navi', p: { day: 0, mode: 'select' } },
+      // 01:01,5–01:13,5 Bewusste Auswahl
+      { start: 61.5, end: 64.9, draw: 'navi', p: { day: 0, mode: 'available' }, fade: 0.7, dip: '#25282A' },
+      { start: 64.9, end: 67.9, draw: 'cabin', p: { mode: 'consider' } },
+      { start: 67.9, end: 73.5, draw: 'navi', p: { day: 0, mode: 'select' } },
 
-      // 01:11–01:18 Gemeinsam losfahren
-      { start: 71.0, end: 74.0, draw: 'drive', p: {} },
-      { start: 74.0, end: 78.0, draw: 'aerial', p: {}, fade: 0.8 },
+      // 01:13,5–01:20,5 Gemeinsam losfahren
+      { start: 73.5, end: 76.5, draw: 'drive', p: {} },
+      { start: 76.5, end: 80.5, draw: 'aerial', p: {}, fade: 0.8 },
 
-      // 01:18–01:25 Schlussgedanke
-      { start: 78.0, end: 85.0, draw: 'card', p: { key: 'final', theme: 'light' }, fade: 0.7, dip: '#FFFFFF' },
+      // 01:20,5–01:27,5 Schlussgedanke
+      { start: 80.5, end: 87.5, draw: 'card', p: { key: 'final', theme: 'light' }, fade: 0.7, dip: '#FFFFFF' },
 
-      // 01:25–01:30 Marken-Callout
-      { start: 85.0, end: 90.0, draw: 'callout', p: {}, fade: 0.6, dip: '#25282A' },
+      // 01:27,5–01:32,5 Marken-Callout
+      { start: 87.5, end: 92.5, draw: 'callout', p: {}, fade: 0.6, dip: '#25282A' },
     ],
 
     audio: {
@@ -163,8 +167,8 @@
       sfxGain: 0.55,
       // Ereignisse der Geräusche (Sekunden) – werden aus den Einstellungen abgeleitet,
       // hier nur globale Parameter.
-      duckPause: { start: 47.6, end: 59.0 }, // musikalische Zurücknahme beim Innehalten
-      variationFrom: 67.6, // leichte Variation nach der bewussten Auswahl
+      duckPause: { start: 50.1, end: 61.5 }, // musikalische Zurücknahme beim Innehalten
+      variationFrom: 70.15, // leichte Variation nach der bewussten Auswahl
     },
   };
 })();

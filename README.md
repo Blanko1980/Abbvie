@@ -1,6 +1,6 @@
 # Der vertraute Griff – Rethink the Routine
 
-Ein vollständig programmatisch erzeugter Animationsfilm (Entwurf, ca. 90 s, 1920 × 1080, 30 fps).
+Ein vollständig programmatisch erzeugter Animationsfilm (Entwurf, Fassung 2, 92,5 s, 1920 × 1080, 30 fps).
 Alle Bilder, Figuren, Bewegungen, Texte und Klänge entstehen im Code: HTML5 Canvas 2D und Web Audio API.
 Es gibt keine externen Assets, kein CDN und keinen Build-Schritt.
 
@@ -32,7 +32,7 @@ Mit `&clean` wird nur die Filmfläche ohne Bedienelemente gezeigt.
 
 ## Fertiges Video
 
-`export/der-vertraute-griff.mp4`: H.264 + AAC, 1920 × 1080, 30 fps, 90 s.
+`export/der-vertraute-griff.mp4`: H.264 + AAC, 1920 × 1080, 30 fps, 92,5 s.
 Das Video wurde lokal Bild für Bild gerendert, nicht in Echtzeit aufgenommen.
 Neu erzeugen lässt es sich mit dem optionalen Render-Werkzeug. Es setzt Playwright mit Chromium sowie ffmpeg voraus:
 
@@ -49,7 +49,7 @@ Der Player prüft zur Laufzeit, welche Formate der Browser unterstützt, und ben
 In Chrome, Edge und Firefox ist das WebM (VP9/VP8 + Opus).
 MP4 entsteht nur, wenn der Browser es selbst anbietet (z. B. Safari).
 
-- Die Aufnahme startet immer bei 00:00 und dauert 90 s.
+- Die Aufnahme startet immer bei 00:00 und dauert 92,5 s.
 - Während der Aufnahme den Tab sichtbar lassen. Im Hintergrund drosselt der Browser die Bildrate.
 - War der Tab während der Aufnahme im Hintergrund, weist der Status nach dem Export darauf hin.
 - Für eine bildgenaue Datei das Render-Werkzeug oben verwenden.
@@ -72,29 +72,32 @@ Es gibt keine frameabhängigen Fortschreibungen und keine `setTimeout`-Animation
 
 ## Timing
 
+Das vollständige Drehbuch mit allen Änderungen der Fassung 2 steht in [SKRIPT.md](SKRIPT.md).
+
 | Zeit | Szene |
 |---|---|
-| 00:00–00:14 | Der vertraute Morgen |
-| 00:14–00:25 | Wiederholung wird Routine (Tag 2–4, Schnitte von 1,0 s über 0,7 s auf 0,5 s) |
-| 00:25–00:30 | „Was sich bewährt, wird selbstverständlich.“ |
-| 00:30–00:43 | Der konkrete Patient (Match Cut: Praxis-Türgriff → Autotürgriff) |
-| 00:43–00:53 | Der automatische Griff |
-| 00:53–00:59 | „Passt der vertraute Weg auch diesmal?“ |
-| 00:59–01:11 | Bewusste Auswahl |
-| 01:11–01:18 | Gemeinsam losfahren |
-| 01:18–01:25 | Schlussgedanke |
-| 01:25–01:30 | „Rethink the Routine“ |
+| 00:00–00:14 | Der vertraute Morgen (Navi zeigt nur die gespeicherte Route) |
+| 00:14–00:27,5 | Wiederholung wird Routine. Tag 2–4, dann der Dialog „Neue Route gefunden“, die Hand wählt die gespeicherte Route |
+| 00:27,5–00:32,5 | „Was sich bewährt, wird selbstverständlich.“ (Schrift in Dupixent-Farbe) |
+| 00:32,5–00:45,5 | Der konkrete Patient (Match Cut: Praxis-Türgriff → Autotürgriff, Hand dreht sich) |
+| 00:45,5–00:55,5 | Der automatische Griff („Verfügbare Routen“) |
+| 00:55,5–01:01,5 | „Passt der vertraute Weg auch diesmal?“ |
+| 01:01,5–01:13,5 | Bewusste Auswahl |
+| 01:13,5–01:20,5 | Gemeinsam losfahren |
+| 01:20,5–01:27,5 | „Bewährte Wege geben Sicherheit. Doch welcher passt wirklich?“ |
+| 01:27,5–01:32,5 | „Rethink the Routine“ |
 
 ## Farben und Markenregeln
 
 - **Rinvoq Gold** `#FFD100`: alternative Route, Bestätigen-Button nach der bewussten Wahl, Schlusskarte
 - **Charcoal** `#25282A` und **Weiß**: Hintergründe
-- **Deep Teal 2** `#366B8F`: ausschließlich für die vertraute (gespeicherte) Route
+- **Dupixent-Farbe** `#1D7D7E`: gespeicherte (vertraute) Route und Schrift der ersten Texttafel
 - **Plum**: bewusst nicht verwendet
 - **Figuren und Auto:** neutral, keiner Produktfarbe zugeordnet
 
-Beide Routen haben denselben Start und dasselbe Ziel bei nahezu gleicher Länge (Kartenraum: 899 zu 906 Einheiten).
-Sie sind zusätzlich über ihre Lage unterscheidbar: Teal verläuft unten rechts, Gold oben links.
+Beide Routen haben denselben Start und dasselbe Ziel.
+Die gespeicherte Route ist deutlich länger: 1184 zu 822 Einheiten im Kartenraum.
+Sie sind auch über ihre Lage unterscheidbar: die gespeicherte verläuft unten rechts, die goldene oben links.
 
 ## Schrift-Ersatz
 

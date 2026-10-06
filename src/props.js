@@ -5,17 +5,19 @@
   const C = F.config.colors;
 
   /* ------------------------------------------------------------- Routen */
-  // Kartenraum 1000 × 560. Gleicher Start, gleiches Ziel, ähnliche Länge.
-  // Vertraut (Teal): unten/rechts. Alternative (Gold): oben/links.
+  // Kartenraum 1000 × 560. Gleicher Start, gleiches Ziel.
+  // Gespeicherte Route (Dupixent-Farbe): unten/rechts, deutlich länger. Neue Route (Gold): oben/links, kürzer.
   const S = [130, 455], E = [870, 112];
   const ROUTES = {
+    // Gespeicherte Route (Dupixent-Farbe): lang, unten entlang und am rechten Rand hinauf
     teal: makePath([
-      [S, [360, 515], [585, 480], [690, 340]],
-      [[690, 340], [770, 232], [800, 140], E],
+      [S, [250, 560], [560, 555], [730, 500]],
+      [[730, 500], [920, 440], [985, 360], [965, 240]],
+      [[965, 240], [958, 170], [930, 118], E],
     ]),
+    // Neue Route (Rinvoq-Gold): direkter und kürzer
     gold: makePath([
-      [S, [150, 300], [250, 175], [410, 168]],
-      [[410, 168], [585, 160], [745, 70], E],
+      [S, [270, 330], [560, 190], E],
     ]),
     S, E,
   };
@@ -113,30 +115,77 @@
   // Zustand s: on, ov (Übersicht 0..1), goldVis (0..1), sel (Gold gewählt 0..1),
   // press (Bestätigen gedrückt 0..1), routesPress, confirmGold, confirmDisabled,
   // puck: {route, u}, ambient (Lichtreflex)
-  const NAVI = { w: 1200, h: 680, header: 104, footer: 126 };
+  const NAVI = { w: 1200, h: 680, header: 104, footer: 126, sheet: 250 };
   function confirmRect() {
     return { x: 40, y: NAVI.h - NAVI.footer + 19, w: 392, h: 88 };
   }
   function routesRect() {
     return { x: 462, y: NAVI.h - NAVI.footer + 27, w: 226, h: 72 };
   }
-  function mapXform() {
-    const top = NAVI.header, bottom = NAVI.h - NAVI.footer;
-    const sx = 1.1, sy = ((bottom - top) / 560) * 0.98;
-    return { sx, sy, ox: (NAVI.w - 1000 * sx) / 2, oy: top + 2 };
+  // Schaltflächen im Dialog „Neue Route gefunden“ (bei voll ausgefahrenem Dialog)
+  function sheetButtons() {
+    const y = NAVI.h - 108;
+    return {
+      saved: { x: 40, y, w: 548, h: 84 },
+      fresh: { x: 612, y, w: 548, h: 84 },
+    };
+  }
+  function mapXform(sheet = 0) {
+    const top = NAVI.header;
+    const bottom = NAVI.h - lerp(NAVI.footer, NAVI.sheet, ease.inOutCubic(clamp(sheet)));
+    const sx = 1.1, sy = ((bottom - top) / 560) * 0.96;
+    return { sx, sy, ox: (NAVI.w - 1000 * sx) / 2, oy: top + 6 };
   }
   // Screen-Koordinaten eines Routenpunkts (für Fingerziele)
-  function routePoint(key, u) {
-    const m = mapXform();
+  function routePoint(key, u, sheet = 0) {
+    const m = mapXform(sheet);
     const p = ROUTES[key].at(u);
     return [m.ox + p.x * m.sx, m.oy + p.y * m.sy];
   }
 
+  function pill(ctx, r, fill, stroke, label, color, size, press, swatch) {
+    ctx.save();
+    const sc = 1 - (press || 0) * 0.035;
+    ctx.translate(r.x + r.w / 2, r.y + r.h / 2);
+    ctx.scale(sc, sc);
+    rr(ctx, -r.w / 2, -r.h / 2, r.w, r.h, r.h / 2);
+    ctx.fillStyle = mix(fill, '#000000', (press || 0) * 0.16);
+    ctx.fill();
+    if (stroke) {
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = stroke;
+      ctx.stroke();
+    }
+    setFont(ctx, size, 700, 0);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    const tw = ctx.measureText(label).width;
+    const off = swatch ? 22 : 0;
+    ctx.fillText(label, off, 3);
+    if (swatch) {
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = swatch;
+      ctx.beginPath();
+      ctx.moveTo(-tw / 2 + off - 46, 2);
+      ctx.lineTo(-tw / 2 + off - 20, 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* Navi-Bildschirm. Zustand s:
+     on (0..1), mode ('saved' | 'available'), showGold (0..1), sel (0 = gespeicherte Route gewählt, 1 = goldene),
+     sheet (Dialog „Neue Route gefunden“ 0..1), pressSaved / pressNew, press (Bestätigen), btnAlpha,
+     puck {route, u}, ambient */
   function drawNavi(ctx, s) {
     const W = NAVI.w, H = NAVI.h;
+    const C2 = F.config.colors;
     const on = s.on != null ? s.on : 1;
+    const mode = s.mode || 'saved';
+    const sel = s.sel || 0, showGold = s.showGold || 0, sheet = s.sheet || 0;
     ctx.save();
-    // Grund
     rr(ctx, 0, 0, W, H, 18);
     ctx.save();
     ctx.clip();
@@ -146,19 +195,24 @@
     ctx.fillStyle = '#E7E4DE';
     ctx.fillRect(0, 0, W, H);
 
-    const m = mapXform();
+    const m = mapXform(sheet);
     drawMapBase(ctx, m.sx, m.sy, m.ox, m.oy, { water: '#D6DBDE', park: '#DCDFD5', road: '#F7F6F3' });
 
-    const ov = s.ov || 0, sel = s.sel || 0;
-    const gv = clamp((s.goldVis || 0) + ov);
-    // Routen: Teal bleibt immer intakt sichtbar; im Übersichtszustand gleichwertig gestaltet
-    const tealO = { w: lerp(17, 14, gv), casing: 3.5, contour: lerp(0, 1.0, gv) };
-    const goldO = { w: lerp(7, 14, gv) + sel * 6, casing: lerp(0, 3.5, gv), contour: lerp(1.3, 1.0, gv) + sel * 2.6, alpha: lerp(0.85, 1, gv) };
-    if (sel > 0) {
-      drawRoute(ctx, 'teal', m.sx, m.sy, m.ox, m.oy, tealO);
-      drawRoute(ctx, 'gold', m.sx, m.sy, m.ox, m.oy, goldO);
+    // Routen
+    let tealO, goldO;
+    if (mode === 'available') {
+      tealO = { w: 14 + (1 - sel) * 5, casing: 3.5, contour: 1 + (1 - sel) * 2.6 };
+      goldO = { w: 14 + sel * 5, casing: 3.5, contour: 1 + sel * 2.6 };
     } else {
-      drawRoute(ctx, 'gold', m.sx, m.sy, m.ox, m.oy, goldO);
+      tealO = { w: 17, casing: 3.5, contour: 0 };
+      goldO = { w: 13, casing: 3.5, contour: 1.2, alpha: showGold };
+    }
+    const drawGold = mode === 'available' || showGold > 0.001;
+    if (sel > 0.5) {
+      drawRoute(ctx, 'teal', m.sx, m.sy, m.ox, m.oy, tealO);
+      if (drawGold) drawRoute(ctx, 'gold', m.sx, m.sy, m.ox, m.oy, goldO);
+    } else {
+      if (drawGold) drawRoute(ctx, 'gold', m.sx, m.sy, m.ox, m.oy, goldO);
       drawRoute(ctx, 'teal', m.sx, m.sy, m.ox, m.oy, tealO);
     }
 
@@ -180,82 +234,83 @@
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const hy = NAVI.header / 2 + 2;
-    // Titel „Gespeicherte Route“ ↔ „Routen“
-    ctx.save();
-    ctx.globalAlpha = on * (1 - ov);
-    poly(ctx, [[46, hy - 24], [72, hy - 24], [72, hy + 24], [59, hy + 13], [46, hy + 24]], C.charcoal);
     setFont(ctx, 46, 700, -0.3);
     ctx.fillStyle = C.charcoal;
-    ctx.fillText(T.saved, 96, hy);
-    ctx.restore();
-    if (ov > 0) {
-      ctx.save();
-      ctx.globalAlpha = on * ov;
-      ctx.strokeStyle = C.charcoal;
+    if (mode === 'available') {
+      // Symbol: zwei Linien
       ctx.lineWidth = 6;
       ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      ctx.strokeStyle = C.charcoal;
       ctx.beginPath();
-      ctx.moveTo(70, hy - 18);
-      ctx.lineTo(52, hy);
-      ctx.lineTo(70, hy + 18);
+      ctx.moveTo(44, hy + 18);
+      ctx.bezierCurveTo(50, hy - 14, 62, hy - 18, 78, hy - 18);
+      ctx.moveTo(44, hy + 18);
+      ctx.bezierCurveTo(62, hy + 22, 72, hy + 12, 78, hy - 2);
       ctx.stroke();
-      setFont(ctx, 46, 700, -0.3);
-      ctx.fillStyle = C.charcoal;
-      ctx.fillText(T.routes, 96, hy);
-      ctx.restore();
+      ctx.fillText(T.available, 100, hy);
+    } else {
+      poly(ctx, [[46, hy - 24], [72, hy - 24], [72, hy + 24], [59, hy + 13], [46, hy + 24]], C.charcoal);
+      ctx.fillText(T.saved, 96, hy);
     }
 
-    // Fußleiste: Bestätigungsbereich + reduzierte Routenübersicht
-    ctx.save();
-    ctx.globalAlpha = on;
+    // Fußleiste: Bestätigen (+ reduzierte Routenübersicht im gespeicherten Zustand)
     ctx.fillStyle = 'rgba(255,255,255,0.97)';
     ctx.fillRect(0, H - NAVI.footer, W, NAVI.footer);
     ctx.fillStyle = 'rgba(0,0,0,0.08)';
     ctx.fillRect(0, H - NAVI.footer - 2, W, 2);
-    // „Routen“
-    const rb = routesRect();
-    const rp = clamp((s.routesPress || 0) + ov * 0.6);
-    rr(ctx, rb.x, rb.y, rb.w, rb.h, rb.h / 2);
-    ctx.fillStyle = mix('#FFFFFF', '#E1E0DD', rp);
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = C.charcoal;
-    ctx.stroke();
-    ctx.lineWidth = 4.5;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(rb.x + 30, rb.y + 50);
-    ctx.bezierCurveTo(rb.x + 36, rb.y + 24, rb.x + 50, rb.y + 22, rb.x + 66, rb.y + 22);
-    ctx.moveTo(rb.x + 30, rb.y + 50);
-    ctx.bezierCurveTo(rb.x + 46, rb.y + 52, rb.x + 58, rb.y + 46, rb.x + 66, rb.y + 34);
-    ctx.stroke();
-    setFont(ctx, 36, 700, 0);
-    ctx.fillStyle = C.charcoal;
-    ctx.fillText(T.routes, rb.x + 84, rb.y + rb.h / 2 + 2);
-    ctx.restore();
-
-    // Bestätigen
-    const cb = confirmRect();
-    const press = s.press || 0;
-    const cg = s.confirmGold || 0, cd = s.confirmDisabled || 0;
+    if (mode === 'saved') {
+      const rb = routesRect();
+      ctx.save();
+      rr(ctx, rb.x, rb.y, rb.w, rb.h, rb.h / 2);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = C.charcoal;
+      ctx.stroke();
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(rb.x + 30, rb.y + 50);
+      ctx.bezierCurveTo(rb.x + 36, rb.y + 24, rb.x + 50, rb.y + 22, rb.x + 66, rb.y + 22);
+      ctx.moveTo(rb.x + 30, rb.y + 50);
+      ctx.bezierCurveTo(rb.x + 46, rb.y + 52, rb.x + 58, rb.y + 46, rb.x + 66, rb.y + 34);
+      ctx.stroke();
+      setFont(ctx, 36, 700, 0);
+      ctx.fillStyle = C.charcoal;
+      ctx.fillText(T.routes, rb.x + 84, rb.y + rb.h / 2 + 2);
+      ctx.restore();
+    }
     const btnFade = s.btnAlpha != null ? s.btnAlpha : 1;
     if (btnFade > 0) {
       ctx.save();
       ctx.globalAlpha = on * btnFade;
-      const sc = 1 - press * 0.035;
-      ctx.translate(cb.x + cb.w / 2, cb.y + cb.h / 2);
-      ctx.scale(sc, sc);
-      let bg = mix(C.charcoal, '#D3D1CD', cd);
-      bg = mix(bg, C.gold, cg);
-      bg = mix(bg, '#000000', press * 0.16);
-      rr(ctx, -cb.w / 2, -cb.h / 2, cb.w, cb.h, cb.h / 2);
-      ctx.fillStyle = bg;
+      const cg = s.confirmGold || 0;
+      pill(ctx, confirmRect(), mix(C.charcoal, C.gold, cg), null, T.confirm, mix('#FFFFFF', C.charcoal, cg), 42, s.press);
+      ctx.restore();
+    }
+
+    // Dialog „Neue Route gefunden“ (fährt von unten ein)
+    if (sheet > 0) {
+      const e = ease.inOutCubic(clamp(sheet));
+      const top = H - NAVI.sheet * e;
+      ctx.save();
+      ctx.translate(0, H - NAVI.sheet - top < 0 ? top - (H - NAVI.sheet) : 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.10)';
+      ctx.fillRect(0, H - NAVI.sheet - 8, W, 8);
+      rr(ctx, 0, H - NAVI.sheet, W, NAVI.sheet + 30, 22);
+      ctx.fillStyle = '#FFFFFF';
       ctx.fill();
-      setFont(ctx, 42, 700, 0);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = mix(mix('#FFFFFF', '#97958F', cd), C.charcoal, cg);
-      ctx.fillText(T.confirm, 0, 3);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      setFont(ctx, 38, 700, -0.3);
+      ctx.fillStyle = C.charcoal;
+      ctx.fillText(T.dialogTitle, 40, H - NAVI.sheet + 58);
+      setFont(ctx, 34, 400, 0);
+      ctx.fillStyle = '#4A4D50';
+      ctx.fillText(T.dialogQuestion, 40, H - NAVI.sheet + 104);
+      const b = sheetButtons();
+      pill(ctx, b.saved, C.charcoal, null, T.useSaved, '#FFFFFF', 29, s.pressSaved, C2.teal);
+      pill(ctx, b.fresh, '#FFFFFF', C.charcoal, T.useNew, C.charcoal, 29, s.pressNew, C.gold);
       ctx.restore();
     }
     ctx.restore(); // clip
@@ -479,7 +534,7 @@
 
   F.props = {
     ROUTES, NAVI, drawMapBase, drawRoute, drawStartPuck, drawGoalPin,
-    drawNavi, confirmRect, routesRect, routePoint, mapXform,
+    drawNavi, confirmRect, routesRect, sheetButtons, routePoint, mapXform,
     CAR, drawCarSide, drawCarTop, drawWheelFront,
   };
 })();

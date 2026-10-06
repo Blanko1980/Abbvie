@@ -11,12 +11,12 @@
     return 0.4 + 0.6 * ease.outCubic(seg(lt, 0, dur));
   }
 
-  function drawCard(ctx, key, theme, lt, dur) {
+  function drawCard(ctx, key, theme, lt, dur, opts = {}) {
     const T = F.config.texts;
     const dark = theme === 'dark';
     ctx.fillStyle = dark ? C.charcoal : C.white;
     ctx.fillRect(0, 0, W, H);
-    const fg = dark ? C.white : C.charcoal;
+    const fg = opts.color ? C[opts.color] : dark ? C.white : C.charcoal;
     // Schlussgedanke erscheint sofort; Übergänge zwischen Einstellungen übernimmt die Timeline.
     const a = key === 'final' ? 1 : appear(lt);
     ctx.save();

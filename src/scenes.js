@@ -83,7 +83,9 @@
   }
 
   /* ================================================================ Tasse */
-  function drawCup(ctx, cx, by, lift, tilt, level) {
+  // Tasse und (optional) Hand werden im selben Koordinatensystem gezeichnet,
+  // damit die Hand beim Anheben exakt mit der Tasse mitgeht.
+  function drawCup(ctx, cx, by, lift, tilt, level, handFn) {
     const top = by - 280;
     ctx.save();
     ctx.translate(cx, by + lift);
@@ -95,6 +97,11 @@
     ctx.ellipse(cx + 150, top + 125, 30, 44, 0, 0, TAU);
     ctx.fillStyle = '#E4E1DB';
     ctx.fill('evenodd');
+    ctx.beginPath();
+    ctx.ellipse(cx + 150, top + 125, 46, 60, 0, -0.9, 0.9);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 6;
+    ctx.stroke();
     // Körper
     const body = () => {
       ctx.beginPath();
@@ -131,6 +138,7 @@
       fillEllipse(ctx, cx + 16, top + 1 + off, 40, 6, 'rgba(201,160,120,0.35)');
     }
     ctx.restore();
+    if (handFn) handFn({ x: cx + 196, y: top + 125 });
     ctx.restore();
   }
 
@@ -239,22 +247,23 @@
       const sTop = seg(lt, 1.08, 1.32), sBot = seg(lt, 1.2, 1.4);
       if (lt < 1.4) stream = { top: sTop, bot: sBot };
       const reach = ease.inOutCubic(seg(lt, 1.55, 2.0));
-      lift = kf(lt, [[2.0, 0], [2.32, -70, 'inOutCubic'], [2.42, -70], [2.72, 0, 'inOutQuad']]);
-      tilt = kf(lt, [[2.0, 0], [2.32, -0.04], [2.72, 0]]);
-      const hx = cx + 150, hy = by - 280 + 125;
-      handT = { x: lerp(hx + 980, hx, reach), y: lerp(hy + 420, hy, reach) + lift, a: Math.PI + lerp(0.5, 0.1, reach) };
-      const back = ease.inOutCubic(seg(lt, 2.75, 3.0));
-      if (back > 0) { handT.x += back * 30; }
+      lift = kf(lt, [[2.05, 0], [2.35, -70, 'inOutCubic'], [2.45, -70], [2.75, 0, 'inOutQuad']]);
+      tilt = kf(lt, [[2.05, 0], [2.35, -0.015], [2.75, 0]]);
+      const back = ease.inOutCubic(seg(lt, 2.8, 3.0));
+      // Hand relativ zum Henkel (Tassen-Koordinaten): Anflug von rechts unten, dann fester Griff
+      handT = { dx: lerp(860, 0, reach) + back * 26, dy: lerp(380, 0, reach), a: Math.PI + lerp(0.5, 0.06, reach) };
     } else {
-      // Beat: Tasse wird abgesetzt (Hand hält den Henkel)
+      // Beat: Tasse wird abgesetzt (Hand hält den Henkel und geht mit)
       const u = lt / dur;
       lift = kf(u, [[0, -64], [0.5, 0, 'inOutCubic']]);
-      tilt = kf(u, [[0, -0.035], [0.5, 0]]);
-      const hx = cx + 150, hy = by - 280 + 125;
-      handT = { x: hx + ease.inOutCubic(seg(u, 0.65, 1)) * 18, y: hy + lift, a: Math.PI + 0.1 };
+      tilt = kf(u, [[0, -0.012], [0.5, 0]]);
+      handT = { dx: ease.inOutCubic(seg(u, 0.7, 1)) * 22, dy: 0, a: Math.PI + 0.06 };
     }
-    fillEllipse(ctx, cx + 30, by + 4, 160 + lift * 0.4, 20, `rgba(0,0,0,${0.12 + lift * 0.0008})`);
-    drawCup(ctx, cx, by, lift, tilt, level);
+    fillEllipse(ctx, cx + 30, by + 4, 160, 20, `rgba(0,0,0,${0.12 + lift * 0.0007})`);
+    drawCup(ctx, cx, by, lift, tilt, level, (hp) => {
+      if (!handT) return;
+      handAt(ctx, [hp.x + handT.dx, hp.y + handT.dy], GRIP, handT.a, 1.1, { pose: 'grip', flip: true, ...S });
+    });
     if (carafe) {
       if (stream) {
         const spX = carafe.x, spY = carafe.y;
@@ -278,7 +287,6 @@
       }
       drawCarafe(ctx, carafe.x, carafe.y, carafe.ang, carafe.fill);
     }
-    if (handT) handAt(ctx, [handT.x, handT.y], GRIP, handT.a, 1.25, { pose: 'grip', flip: true, ...S });
     grade(ctx, d);
     vignette(ctx, 0.7);
   }
@@ -685,18 +693,41 @@
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
     ctx.fillRect(-80, -46, 170, 4);
     ctx.restore();
-    // Hand (von oben, steiler als das Gurtband – klar getrennt)
+    // Rechter Arm des Fahrers: Schulter oben am Körper, Oberarm seitlich am Rumpf,
+    // Unterarm zum Gurtschloss – klar am eigenen Körper angesetzt (nicht aus Richtung Lenkrad).
     const S = coat ? { sleeve: P.doctor.coat, sleeveShade: P.doctor.coatShade, coatCuff: true } : sleeveOf(p);
-    const hAng = 1.2 - release * 0.15;
-    const hp = [plate[0] - release * 70, plate[1] - release * 120];
+    const hs = 1.3;
+    const hp = [plate[0] - release * 60, plate[1] - release * 70];
+    const shoulder = [600, -70];
+    const elbow = [lerp(560, 660, tip) - release * 20, lerp(470, 560, tip) - release * 20];
+    let hAng = Math.atan2(hp[1] - elbow[1], hp[0] - elbow[0]);
+    const pa = rot(PINCH[0] * hs, PINCH[1] * hs, hAng);
+    const wrist = [hp[0] - pa[0], hp[1] - pa[1]];
+    hAng = Math.atan2(wrist[1] - elbow[1], wrist[0] - elbow[0]);
+    const foreLen = Math.hypot(wrist[0] - elbow[0], wrist[1] - elbow[1]) / hs;
+    const sleeveC = S.sleeve, sleeveSh = S.sleeveShade;
+    const upperArm = (c1, c2) => {
+      taper(ctx, shoulder[0] + 10, shoulder[1] + 8, 88, elbow[0] + 10, elbow[1] + 8, 72, c2);
+      taper(ctx, shoulder[0], shoulder[1], 88, elbow[0], elbow[1], 72, c1);
+    };
     // weicher Schatten des Arms auf dem Körper
     ctx.save();
     ctx.globalAlpha = 0.22;
-    ctx.translate(18, 22);
+    ctx.translate(20, 24);
     ctx.filter = 'blur(10px)';
-    handAt(ctx, hp, PINCH, hAng, 1.3, { pose: 'pinch', silhouette: '#000000' });
+    upperArm('#000000', '#000000');
+    fig.drawHandCU(ctx, wrist[0], wrist[1], hAng, hs, { pose: 'pinch', silhouette: '#000000', arm: foreLen });
     ctx.restore();
-    handAt(ctx, hp, PINCH, hAng, 1.3, { pose: 'pinch', ...S });
+    upperArm(sleeveC, sleeveSh);
+    circle(ctx, elbow[0], elbow[1], 76, sleeveC);
+    // Ärmelfalten am Ellbogen
+    ctx.strokeStyle = rgba('#000000', 0.12);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(elbow[0] - 50, elbow[1] - 30);
+    ctx.quadraticCurveTo(elbow[0] - 10, elbow[1] + 10, elbow[0] + 40, elbow[1] - 10);
+    ctx.stroke();
+    fig.drawHandCU(ctx, wrist[0], wrist[1], hAng, hs, { pose: 'pinch', ...S, arm: foreLen });
     grade(ctx, d);
     vignette(ctx, 0.5);
   }
@@ -749,19 +780,17 @@
   function naviState(p, lt, dur) {
     const cr = props.confirmRect();
     const cC = [cr.x + cr.w * 0.38, cr.y + cr.h * 0.5];
-    const rrct = props.routesRect();
-    const rC = [rrct.x + rrct.w * 0.5, rrct.y + rrct.h * 0.5];
-    const st = { on: 1, ambient: 1 };
-    let finger = null; // {tgt:[x,y] (Screen), lift: px, appear 0..1}
+    const st = { on: 1, ambient: 1, mode: 'saved', showGold: 0, sel: 0 };
+    let finger = null; // {tgt:[x,y] (Screen), lift: px, appear 0..1, exit 0..1}
     const m = p.mode;
-    const tapCurve = (t0) => kf(lt, [[t0 - 0.35, 70], [t0, 0, 'inOutQuad'], [t0 + 0.16, 0], [t0 + 0.5, 60, 'inOutCubic']]);
     if (m === 'morning') {
+      // Erster Morgen: nur die gespeicherte Route
       st.on = kf(lt, [[0, 0.4], [0.35, 1, 'outCubic']]);
       const app = ease.outCubic(seg(lt, 1.35, 2.15));
       const lift = kf(lt, [[2.15, 70], [2.42, 0, 'inOutQuad'], [2.56, 0], [2.95, 90, 'inOutCubic']]);
       st.press = lt > 2.42 && lt < 2.62 ? 1 : 0;
       st.btnAlpha = 1 - ease.inOutCubic(seg(lt, 2.75, 3.2));
-      st.puck = { route: 'teal', u: ease.inOutSine(seg(lt, 2.8, 3.6)) * 0.035 };
+      st.puck = { route: 'teal', u: ease.inOutSine(seg(lt, 2.8, 3.6)) * 0.03 };
       finger = { tgt: cC, lift, appear: app, exit: ease.inOutCubic(seg(lt, 2.95, 3.5)) };
     } else if (m === 'route') {
       st.on = ease.outCubic(seg(lt, 0, Math.min(0.3, dur * 0.4)));
@@ -769,31 +798,47 @@
       const t0 = dur * 0.42;
       st.press = lt > t0 && lt < t0 + 0.14 ? 1 : 0;
       finger = { tgt: cC, lift: kf(lt, [[0, 60], [t0, 0, 'inOutQuad'], [t0 + 0.12, 0], [dur, 50, 'inOutCubic']]), appear: 1 };
+    } else if (m === 'dialog') {
+      // Tag 4: Eine neue, kürzere Route wird angeboten – der routinierte Griff wählt die gespeicherte.
+      const tTap = 2.75;
+      st.on = ease.outCubic(seg(lt, 0, 0.25));
+      st.sheet = ease.inOutCubic(seg(lt, 0.3, 0.75)) * (1 - ease.inOutCubic(seg(lt, 3.0, 3.35)));
+      st.showGold = ease.inOutCubic(seg(lt, 0.4, 0.85)) * (1 - ease.inOutCubic(seg(lt, 3.05, 3.45)));
+      st.pressSaved = lt > tTap && lt < tTap + 0.16 ? 1 : 0;
+      st.puck = { route: 'teal', u: ease.inOutSine(seg(lt, 3.1, 3.5)) * 0.02 };
+      const b = props.sheetButtons().saved;
+      finger = {
+        tgt: [b.x + b.w * 0.42, b.y + b.h * 0.5],
+        lift: kf(lt, [[2.4, 90], [tTap, 0, 'inOutQuad'], [tTap + 0.14, 0], [3.2, 90, 'inOutCubic']]),
+        appear: ease.outCubic(seg(lt, 1.9, 2.5)), exit: ease.inOutCubic(seg(lt, 2.95, 3.45)),
+      };
     } else if (m === 'approach') {
+      st.mode = 'available';
       st.on = kf(lt, [[0, 0.3], [0.4, 1, 'outCubic']]);
       const app = ease.inOutCubic(seg(lt, 0.7, 2.0));
       finger = { tgt: cC, lift: lerp(220, 80, app), appear: ease.outCubic(seg(lt, 0.6, 1.3)) };
     } else if (m === 'hover') {
+      st.mode = 'available';
       const lift = kf(lt, [[0, 64], [0.8, 58], [1.9, 120, 'inOutSine'], [3, 124, 'inOutSine']]);
       finger = { tgt: cC, lift, appear: 1 };
-    } else if (m === 'overview') {
-      st.routesPress = lt > 1.05 && lt < 1.3 ? 1 : 0;
-      st.ov = ease.inOutCubic(seg(lt, 1.3, 2.2));
-      st.confirmDisabled = st.ov;
-      const app = ease.inOutCubic(seg(lt, 0.3, 1.0));
-      const lift = kf(lt, [[0.75, 60], [1.05, 0, 'inOutQuad'], [1.22, 0], [1.8, 170, 'inOutCubic'], [3.4, 190]]);
-      finger = { tgt: [lerp(rC[0] + 120, rC[0], app), rC[1]], lift: lt < 0.75 ? lerp(220, 60, app) : lift, appear: ease.outCubic(seg(lt, 0.2, 0.8)) };
+    } else if (m === 'available') {
+      // Nach der Frage: beide Routen, die Hand prüft ohne zu tippen
+      st.mode = 'available';
+      const a = props.routePoint('teal', 0.36), b = props.routePoint('teal', 0.46);
+      finger = {
+        tgt: kf(lt, [[0.5, [a[0] - 60, a[1] + 120]], [1.5, a, 'outCubic'], [3.0, b, 'inOutSine']]),
+        lift: kf(lt, [[0.5, 220], [1.5, 110, 'outCubic'], [3.4, 100]]),
+        appear: ease.outCubic(seg(lt, 0.4, 1.2)),
+      };
     } else if (m === 'select') {
-      st.ov = 1;
-      const tealP = props.routePoint('teal', 0.42), goldP = props.routePoint('gold', 0.48);
-      const tealP2 = props.routePoint('teal', 0.56);
+      st.mode = 'available';
+      const tealP = props.routePoint('teal', 0.46), tealP2 = props.routePoint('teal', 0.55);
+      const goldP = props.routePoint('gold', 0.5);
       const tSel = 2.25, tConf = 3.85;
       st.sel = ease.inOutCubic(seg(lt, tSel + 0.05, tSel + 0.65));
-      st.confirmDisabled = 1 - st.sel;
       st.confirmGold = st.sel;
       st.press = lt > tConf && lt < tConf + 0.16 ? 1 : 0;
       st.puck = { route: 'gold', u: ease.inOutSine(seg(lt, 4.4, 5.6)) * 0.06 };
-      // Finger: prüfend über Teal, dann zu Gold, Auswahl, dann Bestätigen
       const path = [
         [0.0, [tealP[0] - 80, tealP[1] + 160]],
         [0.7, tealP],
@@ -802,7 +847,7 @@
         [2.9, goldP],
         [3.6, cC, 'inOutCubic'],
       ];
-      const pos = kf(lt, path.map(([a, b, e]) => [a, b, e]));
+      const pos = kf(lt, path);
       const lift = kf(lt, [[0, 200], [0.7, 90, 'outCubic'], [1.95, 80], [tSel, 0, 'inOutQuad'], [tSel + 0.16, 0], [2.7, 80, 'inOutCubic'], [3.55, 70], [tConf, 0, 'inOutQuad'], [tConf + 0.16, 0], [4.6, 120, 'inOutCubic']]);
       finger = { tgt: pos, lift, appear: ease.outCubic(seg(lt, 0, 0.6)), exit: ease.inOutCubic(seg(lt, 4.6, 5.4)) };
     }
@@ -826,6 +871,8 @@
       fy = H / 2 + 120;
     } else if (p.mode === 'route') {
       z = lerp(1.0, 1.025, lt / dur);
+    } else if (p.mode === 'available' || p.mode === 'dialog') {
+      z = lerp(1.0, 1.03, ease.inOutSine(lt / dur));
     }
     ctx.translate(W / 2, H / 2);
     ctx.scale(z, z);
@@ -921,24 +968,28 @@
     const d = dayOf({ day: 0 });
     const s = 1.12, py = 935;
     const patX = 560, docX = 1360;
-    let dYaw, dPitch, pYaw, pPitch = 0, pSmile = 0.15, dSmile = 0.1, reach, dBlink = 0, pBlink = 0, gazeD = 0;
+    // Blickzustände: Der Arzt schaut wach und aufmerksam aufs Navi (offene Augen, Blick nach unten links),
+    // nicht in den Schoß; dann zur Patientin. Werte: Kopfdrehung, Neigung, Augenrichtung, Brauen.
+    const mixLook = (A, B, k) => Object.fromEntries(Object.keys(A).map((key) => [key, lerp(A[key], B[key], k)]));
+    const D_SCREEN = { yaw: -0.52, pitch: 0.26, gaze: -0.8, gazeY: 0.9, brow: 0.55 };
+    const D_PATIENT = { yaw: -1.0, pitch: 0.04, gaze: -0.5, gazeY: 0, brow: 0.2 };
+    const P_AHEAD = { yaw: 0.1, pitch: 0.06, gaze: 0, gazeY: 0, brow: 0 };
+    const P_SCREEN = { yaw: 0.42, pitch: 0.24, gaze: 0.75, gazeY: 0.85, brow: 0.3 };
+    const P_DOCTOR = { yaw: 0.95, pitch: 0.04, gaze: 0.6, gazeY: 0, brow: 0.2 };
+    let dl, pl, pSmile = 0.15, dSmile = 0.1, reach, dBlink = 0, pBlink = 0, nod = 0;
     if (p.mode === 'pause') {
-      dYaw = kf(lt, [[0, -0.38], [0.75, -0.38], [1.25, -1.0, 'inOutCubic']]);
-      dPitch = kf(lt, [[0, 0.75], [0.75, 0.7], [1.25, 0.08, 'inOutCubic']]);
-      pYaw = kf(lt, [[0, 0.1], [1.35, 0.1], [1.85, 0.95, 'inOutCubic']]);
-      pPitch = kf(lt, [[1.35, 0.1], [1.85, 0.05]]);
+      dl = mixLook(D_SCREEN, D_PATIENT, kf(lt, [[0, 0], [0.75, 0], [1.25, 1, 'inOutCubic']]));
+      pl = mixLook(P_AHEAD, P_DOCTOR, kf(lt, [[0, 0], [1.35, 0], [1.85, 1, 'inOutCubic']]));
       reach = kf(lt, [[0, 0.75], [0.7, 0.96, 'outCubic'], [1.15, 1.0, 'outQuad'], [2.4, 1.0], [3.4, 0.9, 'inOutSine']]);
       pSmile = kf(lt, [[1.9, 0.12], [2.6, 0.35]]);
       dSmile = kf(lt, [[2.0, 0.08], [2.8, 0.25]]);
       dBlink = lt > 2.75 && lt < 2.87 ? 1 : 0;
     } else {
-      dYaw = kf(lt, [[0, -0.38], [0.9, -0.38], [1.3, -1.0, 'inOutCubic'], [2.2, -1.0], [2.6, -0.38, 'inOutCubic']]);
-      dPitch = kf(lt, [[0, 0.72], [0.9, 0.72], [1.3, 0.08, 'inOutCubic'], [2.2, 0.08], [2.6, 0.72, 'inOutCubic']]);
-      pYaw = kf(lt, [[0, -0.15], [0.9, -0.15], [1.3, 0.95, 'inOutCubic']]);
-      const nod = Math.sin(seg(lt, 1.55, 2.15) * Math.PI * 2) * 0.28;
-      pPitch = kf(lt, [[0, 0.55], [0.9, 0.55], [1.3, 0.05]]) + Math.max(0, nod);
+      dl = mixLook(D_SCREEN, D_PATIENT, kf(lt, [[0, 0], [0.9, 0], [1.3, 1, 'inOutCubic'], [2.2, 1], [2.6, 0, 'inOutCubic']]));
+      pl = mixLook(P_SCREEN, P_DOCTOR, kf(lt, [[0, 0], [0.9, 0], [1.3, 1, 'inOutCubic']]));
+      nod = Math.max(0, Math.sin(seg(lt, 1.55, 2.15) * Math.PI * 2) * 0.22);
       pSmile = kf(lt, [[1.3, 0.2], [1.8, 0.4]]);
-      dSmile = kf(lt, [[1.3, 0.1], [1.8, 0.3]]);
+      dSmile = kf(lt, [[0, 0.12], [1.3, 0.15], [1.8, 0.32]]);
       reach = 0.9 + Math.sin(lt * 2.2) * 0.04 * (lt < 1.0 ? 1 : 0);
     }
     const toL = (wx, wy, x0) => [(wx - x0) / s, (wy - py) / s];
@@ -952,11 +1003,13 @@
     ctx.translate(-W / 2, -H / 2 + 40);
     cabin(ctx, d, t, () => {
       fig.drawPersonFront(ctx, patX, py, s, 'patient', {
-        belt: 'passenger', headYaw: pYaw, headPitch: pPitch, smile: pSmile, blink: pBlink,
+        belt: 'passenger', headYaw: pl.yaw, headPitch: pl.pitch + nod, gaze: pl.gaze, gazeY: pl.gazeY, brow: pl.brow,
+        smile: pSmile, blink: pBlink,
         rHand: toL(patX - 70, 1000, patX), lHand: toL(patX + 70, 1000, patX),
       });
       fig.drawPersonFront(ctx, docX, py, s, 'doctor', {
-        outfit: 'coat', belt: 'driver', headYaw: dYaw, headPitch: dPitch, smile: dSmile, blink: dBlink,
+        outfit: 'coat', belt: 'driver', headYaw: dl.yaw, headPitch: dl.pitch, gaze: dl.gaze, gazeY: dl.gazeY, brow: dl.brow,
+        smile: dSmile, blink: dBlink,
         rHand: [tgtR[0], tgtR[1], 1, -0.2, 1 + reach * 0.12],
         lHand: toL(docX + 165, 850, docX),
         before: (c) => {},
@@ -1149,7 +1202,7 @@
 
   /* ===================================================== Autotürgriff (Match Cut) */
   function shotCarHandle(ctx, lt, dur, p, t) {
-    const pull = ease.inOutCubic(seg(lt, 0.05, 1.0));
+    const pull = ease.inOutCubic(seg(lt, 0.35, 1.0));
     const dx = pull * 110, sc = 1 + pull * 0.05;
     // Innenraum hinter dem Spalt
     ctx.fillStyle = '#25282B';
@@ -1197,7 +1250,11 @@
     // Hand bleibt am Griff (gleiche Lage wie im Praxis-Griff)
     const hx = 2400 + (1150 + dx - 2400) * sc;
     const hy = 540 + (561 - 540) * sc;
-    handAt(ctx, [hx, hy], GRIP, Math.PI, 1.5 * sc, { pose: 'grip', flip: true, sleeve: P.doctor.coat, sleeveShade: P.doctor.coatShade, coatCuff: true });
+    // Match Cut: Die Faust kommt wie am Praxisgriff (senkrecht) an und dreht sich um den waagerechten
+    // Autotürgriff – Finger greifen von unten um den Griff, der Unterarm kommt von rechts unten.
+    const turn = ease.inOutCubic(seg(lt, 0.0, 0.38));
+    const hAng = lerp(Math.PI, Math.PI * 1.5 - 0.42, turn);
+    handAt(ctx, [hx, hy], GRIP, hAng, 1.5 * sc, { pose: 'grip', flip: true, sleeve: P.doctor.coat, sleeveShade: P.doctor.coatShade, coatCuff: true });
     grade(ctx, dayOf({ day: 0 }));
     vignette(ctx, 0.5);
   }
@@ -1339,7 +1396,7 @@
 
   /* ========================================================== Texte */
   function shotCard(ctx, lt, dur, p) {
-    F.type.drawCard(ctx, p.key, p.theme, lt, dur);
+    F.type.drawCard(ctx, p.key, p.theme, lt, dur, { color: p.color });
   }
   function shotCallout(ctx, lt) {
     F.type.drawCallout(ctx, lt);

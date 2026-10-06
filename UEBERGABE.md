@@ -16,14 +16,15 @@ Sie fasst Briefing, Entscheidungen, aktuellen Stand und den nächsten Plan (Weg 
 - Die bisherige Entscheidung wird nicht abgewertet.
 - Der Arzt ist kompetent und zugewandt. Sein Innehalten zeigt Professionalität.
 
-**Metapher**
-- Eine gespeicherte Navi-Route (Deep Teal 2, `#366B8F`, Dupilumab zugeordnet) steht für die vertraute Entscheidung.
-- Die alternative Route ist Rinvoq-Gold (`#FFD100`). Sie ist vorhanden, wird erst übergangen und dann bewusst gewählt.
-- Gleicher Start, gleiches Ziel, ähnliche Länge.
+**Metapher (Fassung 2, siehe `SKRIPT.md`)**
+- Eine gespeicherte Navi-Route steht für die vertraute Entscheidung. Sie ist in Dupixent-Farbe (`#1D7D7E`) gezeichnet und deutlich länger.
+- Rinvoq-Gold (`#FFD100`) steht für die neue, kürzere Route.
+- Am vierten Morgen bietet das Navi die neue Route an. Der routinierte Griff wählt trotzdem „Gespeicherte Route verwenden“.
+- Im Auto mit der Patientin zeigt das Navi „Verfügbare Routen“. Der Arzt wählt bewusst die goldene Route.
 - Der Arzt wählt selbst, das Navi empfiehlt nichts.
 
 **Verbote**
-- Keine Überlegenheitsbehauptung.
+- Keine ausdrückliche Überlegenheitsbehauptung im Text. Die kürzere goldene Route ist eine bewusste Änderung der Nutzerin und vor Veröffentlichung rechtlich zu prüfen.
 - Keine Fahrzeiten, Kennzahlen oder Warnsymbole.
 - Keine Wirkstoffnamen, keine Wirksamkeitsversprechen.
 - Keine Hautsymptome, keine Heilungserzählung.
@@ -32,20 +33,20 @@ Sie fasst Briefing, Entscheidungen, aktuellen Stand und den nächsten Plan (Weg 
 
 **Farben**
 - Gold `#FFD100`, Charcoal `#25282A`, Weiß.
-- Teal `#366B8F` ausschließlich für die vertraute Route.
+- Dupixent-Farbe `#1D7D7E` für die gespeicherte Route und die erste Texttafel.
 - Plum entfällt.
 
 **Texte (exakt)**
 - „Was sich bewährt, / wird selbstverständlich.“
 - „Passt der vertraute Weg / auch diesmal?“
-- „Bewährte Wege geben Sicherheit. / Doch welcher passt wirklich zu diesem Patienten?“
+- „Bewährte Wege geben Sicherheit. / Doch welcher passt wirklich?“
 - Schlusskarte: „Rethink the Routine“
 
 **Abgestimmte Entscheidungen**
-- Timing nach der Tabelle in `README.md` (1:30 min).
+- Timing nach `SKRIPT.md` (Fassung 2, 1:32,5 min).
 - Figuren: Arzt um die 45, mit Brille. Patientin Mitte 30.
 - Der Arzt trägt im Auto den Kittel.
-- Navi-Texte: „Gespeicherte Route“, „Bestätigen“, „Routen“.
+- Navi-Texte: „Gespeicherte Route“, „Verfügbare Routen“, „Bestätigen“ sowie der Dialog „Es wurde eine neue Route gefunden. Möchten Sie die neue Route verwenden?“ mit „Gespeicherte Route verwenden“ und „Neue Route verwenden“.
 - Der Bestätigen-Button ist in der Routine Charcoal und wird nach der bewussten Wahl Gold.
 - Von der Praxis zum Auto führt ein Match Cut: Praxis-Türgriff → Autotürgriff.
 - Pflichtangaben, Logo und Markenschriften fehlen vorerst. Das ist für den Entwurf so vereinbart.
@@ -53,7 +54,7 @@ Sie fasst Briefing, Entscheidungen, aktuellen Stand und den nächsten Plan (Weg 
 ## 2. Aktueller Stand
 
 **Fertig, aber visuell zu rudimentär**
-- Filmversion 1 ist komplett aus Canvas-Code erzeugt.
+- Filmversion 1 ist komplett aus Canvas-Code erzeugt. Fassung 2 (06.10.2026) korrigiert Fehler und setzt die erzählerischen Änderungen um, siehe `SKRIPT.md`.
 - Player: `index.html`. Video: `export/der-vertraute-griff.mp4`.
 - Aufbau siehe `README.md`.
 
