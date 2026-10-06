@@ -76,7 +76,7 @@ export const ASSETS = [
   },
   {
     id: 'B3', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-auto.jpg'],
-    prompt: 'SCENE, 16:9: inside a light grey car, seen from the passenger seat toward the driver\'s side. In the left-centre foreground the dashboard with a LARGE landscape navigation screen, almost front-facing, occupying about 45% of the image width; the screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). Behind it, on the right, the empty driver\'s seat with the seatbelt visible, the steering wheel, and the side window with soft white morning light. Charcoal and light grey interior with soft gradients. No people.',
+    prompt: 'SCENE, 16:9: inside a light grey car, camera at the passenger seat looking toward the driver side. In the LEFT-CENTRE foreground the dashboard centre console with a LARGE landscape touch screen that we see almost straight on (nearly front-facing, only a slight angle), the screen occupies about 45% of the image width and about 40% of the image height. The screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). To the RIGHT of the screen, further back: the empty driver seat with the seatbelt visible and the steering wheel, and the driver side window with soft white morning light. Charcoal and light warm-grey interior with soft gradients. No people.',
   },
   {
     id: 'B4', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-praxis.jpg'],
@@ -130,7 +130,7 @@ export const ASSETS = [
   },
   {
     id: 'C14', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A4.jpg'],
-    prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, attentive; on the RIGHT chair PATIENT 3 from the second model sheet (broad sturdy man, very short black hair with a little grey, deep brown skin, charcoal-brown cardigan) seated, giving a small nod, eye contact. The darker, greyish dry skin patches on his hands and face are visible. The desk stays empty.',
+    prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, attentive; on the RIGHT chair PATIENT 3 from the second model sheet (broad sturdy man, very short black hair with a little grey, deep brown skin, charcoal-brown cardigan) seated, giving a small nod, eye contact. The darker, greyish dry skin patches on his hands and face are visible. The desk stays empty. No motion lines, no comic symbols.',
   },
   {
     id: 'C15', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A5.jpg'],
@@ -185,7 +185,7 @@ export const ASSETS = [
   },
   {
     id: 'D2', group: 'D', kind: 'accent', refs: [], aspect: '1:1',
-    prompt: 'A subtle, uniform white paper grain texture, very fine fibres, extremely low contrast (nearly white), evenly lit, seamless and tileable, no objects, no shadows, no vignette.',
+    prompt: 'An abstract, almost white, very light surface with an extremely subtle mottled grain and a few fine fibres, like plain handmade paper seen very close, evenly lit, very low contrast, no objects, no shadows, no vignette, no text.',
     noStyle: true,
   },
 ];

@@ -22,7 +22,8 @@
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 1,
+      "note": "Arzt trägt Brille und Bartschatten (aus der Stilvorlage des ersten Films übernommen); Briefing verlangt beides nicht ausdrücklich, widerspricht ihm aber nicht."
     },
     "A5": {
       "candidates": [
@@ -171,18 +172,24 @@
           "n": 1,
           "file": "assets/gen/candidates/B3-c1.jpg",
           "created": "2026-10-06T09:05:23.248Z"
+        },
+        {
+          "n": 2,
+          "file": "assets/gen/candidates/B3-c2.jpg",
+          "created": "2026-10-06T09:09:12.756Z"
         }
       ],
       "group": "B",
       "kind": "scene",
-      "prompt": "Premium flat 2D vector illustration for a calm corporate explainer film, as drawn in Adobe Illustrator: NO outlines or contour lines, every shape is a clean vector shape with smooth soft gradients, very soft paper grain, gentle rim light and soft light bloom, softly blurred backgrounds (shallow depth of field). Stylised, slightly simplified friendly faces (simple dark eyes, small nose, simple mouth, light blush), clear readable expressions, no photo realism, no 3D render, no comic line art. Calm, warm, human mood, medical but not clinical. Bright airy world with lots of white and light warm grey, generous white space. Straight, slightly elevated three-quarter camera, consistent lens and scale across all scenes. Props simple and slightly oversized. Palette: white, light warm greys, charcoal (#25282A) for dark accents, muted beige and light wood, soft muted green for plants, natural varied skin tones. Absolutely NO teal, NO blue, NO turquoise, NO gold, NO yellow anywhere in the image (not in sky, windows, glass, clothing, objects or light). Windows show soft white light only. No text, no logos, no letters, no numbers, no brand marks, no signs.\n\nSCENE, 16:9: inside a light grey car, seen from the passenger seat toward the driver's side. In the left-centre foreground the dashboard with a LARGE landscape navigation screen, almost front-facing, occupying about 45% of the image width; the screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). Behind it, on the right, the empty driver's seat with the seatbelt visible, the steering wheel, and the side window with soft white morning light. Charcoal and light grey interior with soft gradients. No people.",
+      "prompt": "Premium flat 2D vector illustration for a calm corporate explainer film, as drawn in Adobe Illustrator: NO outlines or contour lines, every shape is a clean vector shape with smooth soft gradients, very soft paper grain, gentle rim light and soft light bloom, softly blurred backgrounds (shallow depth of field). Stylised, slightly simplified friendly faces (simple dark eyes, small nose, simple mouth, light blush), clear readable expressions, no photo realism, no 3D render, no comic line art. Calm, warm, human mood, medical but not clinical. Bright airy world with lots of white and light warm grey, generous white space. Straight, slightly elevated three-quarter camera, consistent lens and scale across all scenes. Props simple and slightly oversized. Palette: white, light warm greys, charcoal (#25282A) for dark accents, muted beige and light wood, soft muted green for plants, natural varied skin tones. Absolutely NO teal, NO blue, NO turquoise, NO gold, NO yellow anywhere in the image (not in sky, windows, glass, clothing, objects or light). Windows show soft white light only. No text, no logos, no letters, no numbers, no brand marks, no signs.\n\nSCENE, 16:9: inside a light grey car, camera at the passenger seat looking toward the driver side. In the LEFT-CENTRE foreground the dashboard centre console with a LARGE landscape touch screen that we see almost straight on (nearly front-facing, only a slight angle), the screen occupies about 45% of the image width and about 40% of the image height. The screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). To the RIGHT of the screen, further back: the empty driver seat with the seatbelt visible and the steering wheel, and the driver side window with soft white morning light. Charcoal and light warm-grey interior with soft gradients. No people.",
       "base": null,
       "references": [
         "assets/reference/stil-c-auto.jpg"
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 2,
+      "note": "Kandidat 1 verworfen: Bildschirm zu klein und zu schräg für lesbare Navi-Grafik. Kandidat 2: Blick durch die Windschutzscheibe, Bildschirm groß und fast frontal (Abweichung vom Briefing „vom Beifahrersitz“)."
     },
     "C18": {
       "candidates": [
@@ -316,7 +323,8 @@
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 1,
+      "note": "Gang nach links gezeichnet; wird im Film gespiegelt, damit er von der Tür (links) nach rechts eilt."
     },
     "B2": {
       "candidates": [
@@ -355,7 +363,8 @@
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 1,
+      "note": "Wie C3 im Film gespiegelt."
     },
     "C14": {
       "candidates": [
@@ -376,7 +385,8 @@
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 1,
+      "note": "Kandidat 1 verworfen: Comic-Bewegungsstriche neben dem Kopf. Kandidat 2 ohne."
     },
     "C15": {
       "candidates": [
@@ -446,6 +456,11 @@
           "n": 1,
           "file": "assets/gen/candidates/C1-c1.jpg",
           "created": "2026-10-06T09:06:27.797Z"
+        },
+        {
+          "n": 2,
+          "file": "assets/gen/candidates/C1-c2.jpg",
+          "created": "2026-10-06T09:09:38.902Z"
         }
       ],
       "group": "C",
@@ -458,7 +473,8 @@
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 1
+      "chosen": 2,
+      "note": "Kandidat 1 basierte auf dem verworfenen B3-Kandidaten 1; Kandidat 2 ist die Bearbeitung des neuen B3."
     },
     "C4": {
       "candidates": [
@@ -479,6 +495,183 @@
       "aspect": "16:9",
       "seed": null,
       "chosen": 1
+    },
+    "C9": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C9-c1.jpg",
+          "created": "2026-10-06T09:06:51.398Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the attached image. Keep EVERYTHING identical (room, patient, clothing, all dry skin patches). Change ONLY the DOCTOR: he is turned toward the patient and explains something with one open hand gesture (palm up), warm, engaged expression. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "C15",
+      "references": [
+        "assets/gen/C15.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C15b": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C15b-c1.jpg",
+          "created": "2026-10-06T09:06:52.328Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the attached image. Keep EVERYTHING identical (room, doctor, the patient's body, clothing, hands and all the dry skin patches). Change ONLY the PATIENT's face: she reacts with a small, relieved, hopeful expression (soft smile, relaxed eyebrows), still looking at the doctor. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "C15",
+      "references": [
+        "assets/gen/C15.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C8": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C8-c1.jpg",
+          "created": "2026-10-06T09:06:52.637Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD the DOCTOR's right hand (light skin, light grey-white coat sleeve over a charcoal jumper cuff) entering from the LEFT edge, palm DOWN, flat on the desk, fingers together and extended, as if pushing a flat object across the desk toward the right. Do not draw any object under the hand. Nothing else. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "DESK",
+      "references": [
+        "assets/gen/DESK.jpg",
+        "assets/gen/A1.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C4wb": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C4wb-c1.jpg",
+          "created": "2026-10-06T09:06:53.412Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the attached image. Keep EVERYTHING identical (room, camera, the doctor's position, size, clothing, jacket, bag, face). Change ONLY his stride to the opposite phase of the walk cycle: the other leg is now in front and the free arm swings the other way. Same calm upright posture. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "C4w",
+      "references": [
+        "assets/gen/C4w.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C12": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C12-c1.jpg",
+          "created": "2026-10-06T09:06:53.645Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD PATIENT 1's right hand (light-medium skin, warm-grey sweater sleeve) entering from the RIGHT edge and resting on the desk, palm down, held out openly. The patches of dry skin on the back of the hand are clearly visible, drawn with soft shading. Nothing else. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "DESK",
+      "references": [
+        "assets/gen/DESK.jpg",
+        "assets/gen/A2.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C10": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C10-c1.jpg",
+          "created": "2026-10-06T09:06:54.877Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the attached image. Keep EVERYTHING identical (room, patient, clothing, all dry skin patches). Change ONLY the DOCTOR: his right hand hovers in mid-air over the desk, palm down, holding still, while his eyes are lifted toward the patient, thoughtful and attentive. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "C15",
+      "references": [
+        "assets/gen/C15.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C7": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C7-c1.jpg",
+          "created": "2026-10-06T09:06:57.299Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD a blank white notepad lying on the desk and the DOCTOR's right hand (light skin, light grey-white coat sleeve) holding a plain charcoal pen, writing on the pad (no visible writing, only a few faint grey squiggle lines, no letters, no numbers). Nothing else. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "DESK",
+      "references": [
+        "assets/gen/DESK.jpg",
+        "assets/gen/A1.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C16": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C16-c1.jpg",
+          "created": "2026-10-06T09:07:00.024Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD PATIENT 4's right hand (medium-brown skin, olive-grey jacket sleeve over a cream cuff) entering from the RIGHT edge and resting on the desk, palm down, held out openly. The darker brown-grey patches of dry skin on the back of the hand are clearly visible. Nothing else. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "DESK",
+      "references": [
+        "assets/gen/DESK.jpg",
+        "assets/gen/A5.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "C3b": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/C3b-c1.jpg",
+          "created": "2026-10-06T09:07:01.644Z"
+        }
+      ],
+      "group": "C",
+      "kind": "edit",
+      "prompt": "Edit the attached image. Keep EVERYTHING identical (room, camera, the doctor's position, size, clothing, bag, coat, face). Change ONLY his stride to the opposite phase of the walk cycle: the other leg is now in front and the arms swing the other way. Same hurried forward lean. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "C3",
+      "references": [
+        "assets/gen/C3.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
     }
-  }
+  },
+  "method": "Figuren in Räumen entstehen als KI-Bearbeitung des leeren Raums (pixelgleich) und werden per Differenzmaske freigestellt (scripts/postprocess.mjs). Einzelplatten (C2, C17, C18) auf Weiß mit Flood-Fill-Alpha.",
+  "seedNote": "Die Gemini-Bild-API bietet keinen Seed; Reproduzierbarkeit über Prompt, Modell und Referenzbilder."
 }

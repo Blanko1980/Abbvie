@@ -76,7 +76,7 @@ function bbox(alpha, w, h, thr = 0.004, pad = 2) {
 async function blurMask(mask, w, h, sigma) {
   if (sigma < 0.3) return mask;
   const buf = Buffer.from(mask.map((v) => Math.round(v * 255)));
-  const out = await sharp(buf, {raw: {width: w, height: h, channels: 1}}).blur(sigma).raw().toBuffer();
+  const out = await sharp(buf, {raw: {width: w, height: h, channels: 1}}).blur(sigma).extractChannel(0).raw().toBuffer();
   return Float32Array.from(out, (v) => v / 255);
 }
 // Dilatation ≈ Weichzeichnen + niedrige Schwelle
@@ -156,59 +156,113 @@ async function screen(id) {
   check(id, {data: rgb, w, h}, alpha);
 }
 
-async function group(g) {
-  const base = await load(g.base);
-  const vars = {};
-  for (const id of g.members) { const v = await load(id); if (v) vars[id] = v; }
-  if (!base || !Object.keys(vars).length) return;
-  const {w, h} = base;
-  // Differenz (max. Kanal), leicht geglättet, Schwelle
-  let keep = new Float32Array(w * h);
-  for (const v of Object.values(vars)) {
-    let d = new Float32Array(w * h);
-    for (let i = 0; i < w * h; i++) {
-      d[i] = Math.max(Math.abs(base.data[i * 3] - v.data[i * 3]), Math.abs(base.data[i * 3 + 1] - v.data[i * 3 + 1]), Math.abs(base.data[i * 3 + 2] - v.data[i * 3 + 2])) / 255;
+// Größte zusammenhängende Fläche (plus Teile in ihrem Umfeld) behalten – entfernt Krümel der KI-Bearbeitung
+function largestComponent(mask, w, h) {
+  const lab = new Int32Array(w * h);
+  let best = 0, bestN = 0, cur = 0;
+  const boxes = [];
+  for (let i = 0; i < w * h; i++) {
+    if (!mask[i] || lab[i]) continue;
+    cur++;
+    let n = 0, x0 = w, y0 = h, x1 = 0, y1 = 0;
+    const st = [i];
+    lab[i] = cur;
+    while (st.length) {
+      const j = st.pop();
+      n++;
+      const x = j % w, y = (j / w) | 0;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      for (const k of [x > 0 ? j - 1 : -1, x < w - 1 ? j + 1 : -1, j >= w ? j - w : -1, j < w * (h - 1) ? j + w : -1]) {
+        if (k >= 0 && mask[k] && !lab[k]) { lab[k] = cur; st.push(k); }
+      }
     }
-    d = await blurMask(d, w, h, 1.5);
-    for (let i = 0; i < w * h; i++) if (d[i] > 22 / 255) keep[i] = 1;
+    boxes[cur] = {x0, y0, x1, y1, n};
+    if (n > bestN) { bestN = n; best = cur; }
   }
-  if (g.split) {
-    const xa = Math.round(g.split[0] * w), xb = Math.round(g.split[1] * w);
+  const B = boxes[best];
+  if (!B) return mask;
+  const mx = (B.x1 - B.x0) * 0.08, my = (B.y1 - B.y0) * 0.08;
+  const keepLab = new Uint8Array(cur + 1);
+  for (let c = 1; c <= cur; c++) {
+    const b = boxes[c];
+    const inside = b.x0 >= B.x0 - mx && b.x1 <= B.x1 + mx && b.y0 >= B.y0 - my && b.y1 <= B.y1 + my;
+    if (c === best || (inside && b.n > 30)) keepLab[c] = 1;
+  }
+  return Float32Array.from(lab, (l) => (l && keepLab[l] ? 1 : 0));
+}
+
+async function diffKeep(base, v, w, h, split) {
+  let d = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    d[i] = Math.max(Math.abs(base.data[i * 3] - v.data[i * 3]), Math.abs(base.data[i * 3 + 1] - v.data[i * 3 + 1]), Math.abs(base.data[i * 3 + 2] - v.data[i * 3 + 2])) / 255;
+  }
+  d = await blurMask(d, w, h, 1.5);
+  const keep = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) if (d[i] > 22 / 255) keep[i] = 1;
+  if (split) {
+    const xa = Math.round(split[0] * w), xb = Math.round(split[1] * w);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < xa || x >= xb) keep[y * w + x] = 0;
   }
-  // Rauschen weg (Öffnen ≈ Erosion+Dilatation über Blur), dann wachsen lassen und weich machen
+  return keep;
+}
+
+async function maskFrom(keep, w, h, g) {
+  // Rauschen weg (Öffnen ≈ Blur + hohe Schwelle), bei bewegten Ebenen nur die Figur, dann wachsen + weich
   let k = await blurMask(keep, w, h, 2);
   k = k.map((v) => (v > 0.6 ? 1 : 0));
+  if (g.tight) k = largestComponent(k, w, h);
   k = await dilate(k, w, h, g.tight ? 6 : 26);
   const alpha = await blurMask(k, w, h, g.tight ? 2 : 14);
   if (g.split) {
     const xa = Math.round(g.split[0] * w), xb = Math.round(g.split[1] * w);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < xa || x >= xb) alpha[y * w + x] = 0;
   }
-  const crop = bbox(alpha, w, h);
-  meta[g.group] = {base: g.base, x: crop.x0, y: crop.y0, w: crop.x1 - crop.x0, h: crop.y1 - crop.y0, pose: {}};
-  for (const [id, v] of Object.entries(vars)) {
-    // Farbe/Kontrast an das Grundbild angleichen (unveränderte Pixel im Ebenenbereich)
-    const data = Buffer.from(v.data);
-    for (let c = 0; c < 3; c++) {
-      let sx = 0, sy = 0, sxx = 0, sxy = 0, n = 0;
-      for (let y = crop.y0; y < crop.y1; y += 2) for (let x = crop.x0; x < crop.x1; x += 2) {
-        const i = y * w + x;
-        const dd = Math.abs(base.data[i * 3 + c] - v.data[i * 3 + c]);
-        if (dd < 14) { const a = v.data[i * 3 + c], b = base.data[i * 3 + c]; sx += a; sy += b; sxx += a * a; sxy += a * b; n++; }
-      }
-      if (n > 500) {
-        const va = sxx / n - (sx / n) ** 2;
-        if (va > 16) {
-          const gain = Math.min(1.25, Math.max(0.8, (sxy / n - (sx / n) * (sy / n)) / va));
-          const off = sy / n - gain * (sx / n);
-          for (let i = 0; i < w * h; i++) data[i * 3 + c] = Math.max(0, Math.min(255, Math.round(v.data[i * 3 + c] * gain + off)));
-        }
+  return alpha;
+}
+
+function colorMatch(base, v, w, h, crop) {
+  const data = Buffer.from(v.data);
+  for (let c = 0; c < 3; c++) {
+    let sx = 0, sy = 0, sxx = 0, sxy = 0, n = 0;
+    for (let y = crop.y0; y < crop.y1; y += 2) for (let x = crop.x0; x < crop.x1; x += 2) {
+      const i = y * w + x;
+      const dd = Math.abs(base.data[i * 3 + c] - v.data[i * 3 + c]);
+      if (dd < 14) { const a = v.data[i * 3 + c], b = base.data[i * 3 + c]; sx += a; sy += b; sxx += a * a; sxy += a * b; n++; }
+    }
+    if (n > 500) {
+      const va = sxx / n - (sx / n) ** 2;
+      if (va > 16) {
+        const gain = Math.min(1.25, Math.max(0.8, (sxy / n - (sx / n) * (sy / n)) / va));
+        const off = sy / n - gain * (sx / n);
+        for (let i = 0; i < w * h; i++) data[i * 3 + c] = Math.max(0, Math.min(255, Math.round(v.data[i * 3 + c] * gain + off)));
       }
     }
+  }
+  return data;
+}
+
+// Pose-Ebenen: statische Gruppen teilen eine Maske (saubere Überblendung),
+// bewegte Ebenen (tight) bekommen je eine eigene, enge Maske nur um die Figur.
+async function group(g) {
+  const base = await load(g.base);
+  const vars = {};
+  for (const id of g.members) { const v = await load(id); if (v) vars[id] = v; }
+  if (!base || !Object.keys(vars).length) return;
+  const {w, h} = base;
+  meta[g.group] = {base: g.base, pose: {}};
+  let shared = null;
+  if (!g.tight) {
+    const keep = new Float32Array(w * h);
+    for (const v of Object.values(vars)) { const k = await diffKeep(base, v, w, h, g.split); for (let i = 0; i < w * h; i++) if (k[i]) keep[i] = 1; }
+    shared = await maskFrom(keep, w, h, g);
+  }
+  for (const [id, v] of Object.entries(vars)) {
+    const alpha = shared || await maskFrom(await diffKeep(base, v, w, h, g.split), w, h, g);
+    const crop = bbox(alpha, w, h);
+    const data = colorMatch(base, v, w, h, crop);
     const {out, cw, ch} = rgba(data, alpha, w, h, crop);
     await savePng(out, cw, ch, `${id}.png`);
-    meta[g.group].pose[id] = `img/${id}.webp`;
+    meta[g.group].pose[id] = {src: `img/${id}.webp`, x: crop.x0, y: crop.y0, w: cw, h: ch};
     await saveJpg({data, w, h}, `${id}-voll.jpg`); // Vollbild für Kontaktbogen
     check(id, {data, w, h});
   }
@@ -218,21 +272,20 @@ async function plate(id) {
   const im = await load(id);
   if (!im) return;
   const {data, w, h} = im;
-  // Flood-Fill vom Rand: Pixel nahe Weiß (Toleranz 8) und verbunden mit dem Rand → Hintergrund
+  // Flood-Fill vom Rand: Toleranz 8 zum Nachbarpixel (folgt weichen Hintergrund-Verläufen und Vignetten),
+  // nur helle Pixel (Grund ist weiß bis hellgrau) gehören zum Hintergrund
   const bg = new Uint8Array(w * h);
-  const near = (i) => 255 - Math.min(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]) <= 8;
+  const bright = (i) => Math.min(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]) >= 200;
+  const close = (i, j) => Math.max(Math.abs(data[i * 3] - data[j * 3]), Math.abs(data[i * 3 + 1] - data[j * 3 + 1]), Math.abs(data[i * 3 + 2] - data[j * 3 + 2])) <= 8;
   const stack = [];
-  for (let x = 0; x < w; x++) { stack.push(x, (h - 1) * w + x); }
-  for (let y = 0; y < h; y++) { stack.push(y * w, y * w + w - 1); }
+  for (let x = 0; x < w; x++) for (const i of [x, (h - 1) * w + x]) if (bright(i)) { bg[i] = 1; stack.push(i); }
+  for (let y = 0; y < h; y++) for (const i of [y * w, y * w + w - 1]) if (bright(i) && !bg[i]) { bg[i] = 1; stack.push(i); }
   while (stack.length) {
     const i = stack.pop();
-    if (bg[i] || !near(i)) continue;
-    bg[i] = 1;
     const x = i % w;
-    if (x > 0) stack.push(i - 1);
-    if (x < w - 1) stack.push(i + 1);
-    if (i >= w) stack.push(i - w);
-    if (i < w * (h - 1)) stack.push(i + w);
+    for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i >= w ? i - w : -1, i < w * (h - 1) ? i + w : -1]) {
+      if (j >= 0 && !bg[j] && bright(j) && close(i, j)) { bg[j] = 1; stack.push(j); }
+    }
   }
   let alpha = Float32Array.from(bg, (v) => 1 - v);
   alpha = await blurMask(alpha, w, h, 1); // 1 px Kante
