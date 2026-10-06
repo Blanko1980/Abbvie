@@ -1,5 +1,5 @@
 {
-  "_info": "Alle Frame-Nummern (30 fps) und Texte. Szenen-Frames sind lokal (0 = Szenenbeginn). Schnitte in S1–S4 liegen auf dem 9-Frame-Raster (Achtel bei 100 BPM, 1 Schlag = 18 Frames); die Briefing-Werte 75/195/140/260/320 sind auf das Raster gerundet.",
+  "_info": "Alle Frame-Nummern (30 fps) und Texte. Szenen-Frames sind lokal (0 = Szenenbeginn). Schnitte in S1–S4 liegen auf dem 9-Frame-Raster (Achtel bei 100 BPM, 1 Schlag = 18 Frames); die Briefing-Werte 75/195/140/260/320 sind auf das Raster gerundet; die Grenze S2/S3 liegt deshalb bei 603 statt 600.",
   "fps": 30,
   "durationInFrames": 2400,
   "bpm": 100,
@@ -31,16 +31,16 @@
         {"id": "naviWide", "from": 198, "to": 234, "screenOn": [198, 210]},
         {"id": "navi", "from": 234, "to": 360, "routeDraw": [234, 246], "fingerIn": [252, 270], "approach": [270, 324], "tap": 333}
       ]},
-    {"id": "S2", "title": "Ankunft unter Zeitdruck", "from": 360, "to": 600,
+    {"id": "S2", "title": "Ankunft unter Zeitdruck", "from": 360, "to": 603,
       "clock": "clockLate", "clockFlip": [0, 8], "officeIn": [6, 24],
       "walk": {"pose": "C3", "from": 63, "to": 180, "x": [520, 3250], "step": 6, "flip": true}},
-    {"id": "S3", "title": "Die zweite Routine", "from": 600, "to": 900, "patient": "C6C11", "patientHand": "C12",
+    {"id": "S3", "title": "Die zweite Routine", "from": 603, "to": 900, "patient": "C6C11", "patientHand": "C12",
       "shots": [
         {"id": "wide", "from": 0, "to": 90, "zoom": [1.0, 1.06]},
         {"id": "hand", "from": 90, "to": 126},
         {"id": "notes", "from": 126, "to": 162},
         {"id": "look", "from": 162, "to": 180},
-        {"id": "slip", "from": 180, "to": 300, "push": [0, 54], "withdraw": [54, 72], "patientIn": [60, 84], "takeOut": [84, 108]}
+        {"id": "slip", "from": 180, "to": 297, "push": [0, 54], "withdraw": [54, 72], "patientIn": [60, 84], "takeOut": [84, 108]}
       ]},
     {"id": "S4", "title": "Die Routinen wiederholen sich", "from": 900, "to": 1320,
       "days": [
