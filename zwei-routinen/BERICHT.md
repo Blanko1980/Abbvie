@@ -24,8 +24,8 @@ Stand: 07.10.2026 (Korrekturfassung). Bildmodell: `gemini-3-pro-image`. Es unter
 
 | Datei | Video | Ton |
 |---|---|---|
-| `out/zwei-routinen.mp4` (24 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | AAC 48 kHz Stereo, −16,0 LUFS integriert, Spitze −1,3 dB |
-| `out/zwei-routinen-muted.mp4` (21 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | keine Tonspur |
+| `out/zwei-routinen.mp4` (25 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | AAC 48 kHz Stereo, −16,0 LUFS integriert, Spitze −1,3 dB |
+| `out/zwei-routinen-muted.mp4` (22 MB) | H.264, 1920 × 1080, 30 fps, 2400 Frames | keine Tonspur |
 
 Zusätzlich gemessen:
 - Geräusche liegen 7,3 dB über dem Musikbett.
