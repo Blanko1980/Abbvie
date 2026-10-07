@@ -24,13 +24,13 @@ fs.mkdirSync(PUB, {recursive: true});
 // deck: deckendes Bild. plate: Flood-Fill. group: Pose-Ebenen über einem Grundbild (base),
 // tight = enge Maske für Ebenen, die im Code bewegt werden. screen: Magenta-Bildschirm ausstanzen.
 const PLAN = [
-  {deck: ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B4', 'B5', 'DESK', 'C6C11', 'C13', 'C14', 'C15', 'D2']},
+  {deck: ['A1', 'A2', 'A3', 'A4', 'A5', 'B4', 'B4c', 'B5', 'DESK', 'C6C11', 'C13', 'C14', 'C15', 'D2']},
   {screen: 'B3'},
+  {screen: 'B1'}, // Display der Kaffeemaschine
   {group: 'B2', base: 'B1', members: ['B2']},
-  {group: 'C1', base: 'B3', members: ['C1']},
-  {group: 'C3', base: 'B4', members: ['C3', 'C3b'], tight: true, inner: [5, 12], dropGreen: true},
-  {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true},
-  {group: 'C4', base: 'B4', members: ['C4', 'C5']},
+  {group: 'C3', base: 'B4', members: ['C3', 'C3b'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
+  {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
+  {group: 'C4', base: 'B4c', members: ['C4', 'C5']},
   {group: 'C15doc', base: 'C15', members: ['C10', 'C9'], split: [0, 0.5]},
   {group: 'C15pat', base: 'C15', members: ['C15b'], split: [0.5, 1]},
   {group: 'C8', base: 'DESK', members: ['C8'], tight: true, thresh: 9, woodChroma: true, handOnly: true}, // heller Ärmel vor hellem Grund
@@ -280,6 +280,36 @@ async function group(g) {
     if (g.dropGreen) {
       // Pflanzenreste aus dem Hintergrund entfernen (die Figur trägt kein Grün)
       alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return a * (1 - ramp((gg - Math.max(r, b) - 4) / 10)); });
+    }
+    if (g.dropShadow) {
+      // Bodenschatten der KI entfernen (unterhalb der Linie: nur abgedunkelter Boden ohne Farbänderung);
+      // der Schatten wird im Code als weiche Ellipse gezeichnet und läuft sauber mit
+      const yMin = g.dropShadow;
+      alpha = alpha.map((a, i) => {
+        if (a <= 0 || i / w < yMin) return a;
+        const br = base.data[i * 3], bg2 = base.data[i * 3 + 1], bb = base.data[i * 3 + 2];
+        const vr = v.data[i * 3], vg = v.data[i * 3 + 1], vb = v.data[i * 3 + 2];
+        const dl = (br + bg2 + bb - vr - vg - vb) / 3;                       // Abdunklung
+        const dc = Math.abs((br - bg2) - (vr - vg)) + Math.abs((bg2 - bb) - (vg - vb));
+        const shadow = dl > -4 && dl < 60 && dc < 14 && Math.max(vr, vg, vb) > 120;
+        const dust = Math.max(vr, vg, vb) > 180 && Math.max(vr, vg, vb) - Math.min(vr, vg, vb) < 25; // heller Staub am Boden
+        return shadow || dust ? 0 : a;
+      });
+      // verbliebene Sprenkel unter der Linie: kleine Inseln (< 1500 px) entfernen
+      const seen = new Uint8Array(w * h);
+      for (let s0 = yMin * w; s0 < w * h; s0++) {
+        if (seen[s0] || alpha[s0] < 0.05) continue;
+        const comp = [s0]; seen[s0] = 1;
+        for (let k = 0; k < comp.length; k++) {
+          const i = comp[k], x = i % w;
+          for (const j of [i - 1, i + 1, i - w, i + w]) {
+            if (j < yMin * w || j >= w * h || seen[j] || alpha[j] < 0.05) continue;
+            if ((j === i - 1 && x === 0) || (j === i + 1 && x === w - 1)) continue;
+            seen[j] = 1; comp.push(j);
+          }
+        }
+        if (comp.length < 1500) for (const i of comp) alpha[i] = 0;
+      }
     }
     if (g.handOnly) {
       // Nur Haut, heller Ärmel und dunkle Manschette behalten – heller Tisch-Saum unter den Fingern fällt weg

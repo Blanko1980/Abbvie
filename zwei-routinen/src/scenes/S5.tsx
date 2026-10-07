@@ -4,7 +4,7 @@ import {approachFinger, BeltShot, CupShot, HandPlateShot, NaviShot} from '../com
 import {center, NAVI_POS} from '../components/NaviScreen';
 
 // S5 Das Innehalten am Navi: gleicher Morgen (je 20 Frames), Finger nähert sich wie in S1, hält 30 Frames 12 px über
-// „Bestätigen“ (Raster setzt aus), Gold-Route tritt hervor, Chips, Tipp auf Gold.
+// „Bestätigen“ (Raster setzt aus), Pop-up „Neue Route gefunden“, erst jetzt erscheint die Gold-Route (23 min), Tipp auf Gold.
 const S = scene('S5');
 
 export const S5: React.FC<{f: number}> = ({f}) => {
@@ -33,7 +33,8 @@ export const S5: React.FC<{f: number}> = ({f}) => {
         tealDraw: 1,
         goldExpand: lerp(f, n.goldExpand, [0, 1], ease.inOut),
         goldDraw: lerp(f, n.goldDraw, [0, 1], ease.inOut),
-        chips: lerp(f, n.chips, [0, 1], ease.out),
+        popup: lerp(f, n.popup, [0, 1], ease.out),
+        goldVisible: lerp(f, n.popup, [0, 1], ease.out),
         selected: f >= n.tap ? 'gold' : 'teal',
         pressGold,
       }}

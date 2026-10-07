@@ -17,6 +17,7 @@ export const colors = {
   streetEdge: '#DCDAD5',
   muted: '#8C8E90',
   line: '#D9D7D3',
+  coffee: '#6B3F22',
 };
 
 // TODO brand font: Markenschriften (Graphik / Neue Haas Grotesk) fehlen in /public/fonts – Ersatz Source Sans 3 (OFL)

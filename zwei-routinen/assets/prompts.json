@@ -436,45 +436,24 @@
           "n": 1,
           "file": "assets/gen/candidates/C5-c1.jpg",
           "created": "2026-10-06T09:06:27.127Z"
-        }
-      ],
-      "group": "C",
-      "kind": "edit",
-      "prompt": "Edit the first attached image (the practice entrance hall). Keep the room and the camera EXACTLY identical. ADD the DOCTOR from the attached model sheet standing near the coat hook rail on the right, calmly slipping on a light grey-white doctor's coat over his charcoal jumper, relaxed shoulders, a calm content expression. A dark grey jacket already hangs on the hook. Full figure, same scale as a person in this room. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
-      "base": "B4",
-      "references": [
-        "assets/gen/B4.jpg",
-        "assets/gen/A1.jpg"
-      ],
-      "aspect": "16:9",
-      "seed": null,
-      "chosen": 1
-    },
-    "C1": {
-      "candidates": [
-        {
-          "n": 1,
-          "file": "assets/gen/candidates/C1-c1.jpg",
-          "created": "2026-10-06T09:06:27.797Z"
         },
         {
           "n": 2,
-          "file": "assets/gen/candidates/C1-c2.jpg",
-          "created": "2026-10-06T09:09:38.902Z"
+          "file": "assets/gen/candidates/C5-c2.jpg",
+          "created": "2026-10-07T17:33:50.985Z"
         }
       ],
       "group": "C",
       "kind": "edit",
-      "prompt": "Edit the first attached image (the car interior). Keep the car, the camera and the magenta screen EXACTLY identical. ADD the DOCTOR from the attached model sheet (late 40s, short greying hair, clean-shaven, charcoal crew-neck jumper over a light grey shirt collar) sitting in the driver's seat, seatbelt fastened across his chest, looking at the navigation screen with a calm routine expression. His right arm is free and relaxed in his lap. The magenta screen must stay completely uncovered. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
-      "base": "B3",
+      "prompt": "Edit the first attached image (the practice entrance hall with a white coat on the hook). Keep the room and the camera EXACTLY identical. The white coat is no longer on its hook because the DOCTOR from the attached model sheet now calmly slips it on over his charcoal jumper, standing at the coat hook rail, relaxed shoulders, calm content expression; his dark grey jacket now hangs on the hook instead. Full figure, same scale as a person in this room. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "B4c",
       "references": [
-        "assets/gen/B3.jpg",
+        "assets/gen/B4c.jpg",
         "assets/gen/A1.jpg"
       ],
       "aspect": "16:9",
       "seed": null,
-      "chosen": 2,
-      "note": "Kandidat 1 basierte auf dem verworfenen B3-Kandidaten 1; Kandidat 2 ist die Bearbeitung des neuen B3."
+      "chosen": 2
     },
     "C4": {
       "candidates": [
@@ -666,6 +645,25 @@
       "base": "C3",
       "references": [
         "assets/gen/C3.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
+    },
+    "B4c": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/B4c-c1.jpg",
+          "created": "2026-10-07T17:33:23.174Z"
+        }
+      ],
+      "group": "B",
+      "kind": "edit",
+      "prompt": "Edit the attached image (the empty practice entrance hall). Keep the room and the camera EXACTLY identical. ADD only a light grey-white doctor's coat hanging neatly on one hook of the coat hook rail on the right wall. Nothing else changes, no people. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "B4",
+      "references": [
+        "assets/gen/B4.jpg"
       ],
       "aspect": "16:9",
       "seed": null,

@@ -68,16 +68,18 @@ export const ASSETS = [
   // ---------------------------------------------------------------- Gruppe B: Umgebungen (leer)
   {
     id: 'B1', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-kueche.jpg'],
-    prompt: 'SCENE, 16:9: close-up of a bright kitchen counter in the morning. A simple light grey coffee machine on the right, in front of it on the light wooden counter, slightly left of centre, a large plain white ceramic cup that is EMPTY (we can look slightly into it, the inside is clean white). Behind: a window with soft white morning light, softly blurred plant. No people, no hands. Camera locked.',
+    prompt: 'SCENE, 16:9: close-up of a bright kitchen counter in the morning. A simple light grey espresso machine stands right of centre; it has ONE small rectangular display on its front whose surface is a perfectly flat uniform pure magenta colour (#FF00FF, code will place the display content), and a clearly visible coffee spout pointing down. A large plain white ceramic cup that is EMPTY stands directly UNDER the spout on the drip tray (we can look slightly into the clean white inside of the cup). Behind: a window with soft white morning light, a softly blurred plant. No people, no hands, no text. Camera locked.',
   },
+
   {
     id: 'B2', group: 'B', kind: 'edit', base: 'B1',
     prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel. Change ONLY the inside of the cup: it is now filled with dark coffee up to just below the rim. Nothing else changes.',
   },
   {
-    id: 'B3', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-auto.jpg'],
-    prompt: 'SCENE, 16:9: inside a light grey car, camera at the passenger seat looking toward the driver side. In the LEFT-CENTRE foreground the dashboard centre console with a LARGE landscape touch screen that we see almost straight on (nearly front-facing, only a slight angle), the screen occupies about 45% of the image width and about 40% of the image height. The screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). To the RIGHT of the screen, further back: the empty driver seat with the seatbelt visible and the steering wheel, and the driver side window with soft white morning light. Charcoal and light warm-grey interior with soft gradients. No people.',
+    id: 'B3', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-auto.jpg', DOC],
+    prompt: 'SCENE, 16:9, over-the-shoulder view from the driver: the camera is just behind and slightly to the right of the DOCTOR sitting in the driver\'s seat of a light grey car, looking over his right shoulder toward the dashboard. In the LEFT foreground the back of his head (short greying hair, the temple of his glasses visible) and his right shoulder in a charcoal knitted jumper, the dark seatbelt running over his shoulder. In the centre-right the large landscape navigation screen of the centre console, facing the driver and the camera almost straight on, occupying about 45% of the image width; the screen surface is ONE perfectly flat uniform pure magenta colour (#FF00FF), no reflection, no interface (code will place the screen content). The steering wheel partly visible at the left edge, the windshield with soft white morning light and a blurred street. Charcoal and light warm-grey interior with soft gradients. His hands are not visible.',
   },
+
   {
     id: 'B4', group: 'B', kind: 'scene', refs: ['assets/reference/stil-c-praxis.jpg'],
     prompt: 'SCENE, 16:9: the entrance hall of a friendly medical practice, wide and calm, straight slightly elevated camera. On the LEFT a closed entrance door (light wood, frosted glass with white light). Above the door a plain round wall clock face that is completely BLANK (white face, thin charcoal rim, no numbers, no hands). A short corridor leads to the back; on the right a coat hook rail on the wall and a light wood reception counter. White walls, light warm-grey floor, one plant. Plenty of empty floor space in the middle for a person walking. No people, no signs, no text.',
@@ -88,10 +90,7 @@ export const ASSETS = [
   },
 
   // ---------------------------------------------------------------- Gruppe C: Figuren
-  {
-    id: 'C1', group: 'C', kind: 'edit', base: 'B3', refs: [DOC],
-    prompt: 'Edit the first attached image (the car interior). Keep the car, the camera and the magenta screen EXACTLY identical. ADD the DOCTOR from the attached model sheet (late 40s, short greying hair, clean-shaven, charcoal crew-neck jumper over a light grey shirt collar) sitting in the driver\'s seat, seatbelt fastened across his chest, looking at the navigation screen with a calm routine expression. His right arm is free and relaxed in his lap. The magenta screen must stay completely uncovered.',
-  },
+
   {
     id: 'C2', group: 'C', kind: 'plate', refs: [DOC],
     prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: close-up of the DOCTOR\'s right hand, index finger extended forward as if about to tap a touch screen, other fingers loosely curled, neutral pose. The forearm in a charcoal knitted jumper sleeve enters from the lower RIGHT edge of the image; the fingertip points toward the upper LEFT. Light skin as on the attached model sheet. Nothing else in the image.',
@@ -110,16 +109,23 @@ export const ASSETS = [
   },
   {
     id: 'C4wb', group: 'C', kind: 'edit', base: 'C4w',
-    prompt: 'Edit the attached image. Keep EVERYTHING identical (room, camera, the doctor\'s position, size, clothing, jacket, bag, face). Change ONLY his stride to the opposite phase of the walk cycle: the other leg is now in front and the free arm swings the other way. Same calm upright posture.',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical (room, camera, the doctor\'s position, size, clothing, face, the bag in his hand and the dark grey jacket draped over his arm exactly as it is). Change ONLY his legs to the opposite phase of the walk cycle: the other leg is now in front. The jacket over the arm must stay fully visible and unchanged.',
+  },
+
+  {
+    id: 'B4c', group: 'B', kind: 'edit', base: 'B4',
+    prompt: 'Edit the attached image (the empty practice entrance hall). Keep the room and the camera EXACTLY identical. ADD only a light grey-white doctor\'s coat hanging neatly on one hook of the coat hook rail on the right wall. Nothing else changes, no people.',
   },
   {
-    id: 'C4', group: 'C', kind: 'edit', base: 'B4', refs: [DOC],
-    prompt: 'Edit the first attached image (the practice entrance hall). Keep the room and the camera EXACTLY identical. ADD the DOCTOR from the attached model sheet (charcoal jumper, short greying hair) standing relaxed at the coat hook rail on the right, calmly hanging his dark grey jacket on a hook, upright relaxed posture, calm face. Full figure, same scale as a person in this room.',
+    id: 'C4', group: 'C', kind: 'edit', base: 'B4c', refs: [DOC],
+    prompt: 'Edit the first attached image (the practice entrance hall with a white coat on the hook). Keep the room, the camera and the white coat hanging on its hook EXACTLY identical. ADD the DOCTOR from the attached model sheet (charcoal jumper, short greying hair) standing relaxed at the coat hook rail, calmly hanging his dark grey jacket on the hook next to the white coat, upright relaxed posture, calm face, facing right toward the rail. Full figure, same scale as a person in this room.',
   },
+
   {
-    id: 'C5', group: 'C', kind: 'edit', base: 'B4', refs: [DOC],
-    prompt: 'Edit the first attached image (the practice entrance hall). Keep the room and the camera EXACTLY identical. ADD the DOCTOR from the attached model sheet standing near the coat hook rail on the right, calmly slipping on a light grey-white doctor\'s coat over his charcoal jumper, relaxed shoulders, a calm content expression. A dark grey jacket already hangs on the hook. Full figure, same scale as a person in this room.',
+    id: 'C5', group: 'C', kind: 'edit', base: 'B4c', refs: [DOC],
+    prompt: 'Edit the first attached image (the practice entrance hall with a white coat on the hook). Keep the room and the camera EXACTLY identical. The white coat is no longer on its hook because the DOCTOR from the attached model sheet now calmly slips it on over his charcoal jumper, standing at the coat hook rail, relaxed shoulders, calm content expression; his dark grey jacket now hangs on the hook instead. Full figure, same scale as a person in this room.',
   },
+
   {
     id: 'C6C11', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A2.jpg'],
     prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD two people: on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper, short greying hair) seated, leaning slightly forward, open attentive posture, eye level; on the RIGHT chair PATIENT 1 from the second model sheet (adult man, short dark hair, light-medium skin, warm-grey sweater) seated, listening, eye contact with the doctor. The patient\'s hands rest on the desk edge and the patches of dry skin on his hands and neck are visible. The desk stays empty.',
@@ -166,12 +172,14 @@ export const ASSETS = [
   },
   {
     id: 'C7', group: 'C', kind: 'edit', base: 'DESK', refs: [DOC],
-    prompt: 'Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD a blank white notepad lying on the desk and the DOCTOR\'s right hand (light skin, light grey-white coat sleeve) holding a plain charcoal pen, writing on the pad (no visible writing, only a few faint grey squiggle lines, no letters, no numbers). Nothing else.',
+    prompt: 'Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD a blank white notepad lying on the desk and the DOCTOR\'s right hand (light skin, light grey-white coat sleeve) entering from the LEFT edge of the image (the doctor sits on the left side of the desk), holding a plain charcoal pen and writing on the pad (no visible writing, only a few faint grey squiggle lines, no letters, no numbers). Nothing else.',
   },
+
   {
     id: 'C17', group: 'C', kind: 'plate', refs: [DOC],
-    prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: close-up of the DOCTOR\'s right hand (light skin, charcoal knitted jumper sleeve entering from the right edge) picking up a simple set of car keys (a plain dark key fob without any logo and two silver keys) from a small light ceramic dish. Nothing else in the image.',
+    prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: a sturdy wall key rack drawn as an isolated object (a light wood board with three strong, clearly visible dark metal hooks), a house key hanging on the left hook; the DOCTOR\'s right hand (light skin, charcoal knitted jumper sleeve entering from the right edge) lifts a simple car key (plain dark fob without any logo, a silver key) off the middle hook. Nothing else in the image.',
   },
+
   {
     id: 'C18', group: 'C', kind: 'plate', refs: [DOC],
     prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: close-up of the DOCTOR\'s right hand (light skin, charcoal knitted jumper sleeve entering from the top right) lifting a dark brown leather bag by its strap. Nothing else in the image.',

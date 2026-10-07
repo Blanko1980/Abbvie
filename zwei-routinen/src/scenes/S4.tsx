@@ -3,7 +3,7 @@ import {colors, ease, lerp, scene, T} from '../theme';
 import {camMap} from '../components/ParallaxImage';
 import {center, NAVI_POS} from '../components/NaviScreen';
 import {
-  CLOCK_CAM, confirmTarget, CupShot, DESK_CAM, HallShot, HandPlateShot, NAVI_CAM, NaviShot, NotesShot, PALM, RoomShot, SCREEN, slipAt, SlipShot, Walker,
+  CLOCK_CAM, confirmTarget, CupShot, DESK_CAM, HallShot, HandPlateShot, NAVI_CAM, NaviShot, NotesShot, PALM, RoomShot, naviToSrc, slipAt, SlipShot, Walker,
 } from '../components/Shots';
 import {TextPanel} from '../components/TextPanel';
 
@@ -31,7 +31,8 @@ const fingerNavi = (f: number) => {
 };
 const filmPos = (f: number) => {
   const [nx, ny] = fingerNavi(f);
-  return camMap('B3', NAVI_CAM).toFilm(SCREEN.x + nx, SCREEN.y + ny);
+  const [sx, sy] = naviToSrc(nx, ny);
+  return camMap('B3', NAVI_CAM).toFilm(sx, sy);
 };
 // Tisch-Kamera für den Match Cut so gewählt, dass die Handmitte beim Schnitt ohne Versatz auf der Fingerspitze liegt
 // und die Ärmelkante links außerhalb des Bildes bleibt.

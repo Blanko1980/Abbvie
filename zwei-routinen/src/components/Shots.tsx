@@ -5,10 +5,14 @@ import {camMap, Cam, Layer, ParallaxImage} from './ParallaxImage';
 import {ClockBadge, CLOCK} from './ClockBadge';
 import {center, NAVI, NAVI_POS, NaviScreen, NaviState} from './NaviScreen';
 import {Slip} from './Slip';
+import {mapPoint, matrix3d} from '../homography';
+import anchors from '../data/anchors.json';
 
 // ------------------------------------------------------------ Anker (Quellpixel, aus den Bildern gemessen)
-export const SCREEN = {x: A.B3.quad[0][0], y: A.B3.quad[0][1]}; // linke obere Ecke des Bildschirms in B3
-export const NAVI_CAM: Cam = {z: 1.55, fx: SCREEN.x + NAVI.w / 2, fy: SCREEN.y + NAVI.h / 2 + 20};
+export const QUAD = A.B3.quad as number[][];                          // Bildschirm-Viereck in B3 (Schulterperspektive)
+export const naviToSrc = (nx: number, ny: number) => mapPoint(QUAD, NAVI.w, NAVI.h, nx, ny);
+const qc = naviToSrc(NAVI.w / 2, NAVI.h / 2);
+export const NAVI_CAM: Cam = {z: 1.45, fx: qc[0], fy: qc[1] + 30};
 export const DESK_CAM: Cam = {z: 1.25, fx: 1500, fy: 1000};
 const FINGER = {tip: [3, 24], scale: 0.5};           // C2: Fingerspitze im freigestellten Bild
 const C8_PALM = [1180, 1000];                        // Handmitte der Zettel-Hand (C8) in DESK
@@ -21,13 +25,44 @@ export const CupShot: React.FC<{f: number; dur: number; fill?: [number, number];
   const k = full ? 1 : fill ? lerp(f, fill, [0, 1], ease.inOut) : 1;
   const z = lerp(f, [0, dur], zoom, ease.inOut);
   const streamOn = pour ? f >= pour[0] && f < pour[1] : false;
-  const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+  const [, cy] = anchors.cupTop;
+  const [sx] = anchors.cupTop;
+  // Strahl wächst aus dem Auslauf nach unten bis in die Tasse und reißt am Ende von oben ab
+  const grow = pour ? lerp(f, [pour[0], pour[0] + 4], [0, 1]) : 0;
+  const cut = pour ? lerp(f, [pour[1] - 5, pour[1]], [0, 1]) : 0;
+  const d = A.B1.quad as number[][];
+  const progress = full ? 1 : fill ? lerp(f, fill, [0, 1]) : 1;
   return (
-    <ParallaxImage id="B1" cam={{z, fx: 1500, fy: 900}}>
-      {/* Tasse füllt sich von unten (Maske) */}
-      <Layer p={p} opacity={k > 0 ? 1 : 0} style={{clipPath: `inset(${(1 - k) * 100}% 0 0 0)`}} />
-      {streamOn ? <div style={{position: 'absolute', left: cx - 3, top: -20, width: 6, height: cy + 20 - p.h * 0.1, background: colors.charcoal, borderRadius: 3}} /> : null}
+    <ParallaxImage id="B1" cam={{z, fx: (sx + 1400) / 2, fy: 820}}>
+      <MachineDisplay quad={d} progress={progress} />
+      <Img src={staticFile(A.B1.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B1.w, height: A.B1.h}} />
+      {/* Tasse füllt sich von unten (Maske); Kaffee etwas wärmer/brauner als im Bild */}
+      <Layer p={p} opacity={k > 0 ? 1 : 0} style={{clipPath: `inset(${(1 - k) * 100}% 0 0 0)`, filter: 'brightness(1.12) saturate(1.1)'}} />
+      {/* zwei dünne Strahlen aus den beiden Ausläufen bis auf die Kaffeeoberfläche */}
+      {streamOn ? anchors.spouts.map(([x, y], i) => {
+        const top = y + (cy - y) * cut, bottom = y + (cy - y) * grow;
+        return bottom > top ? <div key={i} style={{position: 'absolute', left: x - 5, top, width: 10, height: bottom - top, borderRadius: 5,
+          background: `linear-gradient(90deg, ${colors.coffee}, #8A5532 45%, ${colors.coffee})`}} /> : null;
+      }) : null}
     </ParallaxImage>
+  );
+};
+
+// Display der Kaffeemaschine (im Code): warmes Licht, Tassen-Symbol, Fortschrittsbalken – ohne Schrift
+const MachineDisplay: React.FC<{quad: number[][]; progress: number}> = ({quad, progress}) => {
+  const w = 300, h = 180;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position: 'absolute', left: 0, top: 0, transformOrigin: '0 0', transform: matrix3d(quad, w, h)}}>
+      <rect width={w} height={h} fill="#2A2C2E" />
+      <rect x={8} y={8} width={w - 16} height={h - 16} rx={10} fill="#F4EFE6" opacity={0.95} />
+      <g transform="translate(150 74)" fill="none" stroke={colors.charcoal} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M -38 -22 H 30 V 8 Q 30 34 -4 34 Q -38 34 -38 8 Z" />
+        <path d="M 30 -10 Q 52 -10 52 6 Q 52 20 30 20" />
+        <path d="M -20 -40 q 6 -8 0 -16 M 0 -40 q 6 -8 0 -16 M 20 -40 q 6 -8 0 -16" strokeWidth={6} opacity={0.6} />
+      </g>
+      <rect x={40} y={138} width={w - 80} height={14} rx={7} fill="#D9D3C8" />
+      <rect x={40} y={138} width={(w - 80) * progress} height={14} rx={7} fill={colors.charcoal} />
+    </svg>
   );
 };
 
@@ -43,16 +78,16 @@ export const HandPlateShot: React.FC<{id: 'C17' | 'C18'; f: number; dur: number}
   );
 };
 
-// Auto, Arzt angeschnallt (B3 + C1); Gurt rastet ein: kleiner weißer Puls
+// Auto aus der Fahrerperspektive über die Schulter (B3); Gurt rastet ein: kleiner weißer Puls
 export const BeltShot: React.FC<{f: number; dur: number; click?: number; screen?: NaviState}> = ({f, dur, click, screen}) => {
   const pulse = click != null ? lerp(f, [click, click + 10], [0, 1]) : 0;
+  const [bx, by] = anchors.beltPulse;
   return (
-    <ParallaxImage id="B3" cam={{z: lerp(f, [0, dur], [1.0, 1.03]), fx: 1700, fy: 800}}>
-      <NaviScreen state={screen ?? {on: 0.25, tealDraw: 0}} x={SCREEN.x} y={SCREEN.y} />
+    <ParallaxImage id="B3" cam={{z: lerp(f, [0, dur], [1.0, 1.03])}}>
+      <NaviScreen state={screen ?? {on: 0.25, tealDraw: 0}} quad={QUAD} />
       <Img src={staticFile(A.B3.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B3.w, height: A.B3.h}} />
-      <Layer p={A.C1.pose.C1} />
       {pulse > 0 && pulse < 1 ? (
-        <div style={{position: 'absolute', left: 2330 - 60 * (1 + pulse), top: 1010 - 60 * (1 + pulse), width: 120 * (1 + pulse), height: 120 * (1 + pulse),
+        <div style={{position: 'absolute', left: bx - 60 * (1 + pulse), top: by - 60 * (1 + pulse), width: 120 * (1 + pulse), height: 120 * (1 + pulse),
           borderRadius: '50%', border: '6px solid #FFFFFF', opacity: 1 - pulse, boxShadow: '0 0 30px rgba(255,255,255,0.8)'}} />
       ) : null}
     </ParallaxImage>
@@ -67,16 +102,20 @@ export const NaviShot: React.FC<{state: NaviState; finger?: Finger; cam?: Cam; b
   const fs = FINGER.scale;
   return (
     <ParallaxImage id="B3" cam={cam}>
-      <NaviScreen state={state} x={SCREEN.x} y={SCREEN.y} />
+      <NaviScreen state={state} quad={QUAD} />
       <Img src={staticFile(A.B3.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B3.w, height: A.B3.h}} />
-      <Layer p={A.C1.pose.C1} />
-      {finger && finger.a > 0 ? (
-        <Img src={staticFile(c2.src)} style={{
-          position: 'absolute', opacity: finger.a,
-          left: SCREEN.x + finger.nx - FINGER.tip[0] * fs, top: SCREEN.y + finger.ny - FINGER.tip[1] * fs,
-          width: c2.w * fs, height: c2.h * fs,
-        }} />
-      ) : null}
+      {finger && finger.a > 0 ? (() => {
+        // Hand des Fahrers kommt aus der Schulterperspektive von links unten: Platte C2 gespiegelt
+        const [tx, ty] = naviToSrc(finger.nx, finger.ny);
+        const flip = anchors.fingerFlip;
+        const tipX = flip ? c2.w - FINGER.tip[0] : FINGER.tip[0];
+        return (
+          <Img src={staticFile(c2.src)} style={{
+            position: 'absolute', opacity: finger.a, left: tx - tipX * fs, top: ty - FINGER.tip[1] * fs,
+            width: c2.w * fs, height: c2.h * fs, transform: flip ? 'scaleX(-1)' : undefined,
+          }} />
+        );
+      })() : null}
     </ParallaxImage>
   );
 };
@@ -87,12 +126,13 @@ export const approachFinger = (f: number, [a, b]: number[], hoverPx: number): Fi
   const [tx, ty] = confirmTarget();
   const hover = hoverPx / (NAVI_CAM.z! * camMap('B3', NAVI_CAM).s / NAVI_CAM.z!); // Filmpixel → Quellpixel
   const u = lerp(f, [a, b], [0, 1], ease.inOut);
-  return {nx: tx + 190 + (0 - 190) * u, ny: ty + 300 + (-hover - 300) * u, a: lerp(f, [a - 6, a], [0, 1])};
+  // Fingerweg von links unten (Fahrerhand in der Schulterperspektive) zu „Bestätigen“
+  return {nx: tx - 260 + 260 * u, ny: ty + 300 + (-hover - 300) * u, a: lerp(f, [a - 6, a], [0, 1])};
 };
 
 // ------------------------------------------------------------ Praxis-Eingangshalle
-export const HallShot: React.FC<{clock?: string; flip?: number; office?: number; cam?: Cam; children?: React.ReactNode}> = ({clock, flip = 1, office = 1, cam = {z: 1}, children}) => (
-  <ParallaxImage id="B4" cam={cam}>
+export const HallShot: React.FC<{clock?: string; flip?: number; office?: number; cam?: Cam; plate?: string; children?: React.ReactNode}> = ({clock, flip = 1, office = 1, cam = {z: 1}, plate = 'B4c', children}) => (
+  <ParallaxImage id={plate} cam={cam}>
     {clock ? <ClockBadge time={clock} flip={flip} office={office} part="hands" /> : null}
     {children}
     {/* Plakette als Einblendung vor der Figur – Uhrzeit bleibt immer lesbar */}
@@ -107,7 +147,15 @@ export const Walker: React.FC<{group: string; f: number; range: number[]; x: num
   const p = A[group].pose[ids[Math.floor((f - range[0]) / step) % 2 === 0 ? 0 : 1]];
   const cx = lerp(f, range, x);
   const bob = Math.abs(Math.sin(((f - range[0]) / step) * Math.PI)) * -6;
-  return <Layer p={p} flip={flip} dx={cx - (p.x + p.w / 2)} dy={lerp(f, range, dy) + bob} scale={lerp(f, range, scale)} />;
+  const sc = lerp(f, range, scale), fy = p.y + p.h + lerp(f, range, dy);
+  // weicher Bodenschatten (im Code, wandert mit; der KI-Schatten ist aus der Ebene entfernt)
+  return (
+    <>
+      <div style={{position: 'absolute', left: cx - 170 * sc, top: fy - 26 * sc, width: 340 * sc, height: 46 * sc, borderRadius: '50%',
+        background: 'radial-gradient(closest-side, rgba(37,40,42,0.24), rgba(37,40,42,0))'}} />
+      <Layer p={p} flip={flip} dx={cx - (p.x + p.w / 2)} dy={lerp(f, range, dy) + bob} scale={sc} />
+    </>
+  );
 };
 
 // ------------------------------------------------------------ Behandlungsraum

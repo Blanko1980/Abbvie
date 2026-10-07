@@ -1,5 +1,6 @@
 import React from 'react';
 import {colors, sans, T} from '../theme';
+import {matrix3d, Quad} from '../homography';
 
 // Navigationsbildschirm, komplett im Code (SVG, 980 × 568 = Bildschirmfläche von B3 in Quellpixeln).
 // Start- und Zielpin bewegen sich nie. Teal = gespeicherte Route (35 min), Gold = Alternative (23 min).
@@ -19,7 +20,8 @@ export type NaviState = {
   tealDraw?: number;    // Teal-Linie gezeichnet (0..1)
   goldDraw?: number;    // Gold-Linie gezeichnet (0..1)
   goldExpand?: number;  // Gold-Karte tritt hervor (0..1)
-  chips?: number;       // Chips „Gestern/Heute“ (0..1)
+  goldVisible?: number; // Gold-Route und Gold-Karte überhaupt sichtbar (erst ab dem Innehalten in S5)
+  popup?: number;       // Pop-up „Neue Route gefunden“ (0..1)
   selected?: 'teal' | 'gold';
   pressConfirm?: number;
   pressGold?: number;
@@ -68,20 +70,13 @@ const Card: React.FC<{c: {x: number; y: number; w: number; h: number}; color: st
   );
 };
 
-const Chip: React.FC<{x: number; y: number; text: string; a: number}> = ({x, y, text, a}) =>
-  a <= 0 ? null : (
-    <g transform={`translate(${x} ${y + (1 - a) * 10})`} opacity={a}>
-      <rect x={0} y={-22} width={text.length * 12.6 + 34} height={44} rx={22} fill="#FFFFFF" stroke={colors.charcoal} strokeOpacity={0.35} strokeWidth={1.5} />
-      <text x={17} y={8} fontFamily={sans} fontWeight={600} fontSize={24} fill={colors.charcoal}>{text}</text>
-    </g>
-  );
-
-export const NaviScreen: React.FC<{state: NaviState; x?: number; y?: number}> = ({state, x = 0, y = 0}) => {
-  const s = {on: 1, tealDraw: 1, goldDraw: 0, goldExpand: 0, chips: 0, selected: 'teal', pressConfirm: 0, pressGold: 0, ...state};
+export const NaviScreen: React.FC<{state: NaviState; quad?: Quad}> = ({state, quad}) => {
+  const s = {on: 1, tealDraw: 1, goldDraw: 0, goldExpand: 0, goldVisible: 0, popup: 0, selected: 'teal', pressConfirm: 0, pressGold: 0, ...state};
   const goldSel = s.selected === 'gold' ? 1 : 0;
   const t = T.texts;
   return (
-    <svg width={NAVI.w} height={NAVI.h} viewBox={`0 0 ${NAVI.w} ${NAVI.h}`} style={{position: 'absolute', left: x, top: y}}>
+    <svg width={NAVI.w} height={NAVI.h} viewBox={`0 0 ${NAVI.w} ${NAVI.h}`}
+      style={{position: 'absolute', left: 0, top: 0, transformOrigin: '0 0', transform: quad ? matrix3d(quad, NAVI.w, NAVI.h) : undefined}}>
       <rect width={NAVI.w} height={NAVI.h} fill="#141618" />
       <g opacity={s.on}>
         {/* vereinfachter Stadtplan: weiß und charcoal */}
@@ -94,7 +89,7 @@ export const NaviScreen: React.FC<{state: NaviState; x?: number; y?: number}> = 
         <Street d="M 560 -20 C 540 120, 600 260, 560 600" w={14} />
         <Street d="M -20 150 C 200 170, 500 120, 1000 160" w={12} />
         <Street d="M 760 -20 C 800 200, 760 380, 840 600" w={12} />
-        <RouteLine d={GOLD_PATH} color={colors.gold} draw={s.goldDraw} width={10 + goldSel * 6 + s.goldExpand * 2} />
+        <RouteLine d={GOLD_PATH} color={colors.gold} draw={s.goldVisible > 0 ? s.goldDraw : 0} width={10 + goldSel * 6 + s.goldExpand * 2} />
         <RouteLine d={TEAL_PATH} color={colors.deepTeal2} draw={s.tealDraw} width={14 - goldSel * 5} opacity={1 - goldSel * 0.35} />
         <Pin x={NAVI_POS.start[0]} y={NAVI_POS.start[1]} />
         <Pin x={NAVI_POS.dest[0]} y={NAVI_POS.dest[1]} dest />
@@ -105,18 +100,27 @@ export const NaviScreen: React.FC<{state: NaviState; x?: number; y?: number}> = 
         <text x={26} y={43} fontFamily={sans} fontWeight={700} fontSize={32} fill={colors.charcoal}>{t.naviHeader}</text>
         <text x={NAVI.w - 26} y={43} textAnchor="end" fontFamily={sans} fontWeight={600} fontSize={26} fill={colors.charcoal}>{t.departure}</text>
 
-        {/* Chips */}
-        <Chip x={NAVI_POS.tealCard.x} y={410} text={t.chipYesterday} a={s.chips} />
-        <Chip x={NAVI_POS.goldCard.x} y={410} text={t.chipToday} a={Math.max(0, s.chips * 1.4 - 0.4)} />
-
         {/* Routenkarten und Bestätigen */}
         <rect y={430} width={NAVI.w} height={138} fill="rgba(255,255,255,0.92)" opacity={0} />
         <Card c={NAVI_POS.tealCard} color={colors.deepTeal2} minutes={t.tealMinutes} active={1 - goldSel} quiet={0} saved />
-        <Card c={NAVI_POS.goldCard} color={colors.gold} minutes={t.goldMinutes} active={goldSel} quiet={(1 - s.goldExpand) * (1 - goldSel)} scale={1 + s.goldExpand * 0.06} press={s.pressGold} />
+        {s.goldVisible > 0 ? (
+          <g opacity={s.goldVisible}>
+            <Card c={NAVI_POS.goldCard} color={colors.gold} minutes={t.goldMinutes} active={goldSel} quiet={(1 - s.goldExpand) * (1 - goldSel)} scale={1 + s.goldExpand * 0.06} press={s.pressGold} />
+          </g>
+        ) : null}
         <g transform={`translate(${NAVI_POS.confirm.x + NAVI_POS.confirm.w / 2} ${NAVI_POS.confirm.y + NAVI_POS.confirm.h / 2}) scale(${1 - s.pressConfirm * 0.05})`}>
           <rect x={-NAVI_POS.confirm.w / 2} y={-NAVI_POS.confirm.h / 2} width={NAVI_POS.confirm.w} height={NAVI_POS.confirm.h} rx={35} fill={s.pressConfirm ? '#111314' : colors.charcoal} />
           <text x={0} y={11} textAnchor="middle" fontFamily={sans} fontWeight={700} fontSize={32} fill="#FFFFFF">{t.confirm}</text>
         </g>
+
+        {/* Pop-up „Neue Route gefunden“ über den Routenkarten */}
+        {s.popup > 0 ? (
+          <g transform={`translate(${NAVI.w / 2} 330) scale(${0.92 + 0.08 * s.popup}) translate(${-250} ${-44})`} opacity={s.popup}>
+            <rect width={500} height={88} rx={22} fill="#FFFFFF" stroke={colors.charcoal} strokeOpacity={0.3} strokeWidth={2} style={{filter: 'drop-shadow(0 6px 14px rgba(37,40,42,0.22))'}} />
+            <path d="M 30 58 C 50 30, 70 62, 96 34" fill="none" stroke={colors.gold} strokeWidth={9} strokeLinecap="round" />
+            <text x={118} y={56} fontFamily={sans} fontWeight={700} fontSize={34} fill={colors.charcoal}>{t.newRoute}</text>
+          </g>
+        ) : null}
 
         {/* Schwebezustand der Fingerspitze: weicher Ring */}
         {s.hover && s.hover.a > 0 ? (

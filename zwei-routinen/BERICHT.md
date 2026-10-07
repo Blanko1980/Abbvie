@@ -1,6 +1,6 @@
 # Bericht: „Zwei Routinen“
 
-Stand: 06.10.2026. Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
+Stand: 07.10.2026 (Korrekturfassung). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
 
 ## Abnahme-Checkliste
 
@@ -9,7 +9,7 @@ Stand: 06.10.2026. Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbil
 - [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen 34 Bildern bestanden, Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
 - [x] **Teal und Gold** kommen nur auf Routenlinien (Karte und Routenkarten im Navi), Zetteln, Tafel-Unterstreichungen und dem Callout-Pinsel vor.
 - [x] **Gold-Zettel in S7:** ist ab dem ersten sichtbaren Frame gold. Die Farbe ist eine Konstante und ändert sich nie.
-- [x] **S2 und S6:** dieselbe Platte B4, dieselbe Kamera (feststehend, Zoom 1,0). Unterschiede: nur Uhr (08:55 / 08:43), Pose und Tempo.
+- [x] **S2 und S6:** dieselbe Platte B4c (leere Halle, Kittel hängt an der Garderobe), dieselbe Kamera (feststehend, Zoom 1,0). Unterschiede: nur Uhr (08:55 / 08:43), Pose und Tempo.
 - [x] **Beide Pausen** (S5 Frame 120, S7 Frame 135) dauern genau 30 Frames. Gleiche Kurve (`settleHold`), gleiche Ton-Absenkung: 3 Frames auf −40 dB, 30 Frames halten, 6 Frames Rückkehr. Gemessen: rund −50 dBFS in beiden Pausen, nur Raumton.
 - [x] **Match Cut S4:** Fingerspitze und Handmitte folgen derselben Bewegungskurve in Filmkoordinaten. Der Schnitt liegt auf der Spitzengeschwindigkeit (Mitte der S-Kurve). Richtung (links nach rechts, leicht abwärts), Tempo und Bildposition sind beim Schnitt also identisch.
 - [x] **S7:** Zwischen Pausenende (Frame 165) und Übergabe (Frame 275) liegen 110 Frames Begegnung: Blick, Erklären, Reaktion.
@@ -42,8 +42,12 @@ Zusätzlich gemessen:
 
 | Asset | Grund |
 |---|---|
-| B3 | Kandidat 1 verworfen: Bildschirm zu klein und zu schräg für eine lesbare Navi-Oberfläche. |
-| C1 | Folgt aus B3 (Bearbeitung des neuen B3). |
+| B3 | Korrektur: Blick über die Schulter des Arztes, damit er den Bildschirm sieht (vorher zeigte der Bildschirm von ihm weg). Der Gurt-Puls liegt jetzt auf dem Gurt über seiner Schulter; C1 entfällt. |
+| B1, B2 | Korrektur: Tasse steht direkt unter dem Auslauf, Display als Magenta-Fläche (im Code ersetzt: Tassen-Symbol und Fortschrittsbalken). |
+| C17 | Korrektur: Schlüsselbrett mit drei kräftigen Metallhaken statt Schale. |
+| C7 | Korrektur: schreibende Hand kommt von links (Arztseite), damit die Achse stimmt. |
+| C4wb | Korrektur: Jacke bleibt in beiden Schrittphasen über dem Arm. |
+| B4c, C4, C5 | Korrektur: Kittel hängt schon vor der Ankunft an der Garderobe (B4c); C4 und C5 sind Bearbeitungen davon. |
 | C14 | Kandidat 1 verworfen: Comic-Bewegungsstriche neben dem Kopf. |
 | D2 | Erster Versuch von Gemini abgelehnt (`IMAGE_RECITATION`), mit umformuliertem Prompt erzeugt. |
 
@@ -52,11 +56,25 @@ Zusätzlich gemessen:
 ## Bewusste Abweichungen vom Briefing
 
 1. **Stil:** Die Nutzerin hat ausdrücklich „im gleichen Stil“ wie der erste NAVI-Film verlangt. Das ist Stil C: flache Vektorflächen ohne Konturen, weiche Verläufe. Das Briefing beschreibt dagegen gleichmäßige Charcoal-Konturen; diese Variante war im ersten Film abgelehnt worden. Die Farbregeln des Briefings gelten unverändert: neutrale, helle Welt, kein Teal oder Gold in Bildern. Die Stilreferenzen liegen in `assets/reference/`.
-2. **Figuren in Räumen** (C1, C3–C5, C6/C11, C9, C10, C13–C16, C7, C8, C12) sind keine Platten auf Weiß. Sie sind KI-Bearbeitungen des leeren Raums und werden per Differenzmaske freigestellt. Nur so passen Perspektive, Maßstab und Licht exakt, besonders bei S2/S6 auf B4. Die Weiß-Platten mit Flood-Fill werden für C2, C17 und C18 genutzt, wie beschrieben.
-3. **B3:** Blick durch die Windschutzscheibe statt vom Beifahrersitz, damit der Navi-Bildschirm groß und fast frontal ist. Der Bildschirm wurde als Magenta-Fläche erzeugt (exakt erkennbar) und im Code ersetzt, statt als dunkles Rechteck.
+2. **Figuren in Räumen** (C3–C5, C6/C11, C9, C10, C13–C16, C7, C8, C12) sind keine Platten auf Weiß. Sie sind KI-Bearbeitungen des leeren Raums und werden per Differenzmaske freigestellt. Nur so passen Perspektive, Maßstab und Licht exakt, besonders bei S2/S6 auf B4. Die Weiß-Platten mit Flood-Fill werden für C2, C17 und C18 genutzt, wie beschrieben.
+3. **B3:** Blick über die Schulter des Fahrers (Arzt links im Vordergrund), der Navi-Bildschirm ist ihm zugewandt. Der Bildschirm wurde als Magenta-Fläche erzeugt (exakt erkennbar) und im Code perspektivisch ersetzt, statt als dunkles Rechteck.
 4. **Auflösung:** Gemini liefert in 2K (2752 px), danach wird auf 2880 px hochskaliert. 4K hätte Kosten und Repository-Größe etwa vervierfacht. Für 115 % Kamerafahrt reicht 2880 px.
 5. **Zusätzliche Bilder:** C3b, C4w und C4wb (zweite Schrittphase bzw. ruhiger Gang), damit Gehen nicht als Gleiten wirkt. Dazu DESK (leerer Tisch in Nahaufnahme) als Grundlage für Zettel, Hände und Notizen.
 6. **Raster:** Die Briefing-Frames 75/195/140/260/320 sind auf das 9-Frame-Raster gerundet (72/198/135/252/324). Die Grenze S2/S3 liegt bei Frame 603 statt 600. Alle 36 Schnitte in S1–S4 liegen auf Schlag oder Achtel, geprüft von `build-audio.mjs`.
 7. **Blickkontakt-Einstellungen in S4:** 18 statt 10–12 Frames. Damit bleiben sie auf dem Raster und der Blickkontakt ist lesbar.
 8. **Der Arzt** trägt Brille und Bartschatten, übernommen aus den Stilreferenzen des ersten Films. Das Briefing verlangt beides nicht, schließt es aber auch nicht aus.
 9. **Farbe der gespeicherten Route:** `#366B8F` (deepTeal2) laut diesem Briefing. Im ersten Film wurde sie zuletzt auf `#1D7D7E` geändert.
+
+## Korrekturen 07.10.2026
+
+| Zeit | Korrektur |
+|---|---|
+| 0:01 | Zwei dünne Kaffeestrahlen kommen aus den Ausläufen und enden auf der Kaffeeoberfläche. Farbe brauner (`colors.coffee` `#6B3F22`). Das Display zeigt Tassen-Symbol und Fortschrittsbalken. |
+| 0:02 | Schlüsselbrett mit Haken (C17 neu). |
+| 0:06 | Über-die-Schulter-Blick (B3 neu), der Navi-Bildschirm ist dem Arzt zugewandt. Die Navi-Oberfläche wird per Homografie perspektivisch in den Bildschirm gelegt. Die Hand kommt von links unten. |
+| 0:07 | Kopfzeile „Gespeicherte Routen“. Die Gold-Route ist bis 0:45 nirgends sichtbar. |
+| ab 0:45 | Gespeicherte Route, unten 35 min. Nach dem Innehalten erscheint das Pop-up „Neue Route gefunden“ und erstmals die Gold-Route mit 23 min. Die Chips „Gestern/Heute“ entfallen. |
+| 0:15 | KI-Bodenschatten und Staub aus den Gehfiguren entfernt. Der Schatten ist jetzt eine weiche Ellipse im Code, die mitläuft. |
+| 0:24 | Schreibende Hand von links (Arzt sitzt links, Patienten rechts) – gilt für alle Patientenszenen. |
+| ab 0:54 | Der Arzt läuft vorwärts nach rechts. Die Jacke bleibt in jedem Schritt über dem Arm. |
+| 1:00 | Der weiße Kittel hängt von Anfang an an der Garderobe. Überblendung zum Haken auf 4 Frames verkürzt. |
