@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {A, colors, ease, lerp, T} from '../theme';
+import {A, colors, ease, lerp, settleHold, T} from '../theme';
 import {camMap, Cam, Layer, ParallaxImage} from './ParallaxImage';
 import {ClockBadge, CLOCK} from './ClockBadge';
 import {center, NAVI, NAVI_POS, NaviScreen, NaviState} from './NaviScreen';
@@ -14,7 +14,6 @@ export const naviToSrc = (nx: number, ny: number) => mapPoint(QUAD, NAVI.w, NAVI
 const qc = naviToSrc(NAVI.w / 2, NAVI.h / 2);
 export const NAVI_CAM: Cam = {z: 1.45, fx: qc[0], fy: qc[1] + 30};
 export const DESK_CAM: Cam = {z: 1.25, fx: 1500, fy: 1000};
-const FINGER = {tip: [3, 24], scale: 0.5};           // C2: Fingerspitze im freigestellten Bild
 const C8_PALM = [1180, 1000];                        // Handmitte der Zettel-Hand (C8) in DESK
 const SLIP_OFF = [120, 12];                          // Zettel relativ zur Handmitte
 export const SLIP_W = 430;
@@ -66,16 +65,23 @@ const MachineDisplay: React.FC<{quad: number[][]; progress: number}> = ({quad, p
   );
 };
 
-// Hand-Platten auf Weiß (C17 Schlüssel, C18 Tasche): Hand hebt das Objekt leicht an
-export const HandPlateShot: React.FC<{id: 'C17' | 'C18'; f: number; dur: number}> = ({id, f, dur}) => {
-  const a = A[id];
-  const lift = lerp(f, [dur * 0.2, dur * 0.8], [0, -70], ease.inOut);
-  const s = 1920 / a.full.w;
-  return (
-    <AbsoluteFill style={{background: colors.white}}>
-      <Img src={staticFile(a.src)} style={{position: 'absolute', left: a.full.x * s, top: (a.full.y + lift) * s, width: a.w * s, height: a.h * s}} />
-    </AbsoluteFill>
-  );
+// Schlüssel (B6) und Tasche (B7) in der Wohnung: Die Hand kommt ins Bild und greift (Bild mit Gegenstand, nur Hand),
+// dann hebt sie den Gegenstand ab (leeres Bild, Hand mit Gegenstand – beim Umschalten pixelgleich). Brett und Bank bleiben stehen.
+const GRAB = {
+  key: {full: 'B6', empty: 'B6e', reach: 'C17', lift: 'C17k', from: [1, 0.15], up: [70, -120]},
+  bag: {full: 'B7', empty: 'B7e', reach: 'C18', lift: 'C18k', from: [0.55, -1], up: [40, -170]},
+};
+const poseOf = (g: string) => Object.values(A[g].pose)[0] as any;
+export const GrabShot: React.FC<{kind: 'key' | 'bag'; f: number; dur: number}> = ({kind, f, dur}) => {
+  const g = GRAB[kind];
+  const grab = Math.round(dur * 0.5);
+  const cam = {z: lerp(f, [0, dur], [1.0, 1.04], ease.inOut)};
+  if (f < grab) {
+    const d = (1 - lerp(f, [0, grab], [0, 1], ease.out)) * 1100;
+    return <ParallaxImage id={g.full} cam={cam}><Layer p={poseOf(g.reach)} dx={g.from[0] * d} dy={g.from[1] * d} /></ParallaxImage>;
+  }
+  const u = lerp(f, [grab + 2, dur], [0, 1], ease.inOut);
+  return <ParallaxImage id={g.empty} cam={cam}><Layer p={poseOf(g.lift)} dx={g.up[0] * u} dy={g.up[1] * u} /></ParallaxImage>;
 };
 
 // Auto aus der Fahrerperspektive über die Schulter (B3); Gurt rastet ein: kleiner weißer Puls
@@ -97,23 +103,23 @@ export const BeltShot: React.FC<{f: number; dur: number; click?: number; screen?
 // ------------------------------------------------------------ Navi
 export type Finger = {nx: number; ny: number; a: number} | null; // Fingerspitze in Navi-Koordinaten
 
+// Rechter Arm des Arztes (B3-Bearbeitungen C2a/C2b, am Körper angesetzt). Die Pose richtet sich nach dem Ziel:
+// C2a zeigt nach rechts unten (Bestätigen), C2b in die Mitte (Gold-Karte, Routenkarten). Kurze Überblendung dazwischen.
+const ARM = {a: anchors.armTips.C2a, b: anchors.armTips.C2b};
 export const NaviShot: React.FC<{state: NaviState; finger?: Finger; cam?: Cam; breath?: number}> = ({state, finger, cam = NAVI_CAM}) => {
-  const c2 = A.C2;
-  const fs = FINGER.scale;
+  const arm = A.C2.pose;
   return (
     <ParallaxImage id="B3" cam={cam}>
       <NaviScreen state={state} quad={QUAD} />
       <Img src={staticFile(A.B3.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B3.w, height: A.B3.h}} />
       {finger && finger.a > 0 ? (() => {
-        // Hand des Fahrers kommt aus der Schulterperspektive von links unten: Platte C2 gespiegelt
         const [tx, ty] = naviToSrc(finger.nx, finger.ny);
-        const flip = anchors.fingerFlip;
-        const tipX = flip ? c2.w - FINGER.tip[0] : FINGER.tip[0];
+        const wb = lerp(finger.nx, [640, 700], [1, 0]); // links der Mitte → C2b
         return (
-          <Img src={staticFile(c2.src)} style={{
-            position: 'absolute', opacity: finger.a, left: tx - tipX * fs, top: ty - FINGER.tip[1] * fs,
-            width: c2.w * fs, height: c2.h * fs, transform: flip ? 'scaleX(-1)' : undefined,
-          }} />
+          <>
+            {wb < 1 ? <Layer p={arm.C2a} dx={tx - ARM.a[0]} dy={ty - ARM.a[1]} opacity={finger.a * (1 - wb)} /> : null}
+            {wb > 0 ? <Layer p={arm.C2b} dx={tx - ARM.b[0]} dy={ty - ARM.b[1]} opacity={finger.a * wb} /> : null}
+          </>
         );
       })() : null}
     </ParallaxImage>
@@ -139,15 +145,15 @@ export const HallShot: React.FC<{clock?: string; flip?: number; office?: number;
     {clock ? <ClockBadge time={clock} flip={flip} office={office} part="badge" /> : null}
   </ParallaxImage>
 );
-export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy + 170};
+export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy - 70};
 
-// Gehende Figur (zwei Schrittphasen im Wechsel), gespiegelt nach rechts laufend
-export const Walker: React.FC<{group: string; f: number; range: number[]; x: number[]; step: number; flip?: boolean; dy?: number[]; scale?: number[]}> = ({group, f, range, x, step, flip, dy = [0, 0], scale = [1, 1]}) => {
+// Gehende Figur (zwei Schrittphasen im Wechsel); feet = Abstand Fußlinie → Unterkante der Ebene
+export const Walker: React.FC<{group: string; f: number; range: number[]; x: number[]; step: number; flip?: boolean; dy?: number[]; scale?: number[]; feet?: number}> = ({group, f, range, x, step, flip, dy = [0, 0], scale = [1, 1], feet = 0}) => {
   const ids = Object.keys(A[group].pose);
   const p = A[group].pose[ids[Math.floor((f - range[0]) / step) % 2 === 0 ? 0 : 1]];
   const cx = lerp(f, range, x);
   const bob = Math.abs(Math.sin(((f - range[0]) / step) * Math.PI)) * -6;
-  const sc = lerp(f, range, scale), fy = p.y + p.h + lerp(f, range, dy);
+  const sc = lerp(f, range, scale), fy = p.y + p.h - feet * sc + lerp(f, range, dy);
   // weicher Bodenschatten (im Code, wandert mit; der KI-Schatten ist aus der Ebene entfernt)
   return (
     <>
@@ -163,25 +169,38 @@ export const RoomShot: React.FC<{id: string; f: number; dur: number; zoom?: [num
   <ParallaxImage id={id} cam={{z: lerp(f, [0, dur], zoom, ease.inOut), fx: 1440, fy: 760}}>{children}</ParallaxImage>
 );
 
-export const NotesShot: React.FC<{f: number; dur: number}> = ({f, dur}) => (
-  <ParallaxImage id="DESK" cam={{...DESK_CAM, z: lerp(f, [0, dur], [1.2, 1.24])}}>
-    <Layer p={A.C7.pose.C7} dx={Math.sin(f * 0.9) * 4} />
-  </ParallaxImage>
-);
+// Schreiben: der Block liegt still (C7pad), nur die Hand bewegt sich in kleinen Schleifen nach rechts.
+// pause: die Hand hört auf zu schreiben, hebt den Stift ein wenig und hält inne (gleiche Kurve wie der Finger in S5).
+export const NotesShot: React.FC<{f: number; dur: number; write?: number[]; pause?: number[]}> = ({f, dur, write, pause}) => {
+  const t = write ? Math.min(f, write[1]) : f;
+  let dx = Math.sin(t * 0.22) * 16 + Math.sin(t * 1.15) * 4, dy = Math.cos(t * 1.15) * 3;
+  if (pause && f >= pause[0]) dy += lerp(f, [pause[0], pause[0] + 10], [0, -16], ease.settle) + settleHold(f, pause) * 1.5;
+  return (
+    <ParallaxImage id="DESK" cam={{...DESK_CAM, z: lerp(f, [0, dur], [1.2, 1.24])}}>
+      <Layer p={A.C7pad.pose.C7p} />
+      <Layer p={A.C7.pose.C7} dx={dx} dy={dy} style={handShadow(pause && f >= pause[0] ? 0.5 : 0.2)} />
+    </ParallaxImage>
+  );
+};
+
+// Weicher Schatten unter Händen am Tisch (statt des mitgezogenen KI-Schattens): je höher die Hand, desto weiter und weicher
+export const handShadow = (lift: number): React.CSSProperties => ({
+  filter: `drop-shadow(${6 + lift * 10}px ${10 + lift * 22}px ${8 + lift * 14}px rgba(37,40,42,${0.2 - lift * 0.08}))`,
+});
 
 export const PatientHandShot: React.FC<{id: 'C12' | 'C16'; f: number; dur: number}> = ({id, f, dur}) => (
   <ParallaxImage id="DESK" cam={{...DESK_CAM, z: lerp(f, [0, dur], [1.22, 1.26])}}>
-    <Layer p={A[id].pose[id]} />
+    <Layer p={A[id].pose[id]} style={handShadow(0)} />
   </ParallaxImage>
 );
 
 // Zettel-Tisch: Arzthand (C8) schiebt den Zettel, Patientenhand (C12/C16) nimmt ihn.
 // handDx: Verschiebung der Arzthand (0 = Endposition), slipX: Zettel-Mitte (Quellpixel), patient: Verschiebung der Patientenhand
-export const SlipShot: React.FC<{color: string; handDx: number | null; handDy?: number; slipX: number | null; slipY?: number; patient?: {id: 'C12' | 'C16'; dx: number} | null; cam?: Cam}> = ({color, handDx, handDy = 0, slipX, slipY, patient, cam = DESK_CAM}) => (
+export const SlipShot: React.FC<{color: string; handDx: number | null; handDy?: number; slipX: number | null; slipY?: number; patient?: {id: 'C12' | 'C16'; dx: number} | null; cam?: Cam; moving?: number}> = ({color, handDx, handDy = 0, slipX, slipY, patient, cam = DESK_CAM, moving = 0}) => (
   <ParallaxImage id="DESK" cam={cam}>
     {slipX != null ? <Slip color={color} x={slipX} y={slipY ?? C8_PALM[1] + SLIP_OFF[1] + handDy} w={SLIP_W} /> : null}
-    {patient ? <Layer p={A[patient.id].pose[patient.id]} dx={patient.dx} /> : null}
-    {handDx != null ? <Layer p={A.C8.pose.C8} dx={handDx} dy={handDy} /> : null}
+    {patient ? <Layer p={A[patient.id].pose[patient.id]} dx={patient.dx} style={handShadow(patient.dx > 300 ? 0.6 : 0.6 * Math.max(0, patient.dx) / 300)} /> : null}
+    {handDx != null ? <Layer p={A.C8.pose.C8} dx={handDx} dy={handDy} style={handShadow(Math.sin(Math.PI * moving) * 0.25)} /> : null}
   </ParallaxImage>
 );
 export const slipAt = (handDx: number) => C8_PALM[0] + SLIP_OFF[0] + handDx;

@@ -91,10 +91,7 @@ export const ASSETS = [
 
   // ---------------------------------------------------------------- Gruppe C: Figuren
 
-  {
-    id: 'C2', group: 'C', kind: 'plate', refs: [DOC],
-    prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: close-up of the DOCTOR\'s right hand, index finger extended forward as if about to tap a touch screen, other fingers loosely curled, neutral pose. The forearm in a charcoal knitted jumper sleeve enters from the lower RIGHT edge of the image; the fingertip points toward the upper LEFT. Light skin as on the attached model sheet. Nothing else in the image.',
-  },
+
   {
     id: 'C3', group: 'C', kind: 'edit', base: 'B4', refs: [DOC],
     prompt: 'Edit the first attached image (the practice entrance hall). Keep the room and the camera EXACTLY identical. ADD the DOCTOR from the attached model sheet walking FAST from the door on the left toward the right through the middle of the hall: hurried long stride, leaning forward, bag in one hand, one arm only half inside a light grey-white doctor\'s coat that flaps behind him; charcoal jumper underneath. Full figure, scale matching the room.',
@@ -115,6 +112,10 @@ export const ASSETS = [
   {
     id: 'B4c', group: 'B', kind: 'edit', base: 'B4',
     prompt: 'Edit the attached image (the empty practice entrance hall). Keep the room and the camera EXACTLY identical. ADD only a light grey-white doctor\'s coat hanging neatly on one hook of the coat hook rail on the right wall. Nothing else changes, no people.',
+  },
+  {
+    id: 'B4cb', group: 'B', kind: 'edit', base: 'B4c', refs: ['assets/gen/C4w.jpg'],
+    prompt: 'Edit the first attached image (the empty practice entrance hall with a white coat on the hook). Keep the room, the camera and the white coat EXACTLY identical. ADD only the brown leather briefcase from the second attached image, standing upright on the floor against the wall on the LEFT side of the plant pot (between the corridor opening and the plant, NOT between the plant and the coat rack), handle up, same scale as in the second image. Nothing else changes, no people.',
   },
   {
     id: 'C4', group: 'C', kind: 'edit', base: 'B4c', refs: [DOC],
@@ -175,14 +176,61 @@ export const ASSETS = [
     prompt: 'Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD a blank white notepad lying on the desk and the DOCTOR\'s right hand (light skin, light grey-white coat sleeve) entering from the LEFT edge of the image (the doctor sits on the left side of the desk), holding a plain charcoal pen and writing on the pad (no visible writing, only a few faint grey squiggle lines, no letters, no numbers). Nothing else.',
   },
 
+
+
+
+
+  // ---------------------------------------------------------------- Korrekturrunde 2: Szenen statt Platten, Hand mit Arm, Freistellung
   {
-    id: 'C17', group: 'C', kind: 'plate', refs: [DOC],
-    prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: a sturdy wall key rack drawn as an isolated object (a light wood board with three strong, clearly visible dark metal hooks), a house key hanging on the left hook; the DOCTOR\'s right hand (light skin, charcoal knitted jumper sleeve entering from the right edge) lifts a simple car key (plain dark fob without any logo, a silver key) off the middle hook. Nothing else in the image.',
+    id: 'B6', group: 'B', kind: 'scene', refs: ['assets/gen/B1.jpg', 'assets/reference/stil-c-kueche.jpg'],
+    prompt: 'SCENE, 16:9, same apartment as the attached kitchen image, same morning light: close-up of a wall in the apartment entrance area. On the LEFT half of the image a light wood key rack board is mounted on a light warm-grey wall, with three strong, clearly visible dark metal hooks; a house key hangs on the LEFT hook, a simple car key (plain dark fob without any logo, a silver key blade) hangs on the MIDDLE hook, the RIGHT hook is empty. The wall ends right of the rack: the RIGHT part of the image looks past the wall corner into the apartment, softly blurred (shallow depth of field): a window with soft white morning light, a plant, a light wood sideboard. No people, no hands. Camera locked.',
+  },
+  {
+    id: 'B6e', group: 'B', kind: 'edit', base: 'B6',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel. Remove ONLY the car key from the middle hook: the middle hook is now empty (the house key on the left hook stays). Nothing else changes.',
+  },
+  {
+    id: 'C17a', group: 'C', kind: 'edit', base: 'B6', refs: [DOC],
+    prompt: 'Edit the first attached image. Keep the wall, the key rack, both keys and the blurred background EXACTLY identical. ADD the DOCTOR\'s right hand (light skin as on the attached model sheet, charcoal knitted jumper sleeve) entering from the RIGHT edge of the image and grasping the dark fob of the car key on the middle hook between thumb and fingers; the key still hangs on the hook. Nothing else changes.',
   },
 
   {
-    id: 'C18', group: 'C', kind: 'plate', refs: [DOC],
-    prompt: 'PLATE on a flat pure white background (#FFFFFF), soft contact shadow only: close-up of the DOCTOR\'s right hand (light skin, charcoal knitted jumper sleeve entering from the top right) lifting a dark brown leather bag by its strap. Nothing else in the image.',
+    id: 'B7o', group: 'B', kind: 'scene', refs: ['assets/gen/B1.jpg', 'assets/reference/stil-c-kueche.jpg'],
+    prompt: 'SCENE, 16:9, same apartment as the attached kitchen image, same morning light: close-up of a low light wood bench next to the apartment front door. On the bench, left of centre, stands a dark brown leather doctor\'s bag with two short handles pointing up. Behind it, softly blurred (shallow depth of field): the light hallway wall, a coat on a hook, a window with soft white morning light, a plant. No people, no hands. Camera locked.',
+  },
+  {
+    id: 'B7e', group: 'B', kind: 'edit', base: 'B7o',
+    prompt: 'Edit the attached image. This is a retouch, not a new picture: the output must match the input pixel for pixel in framing, camera, crop and zoom; the bench, the door, the coat, the plant and the window stay at exactly the same positions and sizes. Remove ONLY the dark brown leather bag and fill its area with the bench top and the wall behind it, continuing naturally. Nothing else changes.',
+  },
+  {
+    // Entfernen verschiebt bei Gemini den Ausschnitt; Hinzufügen bleibt deckungsgleich → leere Bank (B7e) ist die Grundlage
+    id: 'B7', group: 'B', kind: 'edit', base: 'B7e',
+    prompt: 'Edit the attached image (an empty light wood bench next to the front door). Keep EVERYTHING identical, pixel for pixel (framing, zoom, bench, door, coat, plant, window). ADD ONLY a dark brown leather doctor\'s bag with two short handles pointing up, standing on the bench top left of centre, about one third of the image height tall. Nothing else changes.',
+  },
+  {
+    id: 'C18a', group: 'C', kind: 'edit', base: 'B7', refs: [DOC],
+    prompt: 'Edit the first attached image. Keep the bench, the bag and the blurred background EXACTLY identical. ADD the DOCTOR\'s right hand (light skin as on the attached model sheet, charcoal knitted jumper sleeve) coming down from the TOP RIGHT of the image and grasping both handles of the bag; the bag still stands on the bench. Nothing else changes.',
+  },
+
+  {
+    id: 'C2a', group: 'C', kind: 'edit', base: 'B3',
+    prompt: 'Edit the attached image (over-the-shoulder view of the doctor in the driver\'s seat). Keep EVERYTHING identical: camera, car interior, the doctor\'s head, the magenta screen (must stay one perfectly flat uniform pure magenta #FF00FF). ADD ONLY his RIGHT arm: from his right shoulder the arm in the charcoal knitted jumper sleeve reaches forward across to the navigation screen; we see the BACK of his right hand (light skin), the index finger extended and its fingertip touching the screen near its LOWER RIGHT corner, about 15% in from the right edge and 15% up from the bottom edge of the screen; the other fingers loosely curled, the thumb on the left side of the hand. Natural anatomy, the arm is clearly connected to his shoulder.',
+  },
+  {
+    id: 'C2b', group: 'C', kind: 'edit', base: 'B3',
+    prompt: 'Edit the attached image (over-the-shoulder view of the doctor in the driver\'s seat). Keep EVERYTHING identical: camera, car interior, the doctor\'s head, the magenta screen (must stay one perfectly flat uniform pure magenta #FF00FF). ADD ONLY his RIGHT arm: from his right shoulder the arm in the charcoal knitted jumper sleeve reaches forward to the navigation screen; we see the BACK of his right hand (light skin), the index finger extended and its fingertip touching the screen in the LOWER MIDDLE, about 45% from the left edge and 15% up from the bottom edge of the screen; the other fingers loosely curled, the thumb on the left side of the hand. Natural anatomy, the arm is clearly connected to his shoulder.',
+  },
+  {
+    id: 'C7p', group: 'C', kind: 'edit', base: 'C7',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel: the desk, the camera, the white notepad and the faint grey squiggle lines on it. Remove ONLY the hand, the pen and the sleeve completely; where they were, show the notepad and the desk continuing naturally. Nothing else changes.',
+  },
+  {
+    id: 'C3p', group: 'C', kind: 'plate', refs: [DOC],
+    prompt: 'ISOLATED CHARACTER CUT-OUT on a seamless, perfectly flat, solid medium grey background (#9A9A9A) like a sticker sheet: no room, no floor, no walls, no gradient, no shadow at all: the DOCTOR from the attached model sheet in full figure, hurrying FAST toward the RIGHT side of the image (seen from the side, slightly three-quarter), long hurried stride, leaning forward, a brown leather briefcase in his right hand. He wears the light grey-white doctor\'s coat PROPERLY with BOTH arms in its sleeves, the coat open and flapping a little behind him; charcoal jumper and dark grey trousers underneath, dark shoes. Same proportions and look as on the attached model sheet. Clean silhouette, nothing else in the image.',
+  },
+  {
+    id: 'C3pb', group: 'C', kind: 'edit', base: 'C3p',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, coat, briefcase, face, forward lean). Change ONLY his stride to the opposite phase of the run cycle: the other leg is now in front and the arms swing the other way. No shadow.',
   },
 
   // ---------------------------------------------------------------- Gruppe D: Akzente

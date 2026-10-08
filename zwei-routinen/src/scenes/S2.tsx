@@ -3,6 +3,7 @@ import {lerp, scene, T} from '../theme';
 import {HallShot, Walker} from '../components/Shots';
 
 // S2 Ankunft unter Zeitdruck – feste Kamera auf B4, Uhr 08:55, der Arzt eilt durch die Halle.
+// Er trägt den Kittel schon im Laufen, deshalb hängt hier kein Kittel an der Garderobe (Platte B4).
 export const hallScene = (S: any, f: number) => {
   const flip = lerp(f, S.clockFlip, [0, 1]);
   const office = lerp(f, S.officeIn, [0, 1]);
@@ -14,7 +15,7 @@ export const S2: React.FC<{f: number}> = ({f}) => {
   const {flip, office, time} = hallScene(S, f);
   const w = S.walk;
   return (
-    <HallShot clock={time} flip={flip} office={office}>
+    <HallShot clock={time} flip={flip} office={office} plate="B4">
       {f >= w.from && f < w.to ? <Walker group="C3" f={f} range={[w.from, w.to]} x={w.x} step={w.step} flip={w.flip} /> : null}
     </HallShot>
   );

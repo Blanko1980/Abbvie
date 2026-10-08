@@ -12,8 +12,16 @@ export const NAVI_POS = {
   goldCard: {x: 338, y: 444, w: 300, h: 104},
   confirm: {x: 716, y: 462, w: 244, h: 70},
 };
-export const TEAL_PATH = 'M112 372 C 240 418, 420 430, 600 408 C 760 388, 900 360, 918 268 C 934 186, 900 130, 858 118';
-export const GOLD_PATH = 'M112 372 C 210 300, 330 236, 488 204 C 640 174, 760 150, 858 118';
+// Straßennetz (Navi-Koordinaten): drei Querstraßen, fünf Längsstraßen, eine Diagonale. Beide Routen laufen nur auf Straßen.
+const ROADS_H = [118, 250, 372];
+const ROADS_V = [112, 300, 520, 700, 930];
+const DIAG = 'M 390 351 L 780 48';
+const edges = (roads: number[], max: number) => [0, ...roads].map((a, i) => [a, [...roads, max][i]]);
+const BLOCKS = edges(ROADS_H, NAVI.h).flatMap(([y0, y1]) => edges(ROADS_V, NAVI.w).map(([x0, x1]) => [x0 + 16, y0 + 16, x1 - x0 - 32, y1 - y0 - 32]));
+// Teal (gespeichert, 35 min): Umweg unten herum und rechts hinauf
+export const TEAL_PATH = 'M112 372 L 930 372 L 930 118 L 858 118';
+// Gold (neu, 23 min): hoch, quer, über die Diagonale direkt zum Ziel
+export const GOLD_PATH = 'M112 372 L 112 250 L 520 250 L 690 118 L 858 118';
 
 export type NaviState = {
   on?: number;          // Bildschirm an (0..1)
@@ -29,7 +37,7 @@ export type NaviState = {
 };
 
 const Street: React.FC<{d: string; w?: number}> = ({d, w = 18}) => (
-  <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+  <g fill="none" strokeLinecap="butt" strokeLinejoin="round">
     <path d={d} stroke={colors.streetEdge} strokeWidth={w + 4} />
     <path d={d} stroke={colors.street} strokeWidth={w} />
   </g>
@@ -79,16 +87,12 @@ export const NaviScreen: React.FC<{state: NaviState; quad?: Quad}> = ({state, qu
       style={{position: 'absolute', left: 0, top: 0, transformOrigin: '0 0', transform: quad ? matrix3d(quad, NAVI.w, NAVI.h) : undefined}}>
       <rect width={NAVI.w} height={NAVI.h} fill="#141618" />
       <g opacity={s.on}>
-        {/* vereinfachter Stadtplan: weiß und charcoal */}
+        {/* vereinfachter Stadtplan: Häuserblöcke zwischen den Straßen */}
         <rect width={NAVI.w} height={NAVI.h} fill={colors.mapBg} />
-        {[[40, 90, 150, 110], [230, 260, 170, 130], [640, 230, 200, 120], [420, 70, 150, 90], [700, 40, 120, 60]].map(([bx, by, bw, bh], i) => (
-          <rect key={i} x={bx} y={by} width={bw} height={bh} rx={14} fill={colors.mapBlock} />
-        ))}
-        <Street d="M -20 300 C 200 280, 380 330, 560 300 S 860 250, 1000 270" />
-        <Street d="M 180 -20 C 200 140, 160 300, 220 600" w={14} />
-        <Street d="M 560 -20 C 540 120, 600 260, 560 600" w={14} />
-        <Street d="M -20 150 C 200 170, 500 120, 1000 160" w={12} />
-        <Street d="M 760 -20 C 800 200, 760 380, 840 600" w={12} />
+        {BLOCKS.map(([x, y, w, h], i) => <rect key={i} x={x} y={y} width={w} height={h} rx={10} fill={colors.mapBlock} />)}
+        {ROADS_H.map((y) => <Street key={`h${y}`} d={`M -20 ${y} L ${NAVI.w + 20} ${y}`} w={22} />)}
+        {ROADS_V.map((x) => <Street key={`v${x}`} d={`M ${x} -20 L ${x} ${NAVI.h + 20}`} w={22} />)}
+        <Street d={DIAG} w={22} />
         <RouteLine d={GOLD_PATH} color={colors.gold} draw={s.goldVisible > 0 ? s.goldDraw : 0} width={10 + goldSel * 6 + s.goldExpand * 2} />
         <RouteLine d={TEAL_PATH} color={colors.deepTeal2} draw={s.tealDraw} width={14 - goldSel * 5} opacity={1 - goldSel * 0.35} />
         <Pin x={NAVI_POS.start[0]} y={NAVI_POS.start[1]} />

@@ -1,9 +1,11 @@
 import React from 'react';
 import {colors, sans, T} from '../theme';
 
-// Praxisuhr: Zeiger auf dem leeren Zifferblatt von B4 + Plakette mit Digitalzeit (klappt um) + Hinweis „Sprechstunde 09:00“.
+// Praxisuhr: Zeiger auf dem leeren Zifferblatt von B4 + Plakette mit Digitalzeit (klappt um) + Hinweis „Sprechstunde 09:00“ über der Uhr.
 // Alles in Quellpixeln von B4 (Zifferblatt-Mitte 973/453, Radius ≈ 80).
 export const CLOCK = {cx: 973, cy: 453, r: 78};
+// Plakette sitzt ÜBER der Uhr: dort läuft nie eine Figur vorbei (Köpfe bleiben unterhalb von y ≈ 480)
+const BADGE_H = 196;
 
 export const ClockBadge: React.FC<{time: string; flip: number; office: number; part?: 'hands' | 'badge' | 'all'}> = ({time, flip, office, part = 'all'}) => {
   const [hh, mm] = time.split(':').map(Number);
@@ -18,7 +20,7 @@ export const ClockBadge: React.FC<{time: string; flip: number; office: number; p
         <line x1={0} y1={0} x2={0} y2={-r * 0.78} stroke={colors.charcoal} strokeWidth={4.5} strokeLinecap="round" transform={`rotate(${aMin})`} />
         <circle r={6} fill={colors.charcoal} />
       </svg> : null}
-      {part !== 'hands' ? <div style={{position: 'absolute', left: cx - 260, top: cy + r + 34, width: 520, perspective: 800}}>
+      {part !== 'hands' ? <div style={{position: 'absolute', left: cx - 260, top: cy - r - BADGE_H - 22, width: 520, perspective: 800}}>
         <div style={{
           background: '#FFFFFF', borderRadius: 18, boxShadow: '0 10px 30px rgba(37,40,42,0.18)', textAlign: 'center',
           fontFamily: sans, fontWeight: 700, fontSize: 92, color: colors.charcoal, lineHeight: '120px', letterSpacing: 2, width: 300, margin: '0 auto',

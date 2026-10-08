@@ -1,7 +1,7 @@
 {
-  "_info": "Alle Frame-Nummern (30 fps) und Texte. Szenen-Frames sind lokal (0 = Szenenbeginn). Schnitte in S1–S4 liegen auf dem 9-Frame-Raster (Achtel bei 100 BPM, 1 Schlag = 18 Frames); die Briefing-Werte 75/195/140/260/320 sind auf das Raster gerundet; die Grenze S2/S3 liegt deshalb bei 603 statt 600.",
+  "_info": "Alle Frame-Nummern (30 fps) und Texte. Szenen-Frames sind lokal (0 = Szenenbeginn). Schnitte in S1–S4 liegen auf dem 9-Frame-Raster (Achtel bei 100 BPM, 1 Schlag = 18 Frames); die Briefing-Werte 75/195/140/260/320 sind auf das Raster gerundet; Korrekturfassung 2: längere Einstellungen in S4/S5, Gesamtlänge 2744 Frames (91,5 s).",
   "fps": 30,
-  "durationInFrames": 2400,
+  "durationInFrames": 2744,
   "bpm": 100,
   "beatFrames": 18,
   "texts": {
@@ -21,19 +21,19 @@
   },
   "pause": {"duckIn": 3, "hold": 30, "release": 6},
   "scenes": [
-    {"id": "S1", "title": "Der erste Morgen", "from": 0, "to": 360,
+    {"id": "S1", "title": "Der erste Morgen", "from": 0, "to": 378,
       "shots": [
         {"id": "cup", "from": 0, "to": 72, "fill": [6, 66], "pour": [2, 60], "zoom": [1.0, 1.06]},
         {"id": "keys", "from": 72, "to": 135},
-        {"id": "bag", "from": 135, "to": 162},
-        {"id": "belt", "from": 162, "to": 198, "click": 189},
-        {"id": "naviWide", "from": 198, "to": 234, "screenOn": [198, 210]},
-        {"id": "navi", "from": 234, "to": 360, "routeDraw": [234, 246], "fingerIn": [252, 270], "approach": [270, 324], "tap": 333}
+        {"id": "bag", "from": 135, "to": 180},
+        {"id": "belt", "from": 180, "to": 216, "click": 207},
+        {"id": "naviWide", "from": 216, "to": 252, "screenOn": [216, 228]},
+        {"id": "navi", "from": 252, "to": 378, "routeDraw": [252, 264], "fingerIn": [270, 288], "approach": [288, 342], "tap": 351}
       ]},
-    {"id": "S2", "title": "Ankunft unter Zeitdruck", "from": 360, "to": 603,
+    {"id": "S2", "title": "Ankunft unter Zeitdruck", "from": 378, "to": 585,
       "clock": "clockLate", "clockFlip": [0, 8], "officeIn": [6, 24],
-      "walk": {"pose": "C3", "from": 63, "to": 180, "x": [520, 3250], "step": 6, "flip": true}},
-    {"id": "S3", "title": "Die zweite Routine", "from": 603, "to": 900, "patient": "C6C11", "patientHand": "C12",
+      "walk": {"pose": "C3", "from": 63, "to": 180, "x": [520, 3250], "step": 6, "flip": false}},
+    {"id": "S3", "title": "Die zweite Routine", "from": 585, "to": 882, "patient": "C6C11", "patientHand": "C12",
       "shots": [
         {"id": "wide", "from": 0, "to": 90, "zoom": [1.0, 1.06]},
         {"id": "hand", "from": 90, "to": 126},
@@ -41,34 +41,33 @@
         {"id": "look", "from": 162, "to": 180},
         {"id": "slip", "from": 180, "to": 297, "push": [0, 54], "withdraw": [54, 72], "patientIn": [60, 84], "takeOut": [84, 108]}
       ]},
-    {"id": "S4", "title": "Die Routinen wiederholen sich", "from": 900, "to": 1320,
+    {"id": "S4", "title": "Die Routinen wiederholen sich", "from": 882, "to": 1590,
       "days": [
-        {"patient": "C13", "shots": [["cup", 0, 18], ["keys", 18, 27], ["navi", 27, 45], ["clock", 45, 63], ["coat", 63, 81], ["patient", 81, 99], ["notes", 99, 108], ["slip", 108, 135]]},
-        {"patient": "C14", "shots": [["cup", 135, 153], ["keys", 153, 162], ["navi", 162, 180], ["clock", 180, 189], ["coat", 189, 198], ["patient", 198, 216], ["notes", 216, 225], ["slip", 225, 252]]}
+        {"patient": "C13", "shots": [["cup", 0, 36], ["keys", 36, 63], ["navi", 63, 99], ["clock", 99, 126], ["coat", 126, 162], ["patient", 162, 198], ["notes", 198, 225], ["slip", 225, 270]]},
+        {"patient": "C14", "shots": [["cup", 270, 306], ["keys", 306, 333], ["navi", 333, 369], ["clock", 369, 396], ["coat", 396, 432], ["patient", 432, 468], ["notes", 468, 495], ["slip", 495, 540]]}
       ],
-      "matchCut": {"from": 252, "cut": 288, "to": 324, "speed": 15, "dir": [0.97, 0.24], "point": [1010, 640]},
-      "panel": {"from": 324, "to": 420, "underline": [6, 30]}},
-    {"id": "S5", "title": "Das Innehalten am Navi", "from": 1320, "to": 1620,
-      "shots": [["cup", 0, 20], ["keys", 20, 40], ["belt", 40, 60]],
-      "navi": {"from": 60, "fingerIn": [60, 66], "approach": [66, 120], "pause": [120, 150], "hoverPx": 12,
-        "popup": [150, 166], "goldExpand": [160, 190], "goldDraw": [166, 206], "tapMove": [262, 282], "tap": 286}},
-    {"id": "S6", "title": "Eine andere Ankunft", "from": 1620, "to": 1830,
+      "matchCut": {"from": 540, "cut": 576, "to": 612, "speed": 15, "dir": [0.97, 0.24], "point": [1010, 640]},
+      "panel": {"from": 612, "to": 708, "underline": [6, 30]}},
+    {"id": "S5", "title": "Das Innehalten am Navi", "from": 1590, "to": 1938,
+      "shots": [["cup", 0, 36], ["keys", 36, 72], ["belt", 72, 108]],
+      "navi": {"from": 108, "fingerIn": [108, 114], "approach": [114, 168], "pause": [168, 198], "hoverPx": 12,
+        "popup": [198, 214], "goldExpand": [208, 238], "goldDraw": [214, 254], "popupOut": [262, 274], "tapMove": [310, 330], "tap": 334}},
+    {"id": "S6", "title": "Eine andere Ankunft", "from": 1938, "to": 2148,
       "clock": "clockEarly", "clockFlip": [0, 8], "officeIn": [0, 1],
-      "walk": {"pose": "C4w", "from": 12, "to": 112, "x": [520, 2030], "step": 9, "flip": false},
+      "walk": {"pose": "C4w", "from": 12, "to": 112, "x": [520, 1853], "step": 9, "flip": false},
       "hook": [112, 162], "coat": [162, 210], "blend": 4},
-    {"id": "S7", "title": "Das Innehalten im Behandlungsraum", "from": 1830, "to": 2160, "patient": "C15",
+    {"id": "S7", "title": "Das Innehalten im Behandlungsraum", "from": 2148, "to": 2504, "patient": "C15",
       "shots": [
         {"id": "wide", "from": 0, "to": 75, "zoom": [1.0, 1.05]},
-        {"id": "hand", "from": 75, "to": 100},
-        {"id": "notes", "from": 100, "to": 120},
-        {"id": "push", "from": 120, "to": 165, "move": [0, 15], "pause": [15, 45]},
-        {"id": "hesitate", "from": 165, "to": 190},
-        {"id": "explain", "from": 190, "to": 245, "blend": 8},
-        {"id": "react", "from": 245, "to": 275, "blend": 8},
-        {"id": "complete", "from": 275, "to": 310, "move": [0, 26]},
-        {"id": "take", "from": 310, "to": 330, "patientIn": [0, 14]}
+        {"id": "hand", "from": 75, "to": 111},
+        {"id": "notes", "from": 111, "to": 171, "write": [0, 30], "pause": [30, 60]},
+        {"id": "look", "from": 171, "to": 201},
+        {"id": "explain", "from": 201, "to": 256, "blend": 8},
+        {"id": "react", "from": 256, "to": 286, "blend": 8},
+        {"id": "push", "from": 286, "to": 331, "move": [0, 30]},
+        {"id": "take", "from": 331, "to": 356, "patientIn": [0, 14]}
       ]},
-    {"id": "S8", "title": "Abschluss", "from": 2160, "to": 2400,
+    {"id": "S8", "title": "Abschluss", "from": 2504, "to": 2744,
       "panel": {"from": 0, "to": 120, "line1": 0, "underline1": [6, 30], "line2": 36, "underline2": [42, 66]},
       "brush": [120, 150], "write": [150, 190], "end": 240}
   ]

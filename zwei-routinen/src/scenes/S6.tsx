@@ -3,24 +3,27 @@ import {A, lerp, scene} from '../theme';
 import {Layer} from '../components/ParallaxImage';
 import {HallShot, Walker} from '../components/Shots';
 import {hallScene} from './S2';
+import anchors from '../data/anchors.json';
 
 // S6 Eine andere Ankunft: identische Kamera wie S2, Uhr 08:43, normaler Gang, Jacke an den Haken, Kittel in Ruhe.
-// Kein Zoom, kein Glühen – nur Zeit und Haltung unterscheiden sich.
+// Der Kittel hängt von Anfang an an der Garderobe (B4c); am Haken steht die Tasche neben der Pflanze (B4cb).
 const S = scene('S6');
 export const S6: React.FC<{f: number}> = ({f}) => {
   const {flip, office, time} = hallScene(S, f);
   const w = S.walk;
-  const hook = A.C4.pose;
-  // Gang endet auf Haken-Tiefe (C4 steht weiter hinten): Fußpunkt und Größe angleichen
-  const bottomWalk = A.C4w.pose.C4w.y + A.C4w.pose.C4w.h, bottomHook = hook.C4.y + hook.C4.h;
-  const sc = hook.C4.h / A.C4w.pose.C4w.h;
+  const hook = A.C4.pose, walk = A.C4w.pose.C4w;
+  // Gang endet genau auf Figurengröße und Fußlinie der Haken-Pose (aus den Bildern gemessen)
+  const {walkFig, hookFig} = anchors;
+  const sc = hookFig.h / walkFig.h;
+  const bottom = walk.y + walk.h, inset = bottom - walkFig.feet;
+  const dyEnd = hookFig.feet - (bottom - inset * sc);
   const toHook = lerp(f, [S.hook[0] - S.blend / 2, S.hook[0] + S.blend / 2], [0, 1]);
   const toCoat = lerp(f, [S.coat[0], S.coat[0] + S.blend], [0, 1]);
   return (
-    <HallShot clock={time} flip={flip} office={office}>
+    <HallShot clock={time} flip={flip} office={office} plate={toHook > 0 ? 'B4cb' : 'B4c'}>
       {f >= w.from && toHook < 1 ? (
         <div style={{opacity: 1 - toHook}}>
-          <Walker group="C4w" f={Math.min(f, w.to - 1)} range={[w.from, w.to]} x={w.x} step={w.step} flip={w.flip} dy={[0, bottomHook - bottomWalk]} scale={[1, sc]} />
+          <Walker group="C4w" f={Math.min(f, w.to - 1)} range={[w.from, w.to]} x={w.x} step={w.step} flip={w.flip} dy={[0, dyEnd]} scale={[1, sc]} feet={inset} />
         </div>
       ) : null}
       <Layer p={hook.C4} opacity={toHook * (1 - toCoat)} />

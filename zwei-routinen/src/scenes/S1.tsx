@@ -1,6 +1,6 @@
 import React from 'react';
 import {ease, lerp, scene} from '../theme';
-import {approachFinger, BeltShot, confirmTarget, CupShot, HandPlateShot, NaviShot} from '../components/Shots';
+import {approachFinger, BeltShot, confirmTarget, CupShot, GrabShot, NaviShot} from '../components/Shots';
 
 // S1 Der erste Morgen – alles wie immer: Tasse, Schlüssel, Tasche, Gurt, Navi „Bestätigen“ auf Teal.
 const S = scene('S1');
@@ -24,8 +24,8 @@ export const S1: React.FC<{f: number}> = ({f}) => {
     const lf = f - s.from, dur = s.to - s.from;
     switch (s.id) {
       case 'cup': return <CupShot f={lf} dur={dur} fill={s.fill} pour={s.pour} zoom={s.zoom} />;
-      case 'keys': return <HandPlateShot id="C17" f={lf} dur={dur} />;
-      case 'bag': return <HandPlateShot id="C18" f={lf} dur={dur} />;
+      case 'keys': return <GrabShot kind="key" f={lf} dur={dur} />;
+      case 'bag': return <GrabShot kind="bag" f={lf} dur={dur} />;
       case 'belt': return <BeltShot f={lf} dur={dur} click={s.click - s.from} />;
       case 'naviWide': return <BeltShot f={lf + 36} dur={dur + 36} screen={{on: lerp(f, s.screenOn, [0.25, 1]), tealDraw: 0}} />;
       case 'navi': {

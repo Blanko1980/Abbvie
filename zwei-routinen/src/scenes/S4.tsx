@@ -3,7 +3,7 @@ import {colors, ease, lerp, scene, T} from '../theme';
 import {camMap} from '../components/ParallaxImage';
 import {center, NAVI_POS} from '../components/NaviScreen';
 import {
-  CLOCK_CAM, confirmTarget, CupShot, DESK_CAM, HallShot, HandPlateShot, NAVI_CAM, NaviShot, NotesShot, PALM, RoomShot, naviToSrc, slipAt, SlipShot, Walker,
+  CLOCK_CAM, confirmTarget, CupShot, DESK_CAM, GrabShot, HallShot, NAVI_CAM, NaviShot, NotesShot, PALM, RoomShot, naviToSrc, slipAt, SlipShot, Walker,
 } from '../components/Shots';
 import {TextPanel} from '../components/TextPanel';
 
@@ -63,12 +63,12 @@ const Day: React.FC<{day: any; f: number}> = ({day, f}) => {
     const lf = f - from, dur = to - from;
     switch (id) {
       case 'cup': return <CupShot f={lf} dur={dur} full zoom={[1.04, 1.06]} />;
-      case 'keys': return <HandPlateShot id="C17" f={lf + 10} dur={dur + 20} />;
+      case 'keys': return <GrabShot kind="key" f={lf + 6} dur={dur + 10} />;
       case 'navi': return <QuickNavi lf={lf} dur={dur} />;
-      case 'clock': return <HallShot clock={T.texts.clockLate} cam={CLOCK_CAM} />;
+      case 'clock': return <HallShot clock={T.texts.clockLate} cam={CLOCK_CAM} plate="B4" />;
       case 'coat': return (
-        <HallShot clock={T.texts.clockLate}>
-          <Walker group="C3" f={from + lf} range={[from, to + 10]} x={[1300, 2000]} step={4} flip />
+        <HallShot clock={T.texts.clockLate} plate="B4">
+          <Walker group="C3" f={from + lf} range={[from, to + 10]} x={[1100, 2100]} step={6} />
         </HallShot>
       );
       case 'patient': return <RoomShot id={day.patient} f={lf} dur={dur} zoom={[1.08, 1.1]} />;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Nachbearbeitung der Gemini-Bilder → assets/processed + public/img (für Remotion).
 //   - Hochskalieren auf mind. 2880 px lange Kante (Lanczos)
-//   - plate:   Alpha per Flood-Fill vom Rand (Toleranz ≈ 8 zu Weiß), 1 px weich, beschnitten
+//   - plate:   Alpha per Flood-Fill vom Rand (Toleranz ≈ 8 zum Nachbarn, ≤ 30 zur Eckfarbe), 1 px weich, beschnitten
 //   - overlay: KI-Bearbeitung eines Grundbilds → nur die veränderten Bereiche als weich maskierte Ebene
 //              (gemeinsame Maske je Gruppe, damit Posen sauber ineinander überblenden)
 //   - brush:   Grauer Pinselstrich → Alpha aus Helligkeit (Code färbt ihn Gold)
@@ -24,20 +24,31 @@ fs.mkdirSync(PUB, {recursive: true});
 // deck: deckendes Bild. plate: Flood-Fill. group: Pose-Ebenen über einem Grundbild (base),
 // tight = enge Maske für Ebenen, die im Code bewegt werden. screen: Magenta-Bildschirm ausstanzen.
 const PLAN = [
-  {deck: ['A1', 'A2', 'A3', 'A4', 'A5', 'B4', 'B4c', 'B5', 'DESK', 'C6C11', 'C13', 'C14', 'C15', 'D2']},
+  {deck: ['A1', 'A2', 'A3', 'A4', 'A5', 'B4', 'B4c', 'B4cb', 'B5', 'B6', 'B6e', 'B7', 'B7e', 'DESK', 'C6C11', 'C13', 'C14', 'C15', 'D2']},
   {screen: 'B3'},
   {screen: 'B1'}, // Display der Kaffeemaschine
   {group: 'B2', base: 'B1', members: ['B2']},
-  {group: 'C3', base: 'B4', members: ['C3', 'C3b'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
+  // rechter Arm des Arztes am Navi (zwei Zielpunkte), Magenta-Reste des Bildschirms fallen weg
+  {group: 'C2', base: 'B3', members: ['C2a', 'C2b'], tight: true, dropMagenta: true, maskFile: true, extend: 700}, // Maske: scripts/arm-mask.py
+  // Schlüssel und Tasche: dieselbe Greif-Hand zweimal freigestellt – über dem Bild mit Gegenstand (nur Hand, greift zu)
+  // und über dem leeren Bild (Hand mit Gegenstand, hebt ab). Beim Umschalten sind die Pixel identisch.
+  {group: 'C17', base: 'B6', members: ['C17a'], tight: true, extend: 300},
+  {group: 'C17k', base: 'B6e', members: ['C17a'], rename: {C17a: 'C17ak'}, tight: true, extend: 300},
+  {group: 'C18', base: 'B7', members: ['C18a'], tight: true, extend: 300},
+  {group: 'C18k', base: 'B7e', members: ['C18a'], rename: {C18a: 'C18ak'}, tight: true, extend: 300, dropLight: true, despeckle: true},
   {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
   {group: 'C4', base: 'B4c', members: ['C4', 'C5']},
   {group: 'C15doc', base: 'C15', members: ['C10', 'C9'], split: [0, 0.5]},
   {group: 'C15pat', base: 'C15', members: ['C15b'], split: [0.5, 1]},
-  {group: 'C8', base: 'DESK', members: ['C8'], tight: true, thresh: 9, woodChroma: true, handOnly: true}, // heller Ärmel vor hellem Grund
-  {group: 'C12', base: 'DESK', members: ['C12'], tight: true},
-  {group: 'C16', base: 'DESK', members: ['C16'], tight: true},
-  {group: 'C7', base: 'DESK', members: ['C7']},
-  {plate: ['C2', 'C17', 'C18']},
+  // Hände am Tisch: KI-Schatten auf dem Holz entfernen (weicher Schatten im Code)
+  {group: 'C8', base: 'DESK', members: ['C8'], tight: true, thresh: 9, woodChroma: true, handOnly: true, dropShadow: 0, despeckle: true, extend: 600}, // heller Ärmel vor hellem Grund
+  {group: 'C12', base: 'DESK', members: ['C12'], tight: true, dropShadow: 0, despeckle: true, extend: 600},
+  {group: 'C16', base: 'DESK', members: ['C16'], tight: true, dropShadow: 0, despeckle: true, extend: 600},
+  // Block liegt still, nur die schreibende Hand bewegt sich
+  {group: 'C7pad', base: 'DESK', members: ['C7p']},
+  {group: 'C7', base: 'C7p', members: ['C7'], tight: true, maskFile: true, extend: 300}, // Maske: scripts/arm-mask.py
+  // rennender Arzt (S2/S4) auf grauem Grund: saubere Kanten auch am weißen Kittel
+  {plate: ['C3p', 'C3pb']},
   {brush: 'D1'},
 ];
 
@@ -264,7 +275,9 @@ async function group(g) {
     shared = await maskFrom(keep, w, h, g);
   }
   for (const [id, v] of Object.entries(vars)) {
-    let alpha = shared || await maskFrom(await diffKeep(base, v, w, h, g.split, g.thresh, g.woodChroma), w, h, g);
+    let alpha = g.maskFile
+      ? await blurMask(Float32Array.from(await sharp(path.join(ROOT, 'assets/masks', `${id}.png`)).resize(w, h).greyscale().raw().toBuffer(), (x) => x / 255), w, h, 1)
+      : shared || await maskFrom(await diffKeep(base, v, w, h, g.split, g.thresh, g.woodChroma), w, h, g);
     if (g.inner) {
       // Innerhalb der Figur: Pixel, die dem Hintergrund (fast) gleichen, durchsichtig machen –
       // sonst wandern Hintergrundstücke aus Lücken (zwischen Arm und Körper) mit der bewegten Figur mit
@@ -281,7 +294,7 @@ async function group(g) {
       // Pflanzenreste aus dem Hintergrund entfernen (die Figur trägt kein Grün)
       alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return a * (1 - ramp((gg - Math.max(r, b) - 4) / 10)); });
     }
-    if (g.dropShadow) {
+    if (g.dropShadow != null) {
       // Bodenschatten der KI entfernen (unterhalb der Linie: nur abgedunkelter Boden ohne Farbänderung);
       // der Schatten wird im Code als weiche Ellipse gezeichnet und läuft sauber mit
       const yMin = g.dropShadow;
@@ -291,8 +304,9 @@ async function group(g) {
         const vr = v.data[i * 3], vg = v.data[i * 3 + 1], vb = v.data[i * 3 + 2];
         const dl = (br + bg2 + bb - vr - vg - vb) / 3;                       // Abdunklung
         const dc = Math.abs((br - bg2) - (vr - vg)) + Math.abs((bg2 - bb) - (vg - vb));
-        const shadow = dl > -4 && dl < 60 && dc < 14 && Math.max(vr, vg, vb) > 120;
-        const dust = Math.max(vr, vg, vb) > 180 && Math.max(vr, vg, vb) - Math.min(vr, vg, vb) < 25; // heller Staub am Boden
+        // am Tisch (yMin 0) nur Schatten auf Holz, nie auf hellem Grund oder Ärmel
+        const shadow = dl > -4 && dl < 60 && dc < 14 && Math.max(vr, vg, vb) > 120 && (yMin > 0 || br - bb > 25);
+        const dust = yMin > 0 && Math.max(vr, vg, vb) > 180 && Math.max(vr, vg, vb) - Math.min(vr, vg, vb) < 25; // heller Staub am Boden
         return shadow || dust ? 0 : a;
       });
       // verbliebene Sprenkel unter der Linie: kleine Inseln (< 1500 px) entfernen
@@ -311,6 +325,21 @@ async function group(g) {
         if (comp.length < 1500) for (const i of comp) alpha[i] = 0;
       }
     }
+    if (g.dropLight) {
+      // Hand (Haut), Ärmel und Tasche (dunkel) bleiben; helle, ungesättigte Reste (Bankkante, Wand) fallen weg
+      alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return Math.max(r, gg, b) > 150 && r - b < 35 ? 0 : a; });
+      // unter der Unterkante der Tasche (je Spalte das tiefste dunkle Pixel) liegt nur noch Schatten auf der Bank
+      for (let x = 0; x < w; x++) {
+        let low = -1;
+        for (let y = h - 1; y >= 0; y--) { const i = y * w + x; if (alpha[i] > 0.5 && Math.max(v.data[i * 3], v.data[i * 3 + 1], v.data[i * 3 + 2]) < 110) { low = y; break; } }
+        if (low >= 0) for (let y = low + 3; y < h; y++) alpha[y * w + x] = 0;
+      }
+    }
+    if (g.dropMagenta) {
+      // Bildschirmfläche (Magenta) und rosa Säume entfernen, Rest entsättigen
+      alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return a * (1 - ramp((Math.min(r, b) - gg - 40) / 50)); });
+      for (let i = 0; i < w * h; i++) if (alpha[i] > 0 && v.data[i * 3 + 2] > v.data[i * 3 + 1] + 8) v.data[i * 3 + 2] = v.data[i * 3 + 1] + 8;
+    }
     if (g.handOnly) {
       // Nur Haut, heller Ärmel und dunkle Manschette behalten – heller Tisch-Saum unter den Fingern fällt weg
       alpha = alpha.map((a, i) => {
@@ -323,13 +352,27 @@ async function group(g) {
       });
       alpha = await blurMask(alpha, w, h, 0.8);
     }
+    if (g.despeckle) {
+      // vereinzelte Krümel (Holzmaserung) an den Kanten entfernen: nur dichte Bereiche bleiben
+      const b = await blurMask(alpha, w, h, 3);
+      alpha = alpha.map((a, i) => a * ramp((b[i] - 0.3) / 0.3));
+    }
     const crop = bbox(alpha, w, h);
     const data = colorMatch(base, v, w, h, crop);
-    const {out, cw, ch} = rgba(data, alpha, w, h, crop);
-    await savePng(out, cw, ch, `${id}.png`);
-    meta[g.group].pose[id] = {src: `img/${id}.webp`, x: crop.x0, y: crop.y0, w: cw, h: ch};
-    await saveJpg({data, w, h}, `${id}-voll.jpg`); // Vollbild für Kontaktbogen
-    check(id, {data, w, h});
+    let {out, cw, ch} = rgba(data, alpha, w, h, crop);
+    let px = crop.x0, py = crop.y0;
+    if (g.extend) {
+      // Ärmel, die am Bildrand enden, über den Rand hinaus verlängern (Randpixel fortsetzen),
+      // damit beim Verschieben der Ebene keine Schnittkante ins Bild kommt
+      const e = {left: crop.x0 === 0 ? g.extend : 0, right: crop.x1 >= w ? g.extend : 0, top: crop.y0 === 0 ? g.extend : 0, bottom: crop.y1 >= h ? g.extend : 0};
+      const r = await sharp(out, {raw: {width: cw, height: ch, channels: 4}}).extend({...e, extendWith: 'copy'}).raw().toBuffer({resolveWithObject: true});
+      out = r.data; cw = r.info.width; ch = r.info.height; px -= e.left; py -= e.top;
+    }
+    const name = g.rename?.[id] ?? id; // dasselbe Bild über einem anderen Grundbild → eigener Name
+    await savePng(out, cw, ch, `${name}.png`);
+    meta[g.group].pose[name] = {src: `img/${name}.webp`, x: px, y: py, w: cw, h: ch};
+    await saveJpg({data, w, h}, `${name}-voll.jpg`); // Vollbild für Kontaktbogen
+    check(name, {data, w, h});
   }
 }
 
@@ -340,7 +383,10 @@ async function plate(id) {
   // Flood-Fill vom Rand: Toleranz 8 zum Nachbarpixel (folgt weichen Hintergrund-Verläufen und Vignetten),
   // nur helle Pixel (Grund ist weiß bis hellgrau) gehören zum Hintergrund
   const bg = new Uint8Array(w * h);
-  const bright = (i) => Math.min(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]) >= 200;
+  // Grundfarbe aus den vier Ecken (weiß oder flaches Grau)
+  const ref = [0, 0, 0];
+  for (const [cx, cy] of [[0, 0], [w - 10, 0], [0, h - 10], [w - 10, h - 10]]) for (let y = cy; y < cy + 10; y++) for (let x = cx; x < cx + 10; x++) for (let c = 0; c < 3; c++) ref[c] += data[(y * w + x) * 3 + c] / 400;
+  const bright = (i) => Math.max(Math.abs(data[i * 3] - ref[0]), Math.abs(data[i * 3 + 1] - ref[1]), Math.abs(data[i * 3 + 2] - ref[2])) <= 30;
   const close = (i, j) => Math.max(Math.abs(data[i * 3] - data[j * 3]), Math.abs(data[i * 3 + 1] - data[j * 3 + 1]), Math.abs(data[i * 3 + 2] - data[j * 3 + 2])) <= 8;
   const stack = [];
   for (let x = 0; x < w; x++) for (const i of [x, (h - 1) * w + x]) if (bright(i)) { bg[i] = 1; stack.push(i); }
@@ -385,6 +431,12 @@ for (const step of PLAN) {
   if (step.screen) await screen(step.screen);
   if (step.group) await group(step);
   if (step.plate) for (const id of step.plate) await plate(id);
+  if (step.plate?.includes('C3p') && meta.C3p && meta.C3pb) {
+    // Rennender Arzt als Pose-Gruppe in B4-Koordinaten: Größe und Fußlinie wie die alte Raumbearbeitung (Höhe 836, Fuß 1400)
+    const k = 836 / meta.C3p.h, X0 = 1104 - (meta.C3p.full.x + meta.C3p.w / 2) * k, Y0 = 1400 - (meta.C3p.full.y + meta.C3p.h) * k;
+    const pose = (id) => ({src: meta[id].src, x: Math.round(X0 + meta[id].full.x * k), y: Math.round(Y0 + meta[id].full.y * k), w: Math.round(meta[id].w * k), h: Math.round(meta[id].h * k)});
+    meta.C3 = {base: 'B4', pose: {C3p: pose('C3p'), C3pb: pose('C3pb')}};
+  }
   if (step.brush) await brush(step.brush);
 }
 

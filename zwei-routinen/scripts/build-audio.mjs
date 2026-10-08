@@ -77,14 +77,14 @@ function noiseBurst(dur, {hp = 0.6, decay = 0.02} = {}) {
 
 // ------------------------------------------------------------ Zeitachse aus timeline.json
 const S4 = scene('S4'), S5 = scene('S5'), S7 = scene('S7');
-const pauseS5 = S5.from + S5.navi.pause[0];                                  // Frame 1440
-const pushS7 = S7.shots.find((s) => s.id === 'push');
-const pauseS7 = S7.from + pushS7.from + pushS7.pause[0];                     // Frame 1965
+const pauseS5 = S5.from + S5.navi.pause[0];                                  // Finger über „Bestätigen“
+const notesS7 = S7.shots.find((s) => s.id === 'notes');
+const pauseS7 = S7.from + notesS7.from + notesS7.pause[0];                   // Stift hält inne
 const P = TL.pause;                                                          // 3 / 30 / 6
 const pauses = [pauseS5, pauseS7].map((p) => ({duck: [p - P.duckIn, p], hold: [p, p + P.hold], rel: [p + P.hold, p + P.hold + P.release]}));
 const gridEnd1 = pauses[0].duck[1], calm1 = pauses[0].rel[0];
 const gridStart2 = S7.from, gridEnd2 = pauses[1].duck[1], calm2 = pauses[1].rel[0];
-const fadeEnd = 2370;
+const fadeEnd = TL.durationInFrames - 30;
 
 // ------------------------------------------------------------ Musik: Routine-Raster (Moll, trocken)
 const grid = stem(), bass = stem(), calm = stem();
@@ -117,7 +117,7 @@ function calmBed(a, b, warm) {
 }
 calmBed(calm1, gridStart2, false);
 calmBed(calm2, TL.scenes.find((s) => s.id === 'S8').from + 40, true);
-// Schluss: ein gehaltener Akkord, ausgeblendet bis Frame 2370
+// Schluss: ein gehaltener Akkord, ausgeblendet bis 30 Frames vor Schluss
 const endAt = TL.scenes.find((s) => s.id === 'S8').from + 40;
 for (const m of [48, 55, 60, 64, 67, 74]) add(calm, fr(endAt), tone(mtof(m), fr(fadeEnd - endAt) - 1.2, {attack: 0.8, release: 1.2, type: 'soft'}), 0.06, (m % 7) / 7 - 0.5);
 
@@ -209,12 +209,11 @@ fxPing(S5.from + S5.navi.tap, -12, 0.3);                                    // G
 fx('clock', S6.from + S6.clockFlip[0], 0.35);
 fx('stepsCalm', S6.from + S6.walk.from, 0.5);
 fx('coat', S6.from + S6.coat[0], 0.45);
-const n7 = sh(S7, 'notes'), c7 = sh(S7, 'complete'), t7 = sh(S7, 'take');
-fx('pen', S7.from + n7.from + 2, 0.4);
-fx('slide', S7.from + pushS7.from + 2, 0.4);
-fx('slide', S7.from + c7.from + 2, 0.45);
+const p7 = sh(S7, 'push'), t7 = sh(S7, 'take');
+fx('pen', S7.from + notesS7.from + 2, 0.4);
+fx('slide', S7.from + p7.from + 2, 0.45);
 fx('rustle', S7.from + t7.from + 10, 0.3);
-fx('rustle', 2392, 0.35);                                                   // letztes Papiergeräusch
+fx('rustle', TL.durationInFrames - 8, 0.35);                               // letztes Papiergeräusch
 // Geräusche halten sich an das Innehalten: dort keine Ereignisse (Dämpfung wie Musik)
 envelope(sfx, (f) => {
   for (const p of pauses) if (f >= p.duck[0] && f < p.rel[1]) return f < p.duck[1] ? 1 - (1 - db40) * ramp(f, ...p.duck) : f < p.hold[1] ? db40 : Math.max(db40, ramp(f, ...p.rel));

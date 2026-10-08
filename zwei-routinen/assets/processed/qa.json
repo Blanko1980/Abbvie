@@ -34,7 +34,32 @@
   "gold": 0,
   "ok": true
  },
+ "B4cb": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
  "B5": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "B6": {
+  "teal": 0.0001054194561094001,
+  "gold": 0,
+  "ok": true
+ },
+ "B6e": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "B7": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "B7e": {
   "teal": 0,
   "gold": 0,
   "ok": true
@@ -84,13 +109,33 @@
   "gold": 0,
   "ok": true
  },
- "C3": {
+ "C2a": {
+  "teal": 0.00009352896475127141,
+  "gold": 0,
+  "ok": true
+ },
+ "C2b": {
+  "teal": 0.0004204430628996837,
+  "gold": 0,
+  "ok": true
+ },
+ "C17a": {
+  "teal": 0.0006516465751356647,
+  "gold": 0,
+  "ok": true
+ },
+ "C17ak": {
   "teal": 0,
   "gold": 0,
   "ok": true
  },
- "C3b": {
-  "teal": 0.00010496263330254429,
+ "C18a": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "C18ak": {
+  "teal": 0,
   "gold": 0,
   "ok": true
  },
@@ -144,22 +189,22 @@
   "gold": 0,
   "ok": true
  },
+ "C7p": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
  "C7": {
   "teal": 0,
   "gold": 0,
   "ok": true
  },
- "C2": {
+ "C3p": {
   "teal": 0,
   "gold": 0,
   "ok": true
  },
- "C17": {
-  "teal": 0,
-  "gold": 0,
-  "ok": true
- },
- "C18": {
+ "C3pb": {
   "teal": 0,
   "gold": 0,
   "ok": true

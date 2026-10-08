@@ -1,6 +1,6 @@
 import React from 'react';
 import {ease, lerp, scene, settleHold} from '../theme';
-import {approachFinger, BeltShot, CupShot, HandPlateShot, NaviShot} from '../components/Shots';
+import {approachFinger, BeltShot, CupShot, GrabShot, NaviShot} from '../components/Shots';
 import {center, NAVI_POS} from '../components/NaviScreen';
 
 // S5 Das Innehalten am Navi: gleicher Morgen (je 20 Frames), Finger nähert sich wie in S1, hält 30 Frames 12 px über
@@ -12,7 +12,7 @@ export const S5: React.FC<{f: number}> = ({f}) => {
     if (f < from || f >= to) continue;
     const lf = f - from;
     if (id === 'cup') return <CupShot f={lf + 40} dur={to - from + 60} full />;
-    if (id === 'keys') return <HandPlateShot id="C17" f={lf} dur={to - from} />;
+    if (id === 'keys') return <GrabShot kind="key" f={lf} dur={to - from} />;
     if (id === 'belt') return <BeltShot f={lf} dur={to - from} click={12} />;
   }
   const n = S.navi;
@@ -33,7 +33,8 @@ export const S5: React.FC<{f: number}> = ({f}) => {
         tealDraw: 1,
         goldExpand: lerp(f, n.goldExpand, [0, 1], ease.inOut),
         goldDraw: lerp(f, n.goldDraw, [0, 1], ease.inOut),
-        popup: lerp(f, n.popup, [0, 1], ease.out),
+        // Pop-up erscheint, die Gold-Route zeichnet sich, dann tritt das Pop-up zurück und gibt die Karte frei
+        popup: lerp(f, n.popup, [0, 1], ease.out) * lerp(f, n.popupOut, [1, 0], ease.inOut),
         goldVisible: lerp(f, n.popup, [0, 1], ease.out),
         selected: f >= n.tap ? 'gold' : 'teal',
         pressGold,
