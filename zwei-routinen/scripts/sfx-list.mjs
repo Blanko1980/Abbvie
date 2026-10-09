@@ -11,4 +11,5 @@ export const SFX = {
   slide: {text: 'a single sheet of paper sliding across a wooden desk, close, dry', seconds: 0.8},
   clock: {text: 'one very soft single wall clock tick, close, dry', seconds: 0.5},
   rustle: {text: 'light short paper rustle, close, dry', seconds: 0.6},
+  crumple: {text: 'a single sheet of paper being crumpled into a ball by hand, a little in the background of a quiet room, dry, no music', seconds: 1.5},
 };

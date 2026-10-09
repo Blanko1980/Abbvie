@@ -1,12 +1,12 @@
 # Bericht: „Zwei Routinen“
 
-Stand: 09.10.2026 (Korrekturfassung 3). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
+Stand: 09.10.2026 (Korrekturfassung 4). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
 
 ## Abnahme-Checkliste
 
 - [x] **Formate:** `out/zwei-routinen.mp4` und `out/zwei-routinen-muted.mp4` existieren, beide 1920 × 1080, 30 fps, 2776 Frames (92,5 s), H.264. Die stumme Fassung hat keine Tonspur. Messwerte: siehe unten.
 - [x] **Texte:** Jede deutsche Tafel stammt wörtlich aus `src/data/timeline.json`. Der Callout lautet „Rethink the Routine“. Hinweis: Abschnitt 5 des Briefings („Section 5“) lag nicht bei. Alle Texte sind deshalb Zeichen für Zeichen aus den Szenenbeschreibungen des Briefings übernommen.
-- [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen Bildern bestanden (Kontaktbogen: 52 Bilder bzw. Ebenen), Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
+- [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen Bildern bestanden (Kontaktbogen: 55 Bilder bzw. Ebenen), Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
 - [x] **Teal und Gold** kommen nur auf Routenlinien (Karte und Routenkarten im Navi), Zetteln, Tafel-Unterstreichungen und dem Callout-Pinsel vor.
 - [x] **Gold-Zettel in S7:** ist ab dem ersten sichtbaren Frame gold. Die Farbe ist eine Konstante und ändert sich nie.
 - [x] **S2 und S6:** dieselbe Halle und dieselbe Kamera, der Kittel hängt beide Male an der Garderobe (B4c). In S2 kommt der Arzt in Alltagskleidung, reißt den Kittel im Laufen vom Haken und hastet weiter; in S6 hängt er die Jacke auf und zieht den Kittel in Ruhe an, seine Tasche steht neben der Pflanze (B4cb). Unterschiede sonst: Uhrzeit (08:55 / 08:43), Pose und Tempo.
@@ -28,7 +28,7 @@ Stand: 09.10.2026 (Korrekturfassung 3). Bildmodell: `gemini-3-pro-image`. Es unt
 | `out/zwei-routinen-muted.mp4` (29 MB) | H.264, 1920 × 1080, 30 fps, 2776 Frames | keine Tonspur |
 
 Zusätzlich gemessen:
-- Geräusche liegen 6,3 dB über dem Musikbett.
+- Geräusche liegen 6,3 dB über dem Musikbett. Das Zerknüllen im Innehalten liegt bei etwa −27,5 dB, leiser als die Szene davor (−21,8 dB).
 - In beiden Pausen bricht die eilige Musik ab, 30 Frames ist nur Raumton zu hören, dann setzt die ruhige Musik ein.
 - In den letzten 30 Frames ist nur noch Raumton zu hören.
 
@@ -114,3 +114,12 @@ Zusätzlich gemessen:
 | Patient Tag 3 | Hautstellen aufgehellt (aschgrau-violett), nicht mehr in der Farbe der Haare (C14 aus C14o). |
 | Eilige Ankunft | Der Arzt kommt in Alltagskleidung (Jacke), der Kittel hängt an der Garderobe. Er reißt ihn im Laufen vom Haken und hastet mit dem Kittel in der Hand hinter dem Tresen weiter (C3p/C3pb/C3g/C3q/C3qb, Tresen als Vordergrund). Erst bei der neuen Route hängt er die Jacke auf und zieht den Kittel in Ruhe an. |
 | Innehalten S7 | Schreiben → Innehalten (Musik bricht ab) → Stift bewusst ablegen (C7d) → Blick zur Patientin mit ruhiger Musik. |
+
+## Korrekturen 09.10.2026 (Korrekturfassung 4)
+
+| Stelle | Korrektur |
+|---|---|
+| Bart | Beim rennenden Arzt (graue Platte) hielt die Freistellung den grauen Bart für Hintergrund. Jetzt enge Toleranz und nur glatte Flächen gelten als Grund (Bart und Haare sind strukturiert), eingeschlossene Grundinseln werden zusätzlich entfernt, die Kante 1 px eingezogen. |
+| Schrift | Waagerechte Schreibschrift (kleine Schleifen, einzelne Ober- und Unterlängen) statt hoher Zacken. |
+| Hautstellen | Bei Patient 3 (C14) und Patientin 4 (C15, C15b, C16) dezenter und an die Hautfarbe angepasst: nur leicht dunkler und matter als die Haut, weiche Kanten. Die Ausgangsbilder liegen als C14o, C15o, C15bo, C16o vor. |
+| Papiergeräusch | Im Innehalten in S7 ist ein Zerknüllen von Papier zu hören (ElevenLabs, `crumple`), ohne Bild: Der Arzt verwirft das alte Rezept. |

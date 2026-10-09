@@ -51,7 +51,7 @@ const PLAN = [
   {group: 'HALL', base: 'B4', members: ['B4d']},
   {group: 'C7', base: 'C7p', members: ['C7'], tight: true, maskFile: true, extend: 300}, // Maske: scripts/arm-mask.py
   // rennender Arzt (S2/S4) auf grauem Grund: saubere Kanten auch am weißen Kittel
-  {plate: ['C3p', 'C3pb', 'C3q', 'C3qb', 'C3g']},
+  {plate: ['C3p', 'C3pb', 'C3q', 'C3qb', 'C3g'], tol: 16, nb: 5, smooth: 6},   // grauer Bart vor grauem Grund: eng und nur glatte Flächen
   {brush: 'D1'},
   // Tresen als Vordergrund-Ebene: der eilige Arzt läuft hinter ihm vorbei
   {front: 'COUNTER', from: 'B4', box: [2090, 820, 2880, 1607]},
@@ -390,7 +390,7 @@ async function group(g) {
   }
 }
 
-async function plate(id) {
+async function plate(id, {tol = 30, nb = 8, smooth = 0} = {}) {
   const im = await load(id);
   if (!im) return;
   const {data, w, h} = im;
@@ -400,8 +400,10 @@ async function plate(id) {
   // Grundfarbe aus den vier Ecken (weiß oder flaches Grau)
   const ref = [0, 0, 0];
   for (const [cx, cy] of [[0, 0], [w - 10, 0], [0, h - 10], [w - 10, h - 10]]) for (let y = cy; y < cy + 10; y++) for (let x = cx; x < cx + 10; x++) for (let c = 0; c < 3; c++) ref[c] += data[(y * w + x) * 3 + c] / 400;
-  const bright = (i) => Math.max(Math.abs(data[i * 3] - ref[0]), Math.abs(data[i * 3 + 1] - ref[1]), Math.abs(data[i * 3 + 2] - ref[2])) <= 30;
-  const close = (i, j) => Math.max(Math.abs(data[i * 3] - data[j * 3]), Math.abs(data[i * 3 + 1] - data[j * 3 + 1]), Math.abs(data[i * 3 + 2] - data[j * 3 + 2])) <= 8;
+  // smooth > 0: nur glatte Pixel (größter Unterschied zu den 4 Nachbarn) gehören zum Grund – Bart und Haare sind strukturiert
+  const rough = (i) => { if (!smooth) return false; const x = i % w; let m = 0; for (const j of [x > 0 ? i - 1 : i, x < w - 1 ? i + 1 : i, i >= w ? i - w : i, i < w * (h - 1) ? i + w : i]) for (let c = 0; c < 3; c++) m = Math.max(m, Math.abs(data[i * 3 + c] - data[j * 3 + c])); return m > smooth; };
+  const bright = (i) => Math.max(Math.abs(data[i * 3] - ref[0]), Math.abs(data[i * 3 + 1] - ref[1]), Math.abs(data[i * 3 + 2] - ref[2])) <= tol && !rough(i);
+  const close = (i, j) => Math.max(Math.abs(data[i * 3] - data[j * 3]), Math.abs(data[i * 3 + 1] - data[j * 3 + 1]), Math.abs(data[i * 3 + 2] - data[j * 3 + 2])) <= nb;
   const stack = [];
   for (let x = 0; x < w; x++) for (const i of [x, (h - 1) * w + x]) if (bright(i)) { bg[i] = 1; stack.push(i); }
   for (let y = 0; y < h; y++) for (const i of [y * w, y * w + w - 1]) if (bright(i) && !bg[i]) { bg[i] = 1; stack.push(i); }
@@ -411,6 +413,29 @@ async function plate(id) {
     for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i >= w ? i - w : -1, i < w * (h - 1) ? i + w : -1]) {
       if (j >= 0 && !bg[j] && bright(j) && close(i, j)) { bg[j] = 1; stack.push(j); }
     }
+  }
+  if (smooth) {
+    // eingeschlossene Grundflächen (z. B. zwischen Arm und Kittel): große, glatte, grundfarbene Inseln ebenfalls entfernen
+    // Kopf (oberstes Fünftel der Figur) bleibt unangetastet: graue Schläfen sehen dem Grund sehr ähnlich
+    let top = h, bottom = 0;
+    for (let i = 0; i < w * h; i++) if (!bg[i]) { const y = (i / w) | 0; if (y < top) top = y; if (y > bottom) bottom = y; }
+    const headEnd = (top + (bottom - top) * 0.2) * w;
+    const seen = new Uint8Array(w * h);
+    for (let s0 = Math.round(headEnd); s0 < w * h; s0++) {
+      if (bg[s0] || seen[s0] || !bright(s0)) continue;
+      const comp = [s0]; seen[s0] = 1;
+      for (let k = 0; k < comp.length; k++) {
+        const i = comp[k], x = i % w;
+        for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i >= w ? i - w : -1, i < w * (h - 1) ? i + w : -1]) {
+          if (j >= headEnd && !bg[j] && !seen[j] && bright(j) && close(i, j)) { seen[j] = 1; comp.push(j); }
+        }
+      }
+      if (comp.length > 1500) for (const i of comp) bg[i] = 1;
+    }
+    // Kante 1 px einziehen (grauer Saum)
+    const grow = Uint8Array.from(bg);
+    for (let i = 0; i < w * h; i++) if (!bg[i]) { const x = i % w; if ((x > 0 && bg[i - 1]) || (x < w - 1 && bg[i + 1]) || (i >= w && bg[i - w]) || (i < w * (h - 1) && bg[i + w])) grow[i] = 1; }
+    bg.set(grow);
   }
   let alpha = Float32Array.from(bg, (v) => 1 - v);
   alpha = await blurMask(alpha, w, h, 1); // 1 px Kante
@@ -462,7 +487,7 @@ for (const step of PLAN) {
   if (step.deck) for (const id of step.deck) await deck(id);
   if (step.screen) await screen(step.screen);
   if (step.group) await group(step);
-  if (step.plate) for (const id of step.plate) await plate(id);
+  if (step.plate) for (const id of step.plate) await plate(id, step);
   if (step.plate?.includes('C3p') && meta.C3p) {
     // Rennender Arzt (Alltagskleidung) als Pose-Gruppen in B4-Koordinaten, alle Platten deckungsgleich:
     // Größe und Fußlinie an der Tür (Höhe 836, Fuß 1400). C3 ohne Kittel, C3c mit Kittel in der Hand, C3g greift den Kittel.

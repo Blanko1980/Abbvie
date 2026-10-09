@@ -176,6 +176,8 @@ envelope(sfx, (f) => {
   for (const p of pauses) if (f >= p.duck[0] && f < p.rel[1]) return f < p.duck[1] ? 1 - (1 - db40) * ramp(f, ...p.duck) : f < p.hold[1] ? db40 : Math.max(db40, ramp(f, ...p.rel));
   return 1;
 });
+// S7: im Innehalten wird hörbar (nicht sichtbar) das alte Rezept zerknüllt – nach der Dämpfung eingefügt, damit es in der Stille steht
+add(sfx, fr(pauseS7 + 6), load('crumple') ?? synth.rustle(), 0.35, 0.25);
 
 // ------------------------------------------------------------ Mischung
 const mix = stem();

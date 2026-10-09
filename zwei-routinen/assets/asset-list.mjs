@@ -140,19 +140,19 @@ export const ASSETS = [
     prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, attentive; on the RIGHT chair PATIENT 3 from the second model sheet (broad sturdy man, very short black hair with a little grey, deep brown skin, charcoal-brown cardigan) seated, giving a small nod, eye contact. The darker, greyish dry skin patches on his hands and face are visible. The desk stays empty. No motion lines, no comic symbols.',
   },
   {
-    id: 'C15', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A5.jpg'],
+    id: 'C15o', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A5.jpg'],
     prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, leaning slightly forward, listening attentively, eye level, open posture; on the RIGHT chair PATIENT 4 from the second model sheet (woman, medium-brown skin, dark curly hair in a loose bun, olive-grey jacket over a cream top) seated, talking calmly and listening; her hands rest on the desk. The dry skin patches on her neck, hands and cheek are visible. The desk stays empty.',
   },
   {
-    id: 'C15b', group: 'C', kind: 'edit', base: 'C15',
+    id: 'C15bo', group: 'C', kind: 'edit', base: 'C15o',
     prompt: 'Edit the attached image. Keep EVERYTHING identical (room, doctor, the patient\'s body, clothing, hands and all the dry skin patches). Change ONLY the PATIENT\'s face: she reacts with a small, relieved, hopeful expression (soft smile, relaxed eyebrows), still looking at the doctor.',
   },
   {
-    id: 'C10', group: 'C', kind: 'edit', base: 'C15',
+    id: 'C10', group: 'C', kind: 'edit', base: 'C15o',
     prompt: 'Edit the attached image. Keep EVERYTHING identical (room, patient, clothing, all dry skin patches). Change ONLY the DOCTOR: his right hand hovers in mid-air over the desk, palm down, holding still, while his eyes are lifted toward the patient, thoughtful and attentive.',
   },
   {
-    id: 'C9', group: 'C', kind: 'edit', base: 'C15',
+    id: 'C9', group: 'C', kind: 'edit', base: 'C15o',
     prompt: 'Edit the attached image. Keep EVERYTHING identical (room, patient, clothing, all dry skin patches). Change ONLY the DOCTOR: he is turned toward the patient and explains something with one open hand gesture (palm up), warm, engaged expression.',
   },
   {
@@ -168,7 +168,7 @@ export const ASSETS = [
     prompt: 'Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD PATIENT 1\'s right hand (light-medium skin, warm-grey sweater sleeve) entering from the RIGHT edge and resting on the desk, palm down, held out openly. The patches of dry skin on the back of the hand are clearly visible, drawn with soft shading. Nothing else.',
   },
   {
-    id: 'C16', group: 'C', kind: 'edit', base: 'DESK', refs: ['assets/gen/A5.jpg'],
+    id: 'C16o', group: 'C', kind: 'edit', base: 'DESK', refs: ['assets/gen/A5.jpg'],
     prompt: 'Edit the first attached image (the empty desk close-up). Keep the desk and camera EXACTLY identical. ADD PATIENT 4\'s right hand (medium-brown skin, olive-grey jacket sleeve over a cream cuff) entering from the RIGHT edge and resting on the desk, palm down, held out openly. The darker brown-grey patches of dry skin on the back of the hand are clearly visible. Nothing else.',
   },
   {
@@ -264,7 +264,20 @@ export const ASSETS = [
   },
   {
     id: 'C14', group: 'C', kind: 'edit', base: 'C14o',
-    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, both people, clothes, poses, faces, hair). Change ONLY the colour of the dry skin patches on the patient\'s hands and face: they are now a lighter, ashy greyish-violet tone with soft edges, clearly lighter than his skin and clearly different from his black hair and beard, so they read unmistakably as dry skin, never as hair. Nothing else changes.',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, people, clothes, poses, faces, hair). Change ONLY the dry skin patches on the patient\'s hands and face: make them much more SUBTLE and matched to his own skin tone - only slightly darker and slightly more matte and ashy than the surrounding skin, low contrast, soft edges, fewer and smaller. They must still be recognisable as dry skin, but calm and respectful, never dominant, never looking like hair or dirt. Nothing else changes.',
+  },
+  // Korrekturrunde 4: Hautstellen bei dunkler Haut dezenter, an die Hautfarbe angepasst
+  {
+    id: 'C15', group: 'C', kind: 'edit', base: 'C15o',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, people, clothes, poses, faces, hair). Change ONLY the dry skin patches on the patient\'s neck, hands and cheek: make them much more SUBTLE and matched to her own skin tone - only slightly darker and slightly more matte and ashy than the surrounding skin, low contrast, soft edges, fewer and smaller. They must still be recognisable as dry skin, but calm and respectful, never dominant, never looking like hair or dirt. Nothing else changes.',
+  },
+  {
+    id: 'C15b', group: 'C', kind: 'edit', base: 'C15bo',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, people, clothes, poses, faces, hair). Change ONLY the dry skin patches on the patient\'s neck, hands and cheek: make them much more SUBTLE and matched to her own skin tone - only slightly darker and slightly more matte and ashy than the surrounding skin, low contrast, soft edges, fewer and smaller. They must still be recognisable as dry skin, but calm and respectful, never dominant, never looking like hair or dirt. Nothing else changes.',
+  },
+  {
+    id: 'C16', group: 'C', kind: 'edit', base: 'C16o',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, people, clothes, poses, faces, hair). Change ONLY the dry skin patches on the patient\'s hand: make them much more SUBTLE and matched to her own skin tone - only slightly darker and slightly more matte and ashy than the surrounding skin, low contrast, soft edges, fewer and smaller. They must still be recognisable as dry skin, but calm and respectful, never dominant, never looking like hair or dirt. Nothing else changes.',
   },
   // ---------------------------------------------------------------- Gruppe D: Akzente
   {
