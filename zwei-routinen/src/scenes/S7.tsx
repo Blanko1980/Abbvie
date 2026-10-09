@@ -3,8 +3,9 @@ import {A, colors, ease, lerp, scene} from '../theme';
 import {Layer} from '../components/ParallaxImage';
 import {NotesShot, PatientHandShot, patientDxFor, RoomShot, slipAt, SlipShot} from '../components/Shots';
 
-// S7 Das Innehalten im Behandlungsraum: Patientin 4, der Arzt schreibt – und hält inne (30 Frames, wie der Finger in S5),
-// schaut die Patientin an, erklärt, sie reagiert. Dann schiebt er ihr den Gold-Zettel zu (Gold ab dem ersten Frame).
+// S7 Das Innehalten im Behandlungsraum: Patientin 4, der Arzt beginnt das übliche Rezept – und hält inne (30 Frames, wie der
+// Finger in S5, die eilige Musik bricht ab). Er legt den Stift bewusst ab, schaut die Patientin an, erklärt, sie reagiert.
+// Dann schiebt er ihr den Gold-Zettel zu (Gold ab dem ersten Frame).
 const S = scene('S7');
 
 export const S7: React.FC<{f: number}> = ({f}) => {
@@ -15,7 +16,7 @@ export const S7: React.FC<{f: number}> = ({f}) => {
     switch (s.id) {
       case 'wide': return <RoomShot id={S.patient} f={lf} dur={dur} zoom={s.zoom} />;
       case 'hand': return <PatientHandShot id="C16" f={lf} dur={dur} />;
-      case 'notes': return <NotesShot f={lf} dur={dur} write={s.write} pause={s.pause} />;
+      case 'notes': return <NotesShot f={lf} dur={dur} write={s.write} ink={s.ink} pause={s.pause} penDown={s.penDown} />;
       case 'look': return <RoomShot id={S.patient} f={lf} dur={dur} zoom={[1.06, 1.07]}><Layer p={doc.C10} /></RoomShot>;
       case 'explain': return (
         <RoomShot id={S.patient} f={lf + 30} dur={dur + 30} zoom={[1.06, 1.08]}>

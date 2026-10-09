@@ -1,0 +1,10 @@
+{
+  "routine": {
+    "seconds": 64,
+    "prompt": "Instrumental underscore for a calm, premium healthcare explainer film. Exactly 100 BPM, steady tempo from the first beat, A minor. A busy, slightly hurried everyday routine: tight plucked acoustic guitar ostinato in eighth notes, pizzicato strings, warm upright bass, soft brushed snare and a light shaker, gentle forward drive and mild restlessness. Organic acoustic instruments only, warm and human, unobtrusive under picture. No synthesizers, no electronic drums, no video-game sounds, no vocals. Starts directly on the beat, no long intro."
+  },
+  "calm": {
+    "seconds": 48,
+    "prompt": "Instrumental underscore for a calm, premium healthcare explainer film. Relaxed and warm, about 80 BPM, C major. Soft felt piano with gentle sustained strings and a little fingerpicked acoustic guitar, open and hopeful, a feeling of relief and having time again. Organic acoustic instruments only, no drums, no synthesizers, no video-game sounds, no vocals. Begins softly, gentle ending."
+  }
+}

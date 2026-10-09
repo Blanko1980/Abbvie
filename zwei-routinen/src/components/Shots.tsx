@@ -2,10 +2,11 @@ import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {A, colors, ease, lerp, settleHold, T} from '../theme';
 import {camMap, Cam, Layer, ParallaxImage} from './ParallaxImage';
-import {ClockBadge, CLOCK} from './ClockBadge';
+import {CLOCK, WallClock} from './WallClock';
 import {center, NAVI, NAVI_POS, NaviScreen, NaviState} from './NaviScreen';
 import {Slip} from './Slip';
-import {mapPoint, matrix3d} from '../homography';
+import {mapPoint, matrix3d, quadToUnit} from '../homography';
+import {Handwriting, inkState, LINES, PAD, padToSrc} from './Handwriting';
 import anchors from '../data/anchors.json';
 
 // ------------------------------------------------------------ Anker (Quellpixel, aus den Bildern gemessen)
@@ -72,6 +73,7 @@ const GRAB = {
   bag: {full: 'B7', empty: 'B7e', reach: 'C18', lift: 'C18k', from: [0.55, -1], up: [40, -170]},
 };
 const poseOf = (g: string) => Object.values(A[g].pose)[0] as any;
+const KEY_RING = [865, 730, 50];   // Mitte und Radius des Schlüsselrings am mittleren Haken (Quellpixel B6)
 export const GrabShot: React.FC<{kind: 'key' | 'bag'; f: number; dur: number}> = ({kind, f, dur}) => {
   const g = GRAB[kind];
   const grab = Math.round(dur * 0.5);
@@ -81,7 +83,19 @@ export const GrabShot: React.FC<{kind: 'key' | 'bag'; f: number; dur: number}> =
     return <ParallaxImage id={g.full} cam={cam}><Layer p={poseOf(g.reach)} dx={g.from[0] * d} dy={g.from[1] * d} /></ParallaxImage>;
   }
   const u = lerp(f, [grab + 2, dur], [0, 1], ease.inOut);
-  return <ParallaxImage id={g.empty} cam={cam}><Layer p={poseOf(g.lift)} dx={g.up[0] * u} dy={g.up[1] * u} /></ParallaxImage>;
+  const dx = g.up[0] * u, dy = g.up[1] * u;
+  return (
+    <ParallaxImage id={g.empty} cam={cam}>
+      <Layer p={poseOf(g.lift)} dx={dx} dy={dy} />
+      {/* Schlüsselring geschlossen nachzeichnen: am Haken war ein Stück vom Haken verdeckt */}
+      {kind === 'key' ? (
+        <svg style={{position: 'absolute', left: KEY_RING[0] - 70 + dx, top: KEY_RING[1] - 70 + dy}} width={140} height={140} viewBox="-70 -70 140 140">
+          <circle r={KEY_RING[2]} fill="none" stroke="#8E9296" strokeWidth={13} />
+          <circle r={KEY_RING[2]} fill="none" stroke="#C9CCCF" strokeWidth={8} />
+        </svg>
+      ) : null}
+    </ParallaxImage>
+  );
 };
 
 // Auto aus der Fahrerperspektive über die Schulter (B3); Gurt rastet ein: kleiner weißer Puls
@@ -137,15 +151,14 @@ export const approachFinger = (f: number, [a, b]: number[], hoverPx: number): Fi
 };
 
 // ------------------------------------------------------------ Praxis-Eingangshalle
-export const HallShot: React.FC<{clock?: string; flip?: number; office?: number; cam?: Cam; plate?: string; children?: React.ReactNode}> = ({clock, flip = 1, office = 1, cam = {z: 1}, plate = 'B4c', children}) => (
+export const HallShot: React.FC<{clock: string; f?: number; cam?: Cam; plate?: string; children?: React.ReactNode; front?: React.ReactNode}> = ({clock, f = 0, cam = {z: 1}, plate = 'B4c', children, front}) => (
   <ParallaxImage id={plate} cam={cam}>
-    {clock ? <ClockBadge time={clock} flip={flip} office={office} part="hands" /> : null}
+    <WallClock time={clock} f={f} />
     {children}
-    {/* Plakette als Einblendung vor der Figur – Uhrzeit bleibt immer lesbar */}
-    {clock ? <ClockBadge time={clock} flip={flip} office={office} part="badge" /> : null}
+    {front}
   </ParallaxImage>
 );
-export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy - 70};
+export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy};
 
 // Gehende Figur (zwei Schrittphasen im Wechsel); feet = Abstand Fußlinie → Unterkante der Ebene
 export const Walker: React.FC<{group: string; f: number; range: number[]; x: number[]; step: number; flip?: boolean; dy?: number[]; scale?: number[]; feet?: number}> = ({group, f, range, x, step, flip, dy = [0, 0], scale = [1, 1], feet = 0}) => {
@@ -169,16 +182,27 @@ export const RoomShot: React.FC<{id: string; f: number; dur: number; zoom?: [num
   <ParallaxImage id={id} cam={{z: lerp(f, [0, dur], zoom, ease.inOut), fx: 1440, fy: 760}}>{children}</ParallaxImage>
 );
 
-// Schreiben: der Block liegt still (C7pad), nur die Hand bewegt sich in kleinen Schleifen nach rechts.
-// pause: die Hand hört auf zu schreiben, hebt den Stift ein wenig und hält inne (gleiche Kurve wie der Finger in S5).
-export const NotesShot: React.FC<{f: number; dur: number; write?: number[]; pause?: number[]}> = ({f, dur, write, pause}) => {
-  const t = write ? Math.min(f, write[1]) : f;
-  let dx = Math.sin(t * 0.22) * 16 + Math.sin(t * 1.15) * 4, dy = Math.cos(t * 1.15) * 3;
+// Schreiben: der Block liegt still (C7pad, leer), die Schrift wächst im Code mit, die Stiftspitze sitzt immer am Ende der Linie.
+// write: Schreibzeit, ink: Anteil der Schrift bis zum Ende der Schreibzeit. pause: Stift hebt leicht ab und hält inne
+// (gleiche Kurve wie der Finger in S5). penDown: die Hand legt den Stift bewusst ab (Überblendung zu C7d).
+const PEN_TIP = [1355, 904];                                   // Stiftspitze der Schreibhand C7 in Ruhelage (Quellpixel)
+const [TIP_U, TIP_V] = quadToUnit(PAD, PEN_TIP[0], PEN_TIP[1]);
+const WORDS = LINES(TIP_V, TIP_U - 0.24, 0.5);
+export const NotesShot: React.FC<{f: number; dur: number; write?: number[]; ink?: number; pause?: number[]; penDown?: number[]}> = ({f, dur, write = [0, dur], ink = 0.5, pause, penDown}) => {
+  const p = lerp(f, write, [0, ink]);
+  const {shown, tip} = inkState(WORDS, p);
+  const [tx, ty] = padToSrc(tip[0], tip[1]);
+  let dx = tx - PEN_TIP[0], dy = ty - PEN_TIP[1] + Math.sin(f * 1.7) * 1.5;
   if (pause && f >= pause[0]) dy += lerp(f, [pause[0], pause[0] + 10], [0, -16], ease.settle) + settleHold(f, pause) * 1.5;
+  const down = penDown ? lerp(f, penDown, [0, 1], ease.inOut) : 0;
+  const hand = A.C7.pose.C7, rest = A.C7d.pose.C7d;
+  const toRest = [(rest.x + rest.w / 2 - (hand.x + hand.w / 2)) * 0.5, (rest.y + rest.h / 2 - (hand.y + hand.h / 2)) * 0.5];
   return (
     <ParallaxImage id="DESK" cam={{...DESK_CAM, z: lerp(f, [0, dur], [1.2, 1.24])}}>
-      <Layer p={A.C7pad.pose.C7p} />
-      <Layer p={A.C7.pose.C7} dx={dx} dy={dy} style={handShadow(pause && f >= pause[0] ? 0.5 : 0.2)} />
+      <Layer p={A.C7pad.pose.C7b} />
+      <Handwriting words={WORDS} shown={shown} />
+      {down < 1 ? <Layer p={hand} dx={dx + toRest[0] * down} dy={dy + toRest[1] * down} opacity={1 - lerp(down, [0.3, 0.8], [0, 1])} style={handShadow(pause && f >= pause[0] ? 0.5 : 0.2)} /> : null}
+      {down > 0 ? <Layer p={rest} opacity={lerp(down, [0.3, 0.8], [0, 1])} style={handShadow(0.1)} /> : null}
     </ParallaxImage>
   );
 };

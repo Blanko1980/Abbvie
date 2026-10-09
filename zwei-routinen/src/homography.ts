@@ -23,3 +23,13 @@ export const matrix3d = (q: Quad, w: number, h: number) => {
   const M = [m.a / w, m.d / w, 0, m.g / w, m.b / h, m.e / h, 0, m.h / h, 0, 0, 1, 0, m.c, m.f, 0, 1];
   return `matrix3d(${M.join(',')})`;
 };
+
+// Umkehrung: Punkt im Viereck → (u, v) im Einheitsquadrat
+export const quadToUnit = (q: Quad, x: number, y: number) => {
+  const {a, b, c, d, e, f, g, h} = squareToQuad(q);
+  // x = (a u + b v + c) / (g u + h v + 1), y = (d u + e v + f) / (g u + h v + 1)  →  lineares 2×2-System
+  const A11 = a - g * x, A12 = b - h * x, B1 = x - c;
+  const A21 = d - g * y, A22 = e - h * y, B2 = y - f;
+  const det = A11 * A22 - A12 * A21;
+  return [(B1 * A22 - A12 * B2) / det, (A11 * B2 - B1 * A21) / det];
+};

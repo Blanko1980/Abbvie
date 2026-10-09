@@ -23,7 +23,7 @@ export const S3: React.FC<{f: number}> = ({f}) => {
     switch (s.id) {
       case 'wide': return <RoomShot id={S.patient} f={lf} dur={dur} zoom={s.zoom} />;
       case 'hand': return <PatientHandShot id={S.patientHand} f={lf} dur={dur} />;
-      case 'notes': return <NotesShot f={lf} dur={dur} />;
+      case 'notes': return <NotesShot f={lf} dur={dur} ink={0.7} />;
       case 'look': return <RoomShot id={S.patient} f={lf + 90} dur={dur + 90} zoom={[1.06, 1.08]} />;
       case 'slip': return slipHandover(lf, s, colors.deepTeal2, 'C12');
     }

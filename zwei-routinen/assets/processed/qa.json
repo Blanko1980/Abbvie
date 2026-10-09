@@ -120,7 +120,7 @@
   "ok": true
  },
  "C17a": {
-  "teal": 0.0006516465751356647,
+  "teal": 0.0006515934990516599,
   "gold": 0,
   "ok": true
  },
@@ -189,7 +189,17 @@
   "gold": 0,
   "ok": true
  },
- "C7p": {
+ "C7b": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "C7d": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "B4d": {
   "teal": 0,
   "gold": 0,
   "ok": true
@@ -205,6 +215,21 @@
   "ok": true
  },
  "C3pb": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "C3q": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "C3qb": {
+  "teal": 0,
+  "gold": 0,
+  "ok": true
+ },
+ "C3g": {
   "teal": 0,
   "gold": 0,
   "ok": true

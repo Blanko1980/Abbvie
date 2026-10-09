@@ -1,18 +1,18 @@
 # Bericht: „Zwei Routinen“
 
-Stand: 08.10.2026 (Korrekturfassung 2). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
+Stand: 09.10.2026 (Korrekturfassung 3). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
 
 ## Abnahme-Checkliste
 
-- [x] **Formate:** `out/zwei-routinen.mp4` und `out/zwei-routinen-muted.mp4` existieren, beide 1920 × 1080, 30 fps, 2744 Frames (91,5 s), H.264. Die stumme Fassung hat keine Tonspur. Messwerte: siehe unten.
+- [x] **Formate:** `out/zwei-routinen.mp4` und `out/zwei-routinen-muted.mp4` existieren, beide 1920 × 1080, 30 fps, 2776 Frames (92,5 s), H.264. Die stumme Fassung hat keine Tonspur. Messwerte: siehe unten.
 - [x] **Texte:** Jede deutsche Tafel stammt wörtlich aus `src/data/timeline.json`. Der Callout lautet „Rethink the Routine“. Hinweis: Abschnitt 5 des Briefings („Section 5“) lag nicht bei. Alle Texte sind deshalb Zeichen für Zeichen aus den Szenenbeschreibungen des Briefings übernommen.
 - [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen Bildern bestanden (Kontaktbogen: 44 Bilder bzw. Ebenen), Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
 - [x] **Teal und Gold** kommen nur auf Routenlinien (Karte und Routenkarten im Navi), Zetteln, Tafel-Unterstreichungen und dem Callout-Pinsel vor.
 - [x] **Gold-Zettel in S7:** ist ab dem ersten sichtbaren Frame gold. Die Farbe ist eine Konstante und ändert sich nie.
-- [x] **S2 und S6:** dieselbe Halle (B4) und dieselbe Kamera. In S2 trägt der Arzt den Kittel schon im Laufen, deshalb hängt dort keiner an der Garderobe. In S6 hängt der Kittel von Anfang an dort (B4c), und an der Garderobe steht danach seine Tasche (B4cb). Sonst gleich: (feststehend, Zoom 1,0). Unterschiede: nur Uhr (08:55 / 08:43), Pose und Tempo.
-- [x] **Beide Pausen** (S5: Finger über „Bestätigen“, S7: der Stift hält nach dem Schreiben inne) dauern genau 30 Frames. Gleiche Kurve (`settleHold`), gleiche Ton-Absenkung: 3 Frames auf −40 dB, 30 Frames halten, 6 Frames Rückkehr. Gemessen: rund −50 dBFS in beiden Pausen, nur Raumton.
+- [x] **S2 und S6:** dieselbe Halle und dieselbe Kamera, der Kittel hängt beide Male an der Garderobe (B4c). In S2 kommt der Arzt in Alltagskleidung, reißt den Kittel im Laufen vom Haken und hastet weiter; in S6 hängt er die Jacke auf und zieht den Kittel in Ruhe an, seine Tasche steht neben der Pflanze (B4cb). Unterschiede sonst: Uhrzeit (08:55 / 08:43), Pose und Tempo.
+- [x] **Beide Pausen** (S5: Finger über „Bestätigen“, S7: der Stift hält mitten im üblichen Rezept inne) dauern genau 30 Frames. In beiden bricht die eilige Musik ab (3 Frames), nach der Pause setzt die ruhige Musik ein (6 Frames). Gleiche Kurve (`settleHold`), gleiche Tonführung. Gemessen: rund −50 dBFS in beiden Pausen, nur Raumton.
 - [x] **Match Cut S4:** Fingerspitze und Handmitte folgen derselben Bewegungskurve in Filmkoordinaten. Der Schnitt liegt auf der Spitzengeschwindigkeit (Mitte der S-Kurve). Richtung (links nach rechts, leicht abwärts), Tempo und Bildposition sind beim Schnitt also identisch.
-- [x] **S7:** Der Arzt schreibt, hält inne (30 Frames), schaut die Patientin an, erklärt, sie reagiert – erst dann schiebt er ihr den Gold-Zettel zu (115 Frames Begegnung zwischen Pause und Zettel).
+- [x] **S7:** Der Arzt beginnt das übliche Rezept, hält inne (30 Frames, Musik bricht ab), legt den Stift bewusst ab, schaut die Patientin an, erklärt, sie reagiert – erst dann schiebt er ihr den Gold-Zettel zu.
 - [x] **Hautstellen:** in jeder Patienteneinstellung sichtbar, auch in der letzten Einstellung von S7 (Hand von Patientin 4 nimmt den Gold-Zettel).
 - [x] **Patienten:** drei deutlich verschiedene in S3 und S4 (Patient 1, 2, 3), dazu Patientin 4 in S7.
 - [x] **Stumm-Prüfung:** `out/muted-contact-sheet.png` mit 24 gleichmäßig verteilten Frames der stummen Fassung. Lesbar sind: Routine, Eile, Innehalten an der Route, ruhigere Ankunft, Innehalten beim Zettel, Entscheidung.
@@ -24,8 +24,8 @@ Stand: 08.10.2026 (Korrekturfassung 2). Bildmodell: `gemini-3-pro-image`. Es unt
 
 | Datei | Video | Ton |
 |---|---|---|
-| `out/zwei-routinen.mp4` (32 MB) | H.264, 1920 × 1080, 30 fps, 2744 Frames | AAC 48 kHz Stereo, −15,9 LUFS integriert, True Peak −1,4 dB |
-| `out/zwei-routinen-muted.mp4` (28 MB) | H.264, 1920 × 1080, 30 fps, 2744 Frames | keine Tonspur |
+| `out/zwei-routinen.mp4` | H.264, 1920 × 1080, 30 fps, 2776 Frames | AAC 48 kHz Stereo, −15,9 LUFS integriert, True Peak −1,4 dB |
+| `out/zwei-routinen-muted.mp4` | H.264, 1920 × 1080, 30 fps, 2776 Frames | keine Tonspur |
 
 Zusätzlich gemessen:
 - Geräusche liegen 6,5 dB über dem Musikbett.
@@ -100,3 +100,17 @@ Zusätzlich gemessen:
 **Neue Bilder:** B4cb, B6, B6e, B7o (verworfen als Grundlage, Ausschnitt verschob sich beim Entfernen), B7e, B7, C17a, C18a, C2a, C2b, C7p, C3p, C3pb.
 **Entfallen:** C2, C17, C18 (Platten auf Weiß), C3/C3b (Raumbearbeitungen mit Kittel-Löchern), C1.
 **Fehlversuche:** Hintergrund per Bearbeitung durch Magenta ersetzen (C3m usw.): Gemini färbte nur die Decke. Tasche entfernen (B7e aus B7o): Ausschnitt verschob sich, deshalb umgekehrt aufgebaut (leere Bank → Tasche hinzufügen).
+
+## Korrekturen 09.10.2026 (Korrekturfassung 3)
+
+| Stelle | Korrektur |
+|---|---|
+| Musik | Neu: zwei akustische Stücke von ElevenLabs Music (`scripts/fetch-music.mjs`, `public/audio/music`). „routine“: gezupfte Gitarre, Pizzicato-Streicher, Kontrabass, Besen – leicht gehetzt, gemessen 100,03 BPM, die Schnitte liegen weiter auf dem Raster. „calm“: Klavier, Streicher, Gitarre – entspannt. Keine Synthesizer. Die eilige Musik bricht in beiden Pausen ab, danach setzt die ruhige ein. |
+| Schlüssel | Hand per GrabCut freigestellt (kein durchsichtiger Finger mehr), Haken bleibt am Brett, Schlüsselring wird beim Abheben geschlossen nachgezeichnet. |
+| Navi | Die diagonale Straße gibt es erst, wenn das Navi die neue Route findet. Die Gold-Route führt direkt über sie zum Ziel (rund 30 % kürzer als Teal). |
+| Praxis-Uhr | Keine Einblendung mehr: digitale Wanduhr (08:55 / 08:43) und ein Schild „Sprechstunde ab 9:00 Uhr“ an der Wand (Bearbeitung B4d, Anzeige und Text im Code). |
+| Schreiben | Leerer Block (C7b), die Schrift entsteht im Code perspektivisch auf dem Block, die Stiftspitze sitzt immer am Linienende. Sichtbar wird sie hinter der Stiftspitze, beim Zeilenwechsel und nach dem Ablegen des Stifts. |
+| Zettel | Liegen jetzt perspektivisch richtig auf der Tischplatte (Homografie der Platte). |
+| Patient Tag 3 | Hautstellen aufgehellt (aschgrau-violett), nicht mehr in der Farbe der Haare (C14 aus C14o). |
+| Eilige Ankunft | Der Arzt kommt in Alltagskleidung (Jacke), der Kittel hängt an der Garderobe. Er reißt ihn im Laufen vom Haken und hastet mit dem Kittel in der Hand hinter dem Tresen weiter (C3p/C3pb/C3g/C3q/C3qb, Tresen als Vordergrund). Erst bei der neuen Route hängt er die Jacke auf und zieht den Kittel in Ruhe an. |
+| Innehalten S7 | Schreiben → Innehalten (Musik bricht ab) → Stift bewusst ablegen (C7d) → Blick zur Patientin mit ruhiger Musik. |

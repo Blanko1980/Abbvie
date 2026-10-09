@@ -32,8 +32,8 @@ const PLAN = [
   {group: 'C2', base: 'B3', members: ['C2a', 'C2b'], tight: true, dropMagenta: true, maskFile: true, extend: 700}, // Maske: scripts/arm-mask.py
   // Schlüssel und Tasche: dieselbe Greif-Hand zweimal freigestellt – über dem Bild mit Gegenstand (nur Hand, greift zu)
   // und über dem leeren Bild (Hand mit Gegenstand, hebt ab). Beim Umschalten sind die Pixel identisch.
-  {group: 'C17', base: 'B6', members: ['C17a'], tight: true, extend: 300},
-  {group: 'C17k', base: 'B6e', members: ['C17a'], rename: {C17a: 'C17ak'}, tight: true, extend: 300},
+  {group: 'C17', base: 'B6', members: ['C17a'], tight: true, extend: 300, maskFile: 'C17a-hand', dropGrey: true, despeckle: true},   // Masken: scripts/arm-mask.py
+  {group: 'C17k', base: 'B6e', members: ['C17a'], rename: {C17a: 'C17ak'}, tight: true, extend: 300, maskFile: 'C17a'},
   {group: 'C18', base: 'B7', members: ['C18a'], tight: true, extend: 300},
   {group: 'C18k', base: 'B7e', members: ['C18a'], rename: {C18a: 'C18ak'}, tight: true, extend: 300, dropLight: true, despeckle: true},
   {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
@@ -45,11 +45,16 @@ const PLAN = [
   {group: 'C12', base: 'DESK', members: ['C12'], tight: true, dropShadow: 0, despeckle: true, extend: 600},
   {group: 'C16', base: 'DESK', members: ['C16'], tight: true, dropShadow: 0, despeckle: true, extend: 600},
   // Block liegt still, nur die schreibende Hand bewegt sich
-  {group: 'C7pad', base: 'DESK', members: ['C7p']},
+  {group: 'C7pad', base: 'DESK', members: ['C7b']},   // leerer Block, die Schrift entsteht im Code
+  {group: 'C7d', base: 'C7b', members: ['C7d'], dropPaper: true},   // nicht eng: der abgelegte Stift ist eine eigene Insel   // Stift bewusst abgelegt (S7)
+  // Praxis-Halle: digitale Wanduhr (Magenta-Anzeige, Ziffern im Code) und Sprechzeiten-Schild, als Ausschnitt über allen Hallenbildern
+  {group: 'HALL', base: 'B4', members: ['B4d']},
   {group: 'C7', base: 'C7p', members: ['C7'], tight: true, maskFile: true, extend: 300}, // Maske: scripts/arm-mask.py
   // rennender Arzt (S2/S4) auf grauem Grund: saubere Kanten auch am weißen Kittel
-  {plate: ['C3p', 'C3pb']},
+  {plate: ['C3p', 'C3pb', 'C3q', 'C3qb', 'C3g']},
   {brush: 'D1'},
+  // Tresen als Vordergrund-Ebene: der eilige Arzt läuft hinter ihm vorbei
+  {front: 'COUNTER', from: 'B4', box: [2090, 820, 2880, 1607]},
 ];
 
 // ------------------------------------------------------------ Bildhilfen
@@ -276,7 +281,7 @@ async function group(g) {
   }
   for (const [id, v] of Object.entries(vars)) {
     let alpha = g.maskFile
-      ? await blurMask(Float32Array.from(await sharp(path.join(ROOT, 'assets/masks', `${id}.png`)).resize(w, h).greyscale().raw().toBuffer(), (x) => x / 255), w, h, 1)
+      ? await blurMask(Float32Array.from(await sharp(path.join(ROOT, 'assets/masks', `${typeof g.maskFile === 'string' ? g.maskFile : id}.png`)).resize(w, h).greyscale().raw().toBuffer(), (x) => x / 255), w, h, 1)
       : shared || await maskFrom(await diffKeep(base, v, w, h, g.split, g.thresh, g.woodChroma), w, h, g);
     if (g.inner) {
       // Innerhalb der Figur: Pixel, die dem Hintergrund (fast) gleichen, durchsichtig machen –
@@ -324,6 +329,15 @@ async function group(g) {
         }
         if (comp.length < 1500) for (const i of comp) alpha[i] = 0;
       }
+    }
+    if (g.dropGrey) {
+      // grauer Wandschatten neben der Hand wandert sonst als Balken mit
+      // nur Haut (warm) und dunkler Ärmel bleiben
+      alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return r - b > 28 || Math.max(r, gg, b) < 110 ? a : 0; });
+    }
+    if (g.dropPaper) {
+      // weißes Papier (Block) gehört nicht zur Ebene, sonst verdeckt es die Schrift
+      alpha = alpha.map((a, i) => { const r = v.data[i * 3], gg = v.data[i * 3 + 1], b = v.data[i * 3 + 2]; return Math.min(r, gg, b) > 234 && Math.max(r, gg, b) - Math.min(r, gg, b) < 14 ? 0 : a; });
     }
     if (g.dropLight) {
       // Hand (Haut), Ärmel und Tasche (dunkel) bleiben; helle, ungesättigte Reste (Bankkante, Wand) fallen weg
@@ -408,6 +422,24 @@ async function plate(id) {
   check(id, im, alpha);
 }
 
+// Vordergrund aus einem Plattenbild ausschneiden (Holzfarbe im Kasten), z. B. der Tresen in der Halle
+async function front(st) {
+  const im = await load(st.from);
+  if (!im) return;
+  const {data, w, h} = im, [bx0, by0, bx1, by1] = st.box;
+  let alpha = new Float32Array(w * h);
+  for (let y = by0; y < Math.min(by1, h); y++) for (let x = bx0; x < Math.min(bx1, w); x++) {
+    const i = y * w + x, r = data[i * 3], b = data[i * 3 + 2];
+    alpha[i] = Math.min(1, Math.max(0, (r - b - 18) / 12));
+  }
+  alpha = await blurMask(alpha, w, h, 1.5);
+  alpha = alpha.map((a) => Math.min(1, Math.max(0, (a - 0.3) / 0.4)));
+  const crop = bbox(alpha, w, h);
+  const {out, cw, ch} = rgba(data, alpha, w, h, crop);
+  await savePng(out, cw, ch, `${st.front}.png`);
+  meta[st.front] = {src: `img/${st.front}.webp`, x: crop.x0, y: crop.y0, w: cw, h: ch};
+}
+
 async function brush(id) {
   const im = await load(id);
   if (!im) return;
@@ -431,13 +463,18 @@ for (const step of PLAN) {
   if (step.screen) await screen(step.screen);
   if (step.group) await group(step);
   if (step.plate) for (const id of step.plate) await plate(id);
-  if (step.plate?.includes('C3p') && meta.C3p && meta.C3pb) {
-    // Rennender Arzt als Pose-Gruppe in B4-Koordinaten: Größe und Fußlinie wie die alte Raumbearbeitung (Höhe 836, Fuß 1400)
+  if (step.plate?.includes('C3p') && meta.C3p) {
+    // Rennender Arzt (Alltagskleidung) als Pose-Gruppen in B4-Koordinaten, alle Platten deckungsgleich:
+    // Größe und Fußlinie an der Tür (Höhe 836, Fuß 1400). C3 ohne Kittel, C3c mit Kittel in der Hand, C3g greift den Kittel.
     const k = 836 / meta.C3p.h, X0 = 1104 - (meta.C3p.full.x + meta.C3p.w / 2) * k, Y0 = 1400 - (meta.C3p.full.y + meta.C3p.h) * k;
     const pose = (id) => ({src: meta[id].src, x: Math.round(X0 + meta[id].full.x * k), y: Math.round(Y0 + meta[id].full.y * k), w: Math.round(meta[id].w * k), h: Math.round(meta[id].h * k)});
     meta.C3 = {base: 'B4', pose: {C3p: pose('C3p'), C3pb: pose('C3pb')}};
+    meta.C3c = {base: 'B4', pose: {C3q: pose('C3q'), C3qb: pose('C3qb')}};
+    meta.C3g = {base: 'B4', pose: {C3g: pose('C3g')}};
+    meta.C3feet = {feet: Math.round(Y0 + (meta.C3p.full.y + meta.C3p.h) * k)};
   }
   if (step.brush) await brush(step.brush);
+  if (step.front) await front(step);
 }
 
 fs.mkdirSync(path.join(ROOT, 'src/data'), {recursive: true});

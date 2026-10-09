@@ -1,6 +1,6 @@
 # Zwei Routinen
 
-Alternative Fassung des NAVI-Films: 91,5 s, 1920 × 1080, 30 fps (2744 Frames), H.264, ohne Voiceover.
+Alternative Fassung des NAVI-Films: 92,5 s, 1920 × 1080, 30 fps (2776 Frames), H.264, ohne Voiceover.
 Die Standbilder stammen aus der Gemini-Bild-API. Animation, Timing, Navi-Oberfläche, Uhr, Zettel, Texttafeln und Ton entstehen im Code (Remotion).
 
 ## Ergebnisse
@@ -22,6 +22,7 @@ node scripts/generate-assets.mjs            # fehlende Bilder erzeugen (--only <
 python3 scripts/arm-mask.py                 # Masken für Ärmel, die dem Hintergrund gleichen (C2a, C2b, C7; braucht opencv)
 node scripts/postprocess.mjs                # Hochskalieren, Freistellen, Farbleck-Check → assets/processed, src/data/assets.json
 node scripts/fetch-sfx.mjs                  # Geräusche von ElevenLabs (nur fehlende)
+node scripts/fetch-music.mjs                # Musik von ElevenLabs Music (nur fehlende, --force erzeugt neu)
 node scripts/build-audio.mjs                # Tonspur → public/audio/mix.wav, beats.json, Rasterprüfung
 node scripts/contact-sheet.mjs              # Kontaktbogen
 npx remotion studio                         # Vorschau
@@ -40,12 +41,12 @@ Schlüssel kommen aus `GEMINI_API_KEY` und `ELEVENLABS_API_KEY` und werden nie a
 | `src/data/timeline.json` | Alle Frame-Nummern und Texte. Szenen lesen nur hieraus, nichts ist in den Szenen fest verdrahtet |
 | `src/theme.ts` | Farben, Schriften (`// TODO brand font`), Easing |
 | `src/scenes/S1–S8.tsx` | Die acht Szenen |
-| `src/components/` | `NaviScreen` (SVG), `ClockBadge`, `Slip`, `TextPanel`, `Callout`, `ParallaxImage`, `Shots` (wiederverwendete Einstellungen) |
+| `src/components/` | `NaviScreen` (SVG), `WallClock` (Wanduhr und Schild), `Handwriting`, `Slip`, `TextPanel`, `Callout`, `ParallaxImage`, `Shots` (wiederverwendete Einstellungen) |
 | `assets/asset-list.mjs` | Alle Bild-Prompts, das Stilpräfix und die Referenzen |
 | `assets/gen/` | Gewählte Gemini-Bilder, `candidates/` alle Kandidaten |
 | `assets/processed/` | Aufbereitete Bilder (über `public/img` eingebunden) |
 | `assets/reference/` | Stilreferenzen aus dem ersten NAVI-Film (Stil C) |
-| `public/audio/` | `mix.wav` und `sfx/` (ElevenLabs) |
+| `public/audio/` | `mix.wav`, `music/` und `sfx/` (ElevenLabs) |
 
 ## Verfahren
 
@@ -53,4 +54,4 @@ Schlüssel kommen aus `GEMINI_API_KEY` und `ELEVENLABS_API_KEY` und werden nie a
 - **Einzelplatten** (rennender Arzt C3p/C3pb) entstehen auf flachem Grau und werden per Flood-Fill vom Rand freigestellt.
 - **Arme**, deren Ärmel dem Hintergrund gleicht (Navi-Arm, Kittelärmel beim Schreiben), werden per GrabCut entlang der Armachse freigestellt (`scripts/arm-mask.py`).
 - **Farbleck-Check:** Jedes Bild wird auf Teal (195–215°, S > 35 %) und Gold (45–55°, S > 80 %) geprüft. Mehr als 0,5 % der Nicht-Haut-Pixel führen zum Fehler.
-- **Ton:** Raster mit 100 BPM. Beide Pausen (S5 und S7) haben dieselbe Hüllkurve: 3 Frames Absenkung auf −40 dB, 30 Frames halten, 6 Frames Rückkehr.
+- **Ton:** Zwei akustische Musikstücke (ElevenLabs Music): eilig (100 BPM, auf dem Schnittraster) und ruhig. In beiden Pausen (S5 und S7) bricht die eilige Musik in 3 Frames ab, 30 Frames nur Raumton, dann setzt die ruhige Musik in 6 Frames ein.

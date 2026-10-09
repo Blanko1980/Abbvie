@@ -136,7 +136,7 @@ export const ASSETS = [
     prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, attentive; on the RIGHT chair PATIENT 2 from the second model sheet (woman, ash-blonde shoulder-length hair, fair skin, off-white blouse, beige cardigan) seated, glancing up at the doctor. The dry skin patches on her neck and the side of her face are visible. The desk stays empty.',
   },
   {
-    id: 'C14', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A4.jpg'],
+    id: 'C14o', group: 'C', kind: 'edit', base: 'B5', refs: [DOC, 'assets/gen/A4.jpg'],
     prompt: 'Edit the first attached image (the empty consultation room). Keep the room and the camera EXACTLY identical. ADD on the LEFT chair the DOCTOR from the first model sheet (light grey-white coat over a charcoal jumper) seated, attentive; on the RIGHT chair PATIENT 3 from the second model sheet (broad sturdy man, very short black hair with a little grey, deep brown skin, charcoal-brown cardigan) seated, giving a small nod, eye contact. The darker, greyish dry skin patches on his hands and face are visible. The desk stays empty. No motion lines, no comic symbols.',
   },
   {
@@ -225,14 +225,47 @@ export const ASSETS = [
     prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel: the desk, the camera, the white notepad and the faint grey squiggle lines on it. Remove ONLY the hand, the pen and the sleeve completely; where they were, show the notepad and the desk continuing naturally. Nothing else changes.',
   },
   {
-    id: 'C3p', group: 'C', kind: 'plate', refs: [DOC],
-    prompt: 'ISOLATED CHARACTER CUT-OUT on a seamless, perfectly flat, solid medium grey background (#9A9A9A) like a sticker sheet: no room, no floor, no walls, no gradient, no shadow at all: the DOCTOR from the attached model sheet in full figure, hurrying FAST toward the RIGHT side of the image (seen from the side, slightly three-quarter), long hurried stride, leaning forward, a brown leather briefcase in his right hand. He wears the light grey-white doctor\'s coat PROPERLY with BOTH arms in its sleeves, the coat open and flapping a little behind him; charcoal jumper and dark grey trousers underneath, dark shoes. Same proportions and look as on the attached model sheet. Clean silhouette, nothing else in the image.',
+    id: 'C3p0', group: 'C', kind: 'plate', refs: [DOC],
+    prompt: 'ISOLATED CHARACTER CUT-OUT on a seamless, perfectly flat, solid medium grey background (#9A9A9A) like a sticker sheet: no room, no floor, no walls, no gradient, no shadow at all: the DOCTOR from the attached model sheet in full figure, hurrying FAST toward the RIGHT side of the image (seen from the side, slightly three-quarter), long hurried stride, leaning forward, a brown leather briefcase in his right hand, his left hand free and swinging. He wears his EVERYDAY clothes: an open dark grey casual jacket (worn on the body) over the charcoal jumper, dark grey trousers, dark shoes. NO doctor\'s coat. Clean silhouette, nothing else in the image.',
+  },
+  {
+    id: 'C3p', group: 'C', kind: 'edit', base: 'C3p0', refs: [DOC],
+    prompt: 'Edit the first attached image. Keep EVERYTHING identical, pixel for pixel (flat grey background, the doctor\'s position, size, pose, clothing, briefcase). ADD ONLY his thin dark rectangular glasses exactly as on the attached model sheet (second image), and give him a slightly calmer, focused hurried expression instead of an angry one. No shadow.',
   },
   {
     id: 'C3pb', group: 'C', kind: 'edit', base: 'C3p',
-    prompt: 'Edit the attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, coat, briefcase, face, forward lean). Change ONLY his stride to the opposite phase of the run cycle: the other leg is now in front and the arms swing the other way. No shadow.',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, jacket, briefcase, face, forward lean). Change ONLY his stride to the opposite phase of the run cycle: the other leg is now clearly in front and the arms swing the other way. No shadow.',
+  },
+  {
+    id: 'C3q', group: 'C', kind: 'edit', base: 'C3p',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, jacket, briefcase, face, stride). ADD ONLY a light grey-white doctor\'s coat that he holds bunched up by its collar in his free LEFT hand; the coat flutters loosely behind his hand as he hurries. No shadow.',
+  },
+  {
+    id: 'C3qb', group: 'C', kind: 'edit', base: 'C3pb', refs: ['assets/gen/C3q.jpg'],
+    prompt: 'Edit the first attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, jacket, briefcase, face, stride). ADD ONLY the light grey-white doctor\'s coat from the second attached image, held bunched up by its collar in his free LEFT hand and fluttering loosely behind his hand. No shadow.',
+  },
+  {
+    id: 'C3g', group: 'C', kind: 'edit', base: 'C3p',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical (flat grey background, the doctor\'s position, size, clothing, jacket, briefcase, face, legs). Change ONLY his free LEFT arm: it is raised forward to shoulder height and his hand grabs a light grey-white doctor\'s coat by its collar, snatching it on the run; the coat hangs down from his hand. No hook, no wall, no shadow.',
   },
 
+  // ---------------------------------------------------------------- Korrekturrunde 3
+  {
+    id: 'B4d', group: 'B', kind: 'edit', base: 'B4',
+    prompt: 'Edit the attached image (the empty practice entrance hall). Keep the room and the camera EXACTLY identical, pixel for pixel. Change ONLY two things on the white wall: (1) replace the round wall clock with a simple rectangular digital wall clock of similar size in the same place (thin white casing, its display is ONE perfectly flat uniform pure magenta colour #FF00FF, no digits); (2) directly BELOW the clock, on the same wall, add a small plain rectangular sign plate like an opening-hours sign (light warm-grey plate with a thin charcoal frame, its surface completely blank, no text). Nothing else changes, no people.',
+  },
+  {
+    id: 'C7b', group: 'C', kind: 'edit', base: 'C7p',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (desk, camera, the white notepad and its position). Remove ONLY the faint grey squiggle lines on the notepad: the notepad is now completely blank white. Nothing else changes.',
+  },
+  {
+    id: 'C7d', group: 'C', kind: 'edit', base: 'C7b', refs: ['assets/gen/C7.jpg'],
+    prompt: 'Edit the first attached image (a blank notepad on the desk). Keep the desk, the camera and the notepad EXACTLY identical. ADD the doctor\'s right hand and light grey-white coat sleeve from the second attached image, entering from the LEFT edge at the same place and size, but now the hand has just laid the charcoal pen down deliberately: the pen lies flat on the notepad, the relaxed open hand rests on the desk just left of the notepad, fingers released from the pen. No writing, no letters.',
+  },
+  {
+    id: 'C14', group: 'C', kind: 'edit', base: 'C14o',
+    prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, both people, clothes, poses, faces, hair). Change ONLY the colour of the dry skin patches on the patient\'s hands and face: they are now a lighter, ashy greyish-violet tone with soft edges, clearly lighter than his skin and clearly different from his black hair and beard, so they read unmistakably as dry skin, never as hair. Nothing else changes.',
+  },
   // ---------------------------------------------------------------- Gruppe D: Akzente
   {
     id: 'D1', group: 'D', kind: 'accent', refs: [],

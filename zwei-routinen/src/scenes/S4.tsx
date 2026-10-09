@@ -6,6 +6,7 @@ import {
   CLOCK_CAM, confirmTarget, CupShot, DESK_CAM, GrabShot, HallShot, NAVI_CAM, NaviShot, NotesShot, PALM, RoomShot, naviToSrc, slipAt, SlipShot, Walker,
 } from '../components/Shots';
 import {TextPanel} from '../components/TextPanel';
+import {Counter} from './S2';
 
 // S4 Die Routinen wiederholen sich: Tag 2 und 3 in schnellen Schnitten, Match Cut Finger → Zettel-Hand, Texttafel.
 const S = scene('S4');
@@ -65,14 +66,15 @@ const Day: React.FC<{day: any; f: number}> = ({day, f}) => {
       case 'cup': return <CupShot f={lf} dur={dur} full zoom={[1.04, 1.06]} />;
       case 'keys': return <GrabShot kind="key" f={lf + 6} dur={dur + 10} />;
       case 'navi': return <QuickNavi lf={lf} dur={dur} />;
-      case 'clock': return <HallShot clock={T.texts.clockLate} cam={CLOCK_CAM} plate="B4" />;
+      case 'clock': return <HallShot clock={T.texts.clockLate} f={lf} cam={CLOCK_CAM} plate="B4c" />;
       case 'coat': return (
-        <HallShot clock={T.texts.clockLate} plate="B4">
-          <Walker group="C3" f={from + lf} range={[from, to + 10]} x={[1100, 2100]} step={6} />
+        // wie in S2: mit dem Kittel in der Hand hinter dem Tresen vorbei
+        <HallShot clock={T.texts.clockLate} f={lf} plate="B4" front={<Counter />}>
+          <Walker group="C3c" f={from + lf} range={[from, to + 10]} x={[1800, 2900]} step={6} dy={[-200, -250]} scale={[0.86, 0.84]} />
         </HallShot>
       );
       case 'patient': return <RoomShot id={day.patient} f={lf} dur={dur} zoom={[1.08, 1.1]} />;
-      case 'notes': return <NotesShot f={lf} dur={dur} />;
+      case 'notes': return <NotesShot f={lf} dur={dur} ink={0.45} />;
       case 'slip': {
         const dx = lerp(lf, [0, dur * 0.7], [-700, 0], ease.inOut);
         return <SlipShot color={colors.deepTeal2} handDx={dx} slipX={slipAt(dx)} />;

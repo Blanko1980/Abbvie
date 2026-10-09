@@ -12,16 +12,17 @@ export const NAVI_POS = {
   goldCard: {x: 338, y: 444, w: 300, h: 104},
   confirm: {x: 716, y: 462, w: 244, h: 70},
 };
-// Straßennetz (Navi-Koordinaten): drei Querstraßen, fünf Längsstraßen, eine Diagonale. Beide Routen laufen nur auf Straßen.
+// Straßennetz (Navi-Koordinaten): drei Querstraßen, fünf Längsstraßen. Die Diagonale ist die NEUE Straße: Sie erscheint erst,
+// wenn das Navi die neue Route findet (S5), vorher gibt es sie auf der Karte nicht. Beide Routen laufen nur auf Straßen.
 const ROADS_H = [118, 250, 372];
 const ROADS_V = [112, 300, 520, 700, 930];
-const DIAG = 'M 390 351 L 780 48';
+const NEW_ROAD = 'M 112 372 L 690 118';
 const edges = (roads: number[], max: number) => [0, ...roads].map((a, i) => [a, [...roads, max][i]]);
 const BLOCKS = edges(ROADS_H, NAVI.h).flatMap(([y0, y1]) => edges(ROADS_V, NAVI.w).map(([x0, x1]) => [x0 + 16, y0 + 16, x1 - x0 - 32, y1 - y0 - 32]));
 // Teal (gespeichert, 35 min): Umweg unten herum und rechts hinauf
 export const TEAL_PATH = 'M112 372 L 930 372 L 930 118 L 858 118';
-// Gold (neu, 23 min): hoch, quer, über die Diagonale direkt zum Ziel
-export const GOLD_PATH = 'M112 372 L 112 250 L 520 250 L 690 118 L 858 118';
+// Gold (neu, 23 min): über die neue Diagonale direkt zum Ziel – rund 30 % kürzer als Teal
+export const GOLD_PATH = 'M112 372 L 690 118 L 858 118';
 
 export type NaviState = {
   on?: number;          // Bildschirm an (0..1)
@@ -92,7 +93,7 @@ export const NaviScreen: React.FC<{state: NaviState; quad?: Quad}> = ({state, qu
         {BLOCKS.map(([x, y, w, h], i) => <rect key={i} x={x} y={y} width={w} height={h} rx={10} fill={colors.mapBlock} />)}
         {ROADS_H.map((y) => <Street key={`h${y}`} d={`M -20 ${y} L ${NAVI.w + 20} ${y}`} w={22} />)}
         {ROADS_V.map((x) => <Street key={`v${x}`} d={`M ${x} -20 L ${x} ${NAVI.h + 20}`} w={22} />)}
-        <Street d={DIAG} w={22} />
+        {s.goldVisible > 0 ? <g opacity={s.goldVisible}><Street d={NEW_ROAD} w={22} /></g> : null}
         <RouteLine d={GOLD_PATH} color={colors.gold} draw={s.goldVisible > 0 ? s.goldDraw : 0} width={10 + goldSel * 6 + s.goldExpand * 2} />
         <RouteLine d={TEAL_PATH} color={colors.deepTeal2} draw={s.tealDraw} width={14 - goldSel * 5} opacity={1 - goldSel * 0.35} />
         <Pin x={NAVI_POS.start[0]} y={NAVI_POS.start[1]} />

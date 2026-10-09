@@ -6,12 +6,13 @@ import sys, cv2, numpy as np
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 # Unterarm-Achse (volle Auflösung): vom unteren Bildrand zum Handgelenk. Der Oberarm liegt außerhalb des Navi-Ausschnitts.
-AXIS = {'C2a': [(1610, 1650), (1770, 1320)], 'C2b': [(1400, 1650), (1500, 1330)], 'C7': [(-60, 700), (780, 830)]}
-BASE = {'C2a': 'B3', 'C2b': 'B3', 'C7': 'C7p'}
-RADIUS = {'C7': (200, 330, 90)}   # (wahrscheinlich Arm, äußerste Grenze, sicher Arm)
+AXIS = {'C2a': [(1610, 1650), (1770, 1320)], 'C2b': [(1400, 1650), (1500, 1330)], 'C7': [(-60, 700), (780, 830)],
+        'C17a': [(2200, 1600), (1370, 1110), (1060, 860)]}
+BASE = {'C2a': 'B3', 'C2b': 'B3', 'C7': 'C7p', 'C17a': 'B6e'}
+RADIUS = {'C7': (200, 330, 90), 'C17a': (200, 330, 80)}   # (wahrscheinlich Arm, äußerste Grenze, sicher Arm)
 # Konsolenteile direkt neben dem Ärmel (gleich dunkel) sicher ausschließen
 EXCLUDE = {'C2a': [[(1858, 1607), (1892, 1380), (2100, 1380), (2100, 1607)]], 'C2b': [[(1250, 1230), (1418, 1230), (1406, 1430), (1404, 1607), (1250, 1607)]]}
-for id_ in sys.argv[1:] or ['C2a', 'C2b', 'C7']:
+for id_ in sys.argv[1:] or ['C2a', 'C2b', 'C7', 'C17a']:
     base = cv2.imread(str(ROOT / f'assets/gen/{BASE[id_]}.jpg'))
     rin, rout, rcore = RADIUS.get(id_, (110, 260, 35))
     img = cv2.imread(str(ROOT / f'assets/gen/{id_}.jpg'))
@@ -25,8 +26,11 @@ for id_ in sys.argv[1:] or ['C2a', 'C2b', 'C7']:
     magenta = (hsv[..., 0] > 135) & (hsv[..., 0] < 165) & (hsv[..., 1] > 120)
     hand = ((d > 45) & ~magenta).astype(np.uint8)
     seg = np.zeros(d.shape, np.uint8)
-    (x0, y0), (x1, y1) = [(int(x * s), int(y * s)) for x, y in AXIS[id_]]
-    dist = lambda r: cv2.line(seg.copy(), (x0, y0), (x1, y1), 1, int(2 * r * s)).astype(bool)
+    pts = [(int(x * s), int(y * s)) for x, y in AXIS[id_]]
+    def dist(r):
+        m_ = seg.copy()
+        for p0, p1 in zip(pts, pts[1:]): cv2.line(m_, p0, p1, 1, int(2 * r * s))
+        return m_.astype(bool)
     near = lambda r: cv2.dilate(hand, np.ones((int(r * s) * 2 + 1,) * 2, np.uint8)).astype(bool)
     m = np.full(d.shape, cv2.GC_BGD, np.uint8)
     m[dist(rout) | near(60)] = cv2.GC_PR_BGD
@@ -49,6 +53,26 @@ for id_ in sys.argv[1:] or ['C2a', 'C2b', 'C7']:
         keep = {k} | {int(c) for c in np.unique(lab[hand.astype(bool) & nearMain]) if c and stats[c, cv2.CC_STAT_AREA] > 150}
         fg = np.where(np.isin(lab, list(keep)), 255, 0).astype(np.uint8)
     fg = cv2.morphologyEx(fg, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    if id_ == 'C7':
+        # Papier unter der Hand (sehr hell, ungesättigt) gehört nicht zur Hand – sonst verdeckt es die Schrift
+        paper = (i2.min(2) > 234) & ((i2.max(2).astype(int) - i2.min(2)) < 14)
+        # Schatten der Hand auf dem Papier (hellgrau, rechts vom Ärmelende) ebenso
+        right = np.zeros_like(paper); right[:, int(760 * s):] = True
+        shade = right & (i2.min(2) > 185) & ((i2.max(2).astype(int) - i2.min(2)) < 18)
+        fg[paper | shade] = 0
     fg = cv2.resize(fg, (base.shape[1], base.shape[0]), interpolation=cv2.INTER_LINEAR)
     cv2.imwrite(str(ROOT / f'assets/masks/{id_}.png'), fg)
     print(id_, 'Maske', int((fg > 127).sum()), 'px')
+    if id_ == 'C17a':
+        # Haken (dunkel, in allen Bildern gleich) gehört nie zur Ebene, sonst wandert er beim Abheben mit
+        b6 = cv2.resize(cv2.imread(str(ROOT / 'assets/gen/B6.jpg')), (img.shape[1], img.shape[0]))
+        still = (np.abs(img.astype(int) - base.astype(int)).max(2) < 18) & (np.abs(img.astype(int) - b6.astype(int)).max(2) < 18) & (img.max(2) < 95)
+        fg = np.where(cv2.dilate(still.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool), 0, fg).astype(np.uint8)
+        cv2.imwrite(str(ROOT / f'assets/masks/{id_}.png'), fg)
+        # Greif-Phase: nur die Hand – der Schlüssel hängt dort noch im Bild B6. Schlüsselpixel = wo C17a dem Bild B6 gleicht
+        # und B6 sich von B6e unterscheidet (der Autoschlüssel); Finger auf dem Anhänger bleiben.
+        keyReg = np.abs(b6.astype(int) - base.astype(int)).max(2) > 30
+        same = np.abs(img.astype(int) - b6.astype(int)).max(2) < 28
+        key = cv2.dilate((keyReg & same).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+        hand = np.where(key, 0, fg).astype(np.uint8)
+        cv2.imwrite(str(ROOT / 'assets/masks/C17a-hand.png'), hand)
