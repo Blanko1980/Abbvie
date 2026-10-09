@@ -98,21 +98,13 @@ export const GrabShot: React.FC<{kind: 'key' | 'bag'; f: number; dur: number}> =
   );
 };
 
-// Auto aus der Fahrerperspektive über die Schulter (B3); Gurt rastet ein: kleiner weißer Puls
-export const BeltShot: React.FC<{f: number; dur: number; click?: number; screen?: NaviState}> = ({f, dur, click, screen}) => {
-  const pulse = click != null ? lerp(f, [click, click + 10], [0, 1]) : 0;
-  const [bx, by] = anchors.beltPulse;
-  return (
-    <ParallaxImage id="B3" cam={{z: lerp(f, [0, dur], [1.0, 1.03])}}>
-      <NaviScreen state={screen ?? {on: 0.25, tealDraw: 0}} quad={QUAD} />
-      <Img src={staticFile(A.B3.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B3.w, height: A.B3.h}} />
-      {pulse > 0 && pulse < 1 ? (
-        <div style={{position: 'absolute', left: bx - 60 * (1 + pulse), top: by - 60 * (1 + pulse), width: 120 * (1 + pulse), height: 120 * (1 + pulse),
-          borderRadius: '50%', border: '6px solid #FFFFFF', opacity: 1 - pulse, boxShadow: '0 0 30px rgba(255,255,255,0.8)'}} />
-      ) : null}
-    </ParallaxImage>
-  );
-};
+// Auto aus der Fahrerperspektive über die Schulter (B3); der Gurt rastet nur hörbar ein (Klick im Ton, kein Bildeffekt)
+export const BeltShot: React.FC<{f: number; dur: number; click?: number; screen?: NaviState}> = ({f, dur, screen}) => (
+  <ParallaxImage id="B3" cam={{z: lerp(f, [0, dur], [1.0, 1.03])}}>
+    <NaviScreen state={screen ?? {on: 0.25, tealDraw: 0}} quad={QUAD} />
+    <Img src={staticFile(A.B3.src)} style={{position: 'absolute', left: 0, top: 0, width: A.B3.w, height: A.B3.h}} />
+  </ParallaxImage>
+);
 
 // ------------------------------------------------------------ Navi
 export type Finger = {nx: number; ny: number; a: number} | null; // Fingerspitze in Navi-Koordinaten
@@ -186,8 +178,8 @@ export const RoomShot: React.FC<{id: string; f: number; dur: number; zoom?: [num
 // write: Schreibzeit, ink: Anteil der Schrift bis zum Ende der Schreibzeit. pause: Stift hebt leicht ab und hält inne
 // (gleiche Kurve wie der Finger in S5). penDown: die Hand legt den Stift bewusst ab (Überblendung zu C7d).
 const PEN_TIP = [1355, 904];                                   // Stiftspitze der Schreibhand C7 in Ruhelage (Quellpixel)
-const [TIP_U, TIP_V] = quadToUnit(PAD, PEN_TIP[0], PEN_TIP[1]);
-const WORDS = LINES(TIP_V, TIP_U - 0.24, 0.5);
+const [TIP_U] = quadToUnit(PAD, PEN_TIP[0], PEN_TIP[1]);
+const WORDS = LINES(TIP_U * 1000 - 40);
 export const NotesShot: React.FC<{f: number; dur: number; write?: number[]; ink?: number; pause?: number[]; penDown?: number[]}> = ({f, dur, write = [0, dur], ink = 0.5, pause, penDown}) => {
   const p = lerp(f, write, [0, ink]);
   const {shown, tip} = inkState(WORDS, p);

@@ -16,7 +16,8 @@ export const Callout: React.FC<{brush: number; write: number}> = ({brush, write}
         clipPath: `inset(0 ${(1 - brush) * 100}% 0 0)`,
       }} />
       <div style={{
-        position: 'relative', fontFamily: script, fontWeight: 700, fontSize: 168, color: colors.charcoal, whiteSpace: 'nowrap',
+        // seitlicher Innenabstand: die Schreibschrift ragt über die Laufweite hinaus (sonst wird das letzte „e“ abgeschnitten)
+        position: 'relative', fontFamily: script, fontWeight: 700, fontSize: 168, color: colors.charcoal, whiteSpace: 'nowrap', padding: '0 80px',
         clipPath: `inset(-20% ${(1 - write) * 100}% -20% 0)`, transform: 'rotate(-3deg)',
       }}>{T.texts.callout}</div>
     </AbsoluteFill>

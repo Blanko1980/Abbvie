@@ -8,25 +8,29 @@ export const PAD: Quad = [[694, 859], [1706, 844], [1799, 1028], [769, 1028]];  
 const C = 1000;                                                                  // Zeichenfläche (Block-Einheiten × 1000)
 
 type Pt = [number, number];
-// Wörter einer Zeile: Schleifen nach oben, unterschiedliche Längen, Lücken dazwischen
-const word = (u0: number, len: number, v: number, seed: number): Pt[] => {
-  // Schreibschrift als Schleifenlinie (Zykloide): kleine Bögen von etwa 12 px Breite und 15 px Höhe, die waagerecht
-  // nach rechts laufen; einzelne Ober- und Unterlängen. Block-Koordinaten: u ≈ 1000 px breit, v ≈ 180 px tief.
-  const pitch = 0.013, K = (2 * Math.PI * len) / pitch, n = Math.round(K * 10), pts: Pt[] = [];
+// Der Block liegt quer vor dem Arzt (er sitzt links): Die Zeilen laufen im Bild von unten nach oben, die Buchstaben sind
+// um 90° gedreht (Oberlängen zeigen nach links, zum Arzt hin), neue Zeilen beginnen rechts daneben.
+// Gerechnet wird in Block-Pixeln (Breite ≈ 1000 px, Tiefe ≈ 180 px) und dann in Block-Koordinaten (0..1) umgerechnet.
+const PW = 1000, PD = 180;
+const word = (x0: number, y0: number, len: number, seed: number): Pt[] => {
+  // Schreibschrift als Schleifenlinie (Zykloide) entlang der Grundlinie nach oben: Buchstaben ≈ 12 px breit, 13–19 px hoch
+  const pitch = 12, K = (2 * Math.PI * len) / pitch, n = Math.round(K * 10), pts: Pt[] = [];
   for (let i = 0; i <= n; i++) {
     const t = i / n, k = t * K, letter = Math.floor(k / (2 * Math.PI));
     const r = Math.sin(seed * 7.1 + letter * 2.3), tall = r > 0.75 ? 2.1 : r < -0.85 ? -1.4 : 1;
-    const vary = Math.abs(Math.sin(letter * 1.7 + seed)), loop = 0.0035 + 0.005 * vary;
-    const hgt = (0.065 + 0.03 * vary) * (tall > 0 ? tall : 1), drop = tall < 0 ? 0.11 * Math.max(0, -Math.cos(k)) : 0;
-    pts.push([u0 + t * len - Math.sin(k) * loop, v - hgt * (1 - Math.cos(k)) / 2 + drop + Math.sin(t * 2.5 + seed) * 0.01]);
+    const vary = Math.abs(Math.sin(letter * 1.7 + seed)), loop = 3.5 + 5 * vary;
+    const hgt = (12 + 6 * vary) * (tall > 0 ? tall : 1), drop = tall < 0 ? 18 * Math.max(0, -Math.cos(k)) : 0;
+    const s = t * len - Math.sin(k) * loop, h = hgt * (1 - Math.cos(k)) / 2 - drop + Math.sin(t * 2.5 + seed) * 1.5;
+    pts.push([(x0 - h) / PW, (y0 - s) / PD]);   // Grundlinie nach oben (−y), Buchstabenhöhe nach links (−x)
   }
   return pts;
 };
-export const LINES = (v0: number, u0: number, width: number) => {
+// Zeilen: Start unten (vorne), drei Wörter nach oben, nächste Zeile 40 px weiter rechts
+export const LINES = (x0: number) => {
   const words: Pt[][] = [];
-  [[0.22, 0.18, 0.3], [0.16, 0.26, 0.2], [0.27, 0.14, 0.24]].forEach((lens, li) => {
-    let u = u0 + (li === 0 ? 0 : 0.02 * li);
-    lens.forEach((l, wi) => { const len = l * width; words.push(word(u, len, v0 + li * 0.22, li * 7 + wi * 3 + 1)); u += len + 0.04; });
+  [[40, 30, 36], [34, 42, 26], [44, 30, 32]].forEach((lens, li) => {
+    let y = 166;
+    lens.forEach((l, wi) => { words.push(word(x0 + li * 40, y, l, li * 7 + wi * 3 + 1)); y -= l + 11; });
   });
   return words;
 };

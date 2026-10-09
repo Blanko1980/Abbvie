@@ -1,6 +1,6 @@
 # Bericht: „Zwei Routinen“
 
-Stand: 09.10.2026 (Korrekturfassung 4). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
+Stand: 09.10.2026 (Korrekturfassung 5). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
 
 ## Abnahme-Checkliste
 
@@ -123,3 +123,11 @@ Zusätzlich gemessen:
 | Schrift | Waagerechte Schreibschrift (kleine Schleifen, einzelne Ober- und Unterlängen) statt hoher Zacken. |
 | Hautstellen | Bei Patient 3 (C14) und Patientin 4 (C15, C15b, C16) dezenter und an die Hautfarbe angepasst: nur leicht dunkler und matter als die Haut, weiche Kanten. Die Ausgangsbilder liegen als C14o, C15o, C15bo, C16o vor. |
 | Papiergeräusch | Im Innehalten in S7 ist ein Zerknüllen von Papier zu hören (ElevenLabs, `crumple`), ohne Bild: Der Arzt verwirft das alte Rezept. |
+
+## Korrekturen 09.10.2026 (Korrekturfassung 5)
+
+| Stelle | Korrektur |
+|---|---|
+| Schrift | Um 90° gedreht: Die Zeilen laufen im Bild von unten nach oben (der Block liegt quer vor dem Arzt), die nächste Zeile beginnt rechts daneben. |
+| Endkarte | Das letzte „e“ von „Rethink the Routine“ wird vollständig gezeichnet (die Schreibschrift ragte über die Textbox hinaus und wurde von der Schreib-Maske abgeschnitten). |
+| Gurt | Der weiße Kreis beim Einrasten ist entfernt, der Klick ist weiter zu hören. |
