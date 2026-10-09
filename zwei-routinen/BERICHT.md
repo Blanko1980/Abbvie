@@ -6,7 +6,7 @@ Stand: 09.10.2026 (Korrekturfassung 3). Bildmodell: `gemini-3-pro-image`. Es unt
 
 - [x] **Formate:** `out/zwei-routinen.mp4` und `out/zwei-routinen-muted.mp4` existieren, beide 1920 × 1080, 30 fps, 2776 Frames (92,5 s), H.264. Die stumme Fassung hat keine Tonspur. Messwerte: siehe unten.
 - [x] **Texte:** Jede deutsche Tafel stammt wörtlich aus `src/data/timeline.json`. Der Callout lautet „Rethink the Routine“. Hinweis: Abschnitt 5 des Briefings („Section 5“) lag nicht bei. Alle Texte sind deshalb Zeichen für Zeichen aus den Szenenbeschreibungen des Briefings übernommen.
-- [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen Bildern bestanden (Kontaktbogen: 44 Bilder bzw. Ebenen), Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
+- [x] **Keine Schrift in Bildern:** Kein generiertes Bild enthält Schrift, Zahlen oder Logos (Sichtprüfung `out/contact-sheet.png`). Der Farbleck-Check hat bei allen Bildern bestanden (Kontaktbogen: 52 Bilder bzw. Ebenen), Höchstwert Teal 0,18 % (Grenze 0,5 %), siehe `assets/processed/qa.json`.
 - [x] **Teal und Gold** kommen nur auf Routenlinien (Karte und Routenkarten im Navi), Zetteln, Tafel-Unterstreichungen und dem Callout-Pinsel vor.
 - [x] **Gold-Zettel in S7:** ist ab dem ersten sichtbaren Frame gold. Die Farbe ist eine Konstante und ändert sich nie.
 - [x] **S2 und S6:** dieselbe Halle und dieselbe Kamera, der Kittel hängt beide Male an der Garderobe (B4c). In S2 kommt der Arzt in Alltagskleidung, reißt den Kittel im Laufen vom Haken und hastet weiter; in S6 hängt er die Jacke auf und zieht den Kittel in Ruhe an, seine Tasche steht neben der Pflanze (B4cb). Unterschiede sonst: Uhrzeit (08:55 / 08:43), Pose und Tempo.
@@ -24,12 +24,12 @@ Stand: 09.10.2026 (Korrekturfassung 3). Bildmodell: `gemini-3-pro-image`. Es unt
 
 | Datei | Video | Ton |
 |---|---|---|
-| `out/zwei-routinen.mp4` | H.264, 1920 × 1080, 30 fps, 2776 Frames | AAC 48 kHz Stereo, −15,9 LUFS integriert, True Peak −1,4 dB |
-| `out/zwei-routinen-muted.mp4` | H.264, 1920 × 1080, 30 fps, 2776 Frames | keine Tonspur |
+| `out/zwei-routinen.mp4` (32 MB) | H.264, 1920 × 1080, 30 fps, 2776 Frames | AAC 48 kHz Stereo, −16,0 LUFS integriert, True Peak −1,4 dB |
+| `out/zwei-routinen-muted.mp4` (29 MB) | H.264, 1920 × 1080, 30 fps, 2776 Frames | keine Tonspur |
 
 Zusätzlich gemessen:
-- Geräusche liegen 6,5 dB über dem Musikbett.
-- In beiden Pausen sinkt der Pegel auf etwa −50 dBFS (nur Raumton), davor liegt er bei −23 bis −27 dBFS.
+- Geräusche liegen 6,3 dB über dem Musikbett.
+- In beiden Pausen bricht die eilige Musik ab, 30 Frames ist nur Raumton zu hören, dann setzt die ruhige Musik ein.
 - In den letzten 30 Frames ist nur noch Raumton zu hören.
 
 ## Markenschriften (TODO brand font)
