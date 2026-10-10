@@ -1,5 +1,5 @@
 import React from 'react';
-import {A, scene, T} from '../theme';
+import {A, lerp, scene, T} from '../theme';
 import {Layer} from '../components/ParallaxImage';
 import {HallShot, Walker} from '../components/Shots';
 
@@ -8,14 +8,16 @@ import {HallShot, Walker} from '../components/Shots';
 // und hastet mit dem Kittel in der Hand hinter den Tresen und weiter – zum Anziehen bleibt keine Zeit.
 export const hallTime = (S: any) => T.texts[S.clock as 'clockLate' | 'clockEarly'];
 export const Counter: React.FC = () => <Layer p={A.COUNTER} />;
+// Eingangstür: geht kurz vor dem Eintreten auf und fällt hinter ihm wieder zu
+export const doorOpen = (f: number, enter: number) => lerp(f, [enter - 12, enter - 6], [0, 1]) * lerp(f, [enter + 42, enter + 50], [1, 0]);
 
 const S = scene('S2');
 export const S2: React.FC<{f: number}> = ({f}) => {
   const {run, runCoat, grab, hookDepth: hd, behindCounter: bc} = S;
   const g = A.C3g.pose.C3g;
   return (
-    <HallShot clock={hallTime(S)} f={f} plate={f >= S.plateSwap ? 'B4' : 'B4c'} front={<Counter />}>
-      {f >= run.from && f < run.to ? <Walker group="C3" f={f} range={[run.from, run.to]} x={run.x} step={run.step} dy={[0, hd.dy]} scale={[1, hd.scale]} /> : null}
+    <HallShot clock={hallTime(S)} f={f} plate={f >= S.plateSwap ? 'B4' : 'B4c'} door={doorOpen(f, run.from)} front={<Counter />}>
+      {f >= run.from && f < run.to ? <Walker group="C3" f={f} range={[run.from, run.to]} x={run.x} step={run.step} dy={[0, hd.dy]} scale={[1, hd.scale]} fadeIn={4} /> : null}
       {f >= grab[0] && f < grab[1] ? <Layer p={g} dx={run.x[1] - (g.x + g.w / 2)} dy={hd.dy} scale={hd.scale} /> : null}
       {f >= runCoat.from && f < runCoat.to ? <Walker group="C3c" f={f} range={[runCoat.from, runCoat.to]} x={runCoat.x} step={runCoat.step} dy={[hd.dy, bc.dy]} scale={[hd.scale, bc.scale]} /> : null}
     </HallShot>

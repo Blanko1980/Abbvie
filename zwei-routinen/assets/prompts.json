@@ -1135,6 +1135,25 @@
       "aspect": "16:9",
       "seed": null,
       "chosen": 1
+    },
+    "B4o": {
+      "candidates": [
+        {
+          "n": 1,
+          "file": "assets/gen/candidates/B4o-c1.jpg",
+          "created": "2026-10-10T12:42:24.479Z"
+        }
+      ],
+      "group": "B",
+      "kind": "edit",
+      "prompt": "Edit the attached image (the practice entrance hall). Keep EVERYTHING identical, pixel for pixel (room, camera, walls, floor, clock, plant, coat on the hook, reception counter). Change ONLY the entrance door on the LEFT: it now stands wide open, the door leaf swung inward toward the wall on the far left so we see it edge-on, and the doorway shows soft bright white morning light from outside (a faint blurred street, no people). The door frame stays exactly where it is. Nothing else changes. Keep the exact same illustration style (flat vector, no outlines, soft gradients), the same framing, camera and image size. Absolutely no teal, blue, gold or yellow. No text, no numbers, no logos.",
+      "base": "B4c",
+      "references": [
+        "assets/gen/B4c.jpg"
+      ],
+      "aspect": "16:9",
+      "seed": null,
+      "chosen": 1
     }
   },
   "method": "Figuren in Räumen entstehen als KI-Bearbeitung des leeren Raums (pixelgleich) und werden per Differenzmaske freigestellt (scripts/postprocess.mjs). Einzelplatten (C2, C17, C18) auf Weiß mit Flood-Fill-Alpha.",

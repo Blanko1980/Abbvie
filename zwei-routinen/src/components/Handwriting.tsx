@@ -8,12 +8,13 @@ export const PAD: Quad = [[694, 859], [1706, 844], [1799, 1028], [769, 1028]];  
 const C = 1000;                                                                  // Zeichenfläche (Block-Einheiten × 1000)
 
 type Pt = [number, number];
-// Der Block liegt quer vor dem Arzt (er sitzt links): Die Zeilen laufen im Bild von unten nach oben, die Buchstaben sind
-// um 90° gedreht (Oberlängen zeigen nach links, zum Arzt hin), neue Zeilen beginnen rechts daneben.
+// Der Block liegt quer vor dem Arzt (er sitzt links und blickt nach rechts über den Block). Aus seiner Sicht schreibt er
+// von links nach rechts: im Bild von oben (hinten) nach unten (vorne). Die Oberlängen zeigen von ihm weg (im Bild nach
+// rechts), die nächste Zeile liegt näher bei ihm (im Bild links daneben). Das ist eine reine 90°-Drehung, keine Spiegelung.
 // Gerechnet wird in Block-Pixeln (Breite ≈ 1000 px, Tiefe ≈ 180 px) und dann in Block-Koordinaten (0..1) umgerechnet.
 const PW = 1000, PD = 180;
 const word = (x0: number, y0: number, len: number, seed: number): Pt[] => {
-  // Schreibschrift als Schleifenlinie (Zykloide) entlang der Grundlinie nach oben: Buchstaben ≈ 12 px breit, 13–19 px hoch
+  // Schreibschrift als Schleifenlinie (Zykloide) entlang der Grundlinie: Buchstaben ≈ 12 px breit, 13–19 px hoch
   const pitch = 12, K = (2 * Math.PI * len) / pitch, n = Math.round(K * 10), pts: Pt[] = [];
   for (let i = 0; i <= n; i++) {
     const t = i / n, k = t * K, letter = Math.floor(k / (2 * Math.PI));
@@ -21,16 +22,16 @@ const word = (x0: number, y0: number, len: number, seed: number): Pt[] => {
     const vary = Math.abs(Math.sin(letter * 1.7 + seed)), loop = 3.5 + 5 * vary;
     const hgt = (12 + 6 * vary) * (tall > 0 ? tall : 1), drop = tall < 0 ? 18 * Math.max(0, -Math.cos(k)) : 0;
     const s = t * len - Math.sin(k) * loop, h = hgt * (1 - Math.cos(k)) / 2 - drop + Math.sin(t * 2.5 + seed) * 1.5;
-    pts.push([(x0 - h) / PW, (y0 - s) / PD]);   // Grundlinie nach oben (−y), Buchstabenhöhe nach links (−x)
+    pts.push([(x0 + h) / PW, (y0 + s) / PD]);   // Schreibrichtung im Bild nach unten (+y), Buchstabenhöhe nach rechts (+x)
   }
   return pts;
 };
-// Zeilen: Start unten (vorne), drei Wörter nach oben, nächste Zeile 40 px weiter rechts
+// Zeilen: Start hinten (oben im Bild), drei Wörter nach vorne, nächste Zeile 40 px weiter links (näher beim Arzt)
 export const LINES = (x0: number) => {
   const words: Pt[][] = [];
   [[40, 30, 36], [34, 42, 26], [44, 30, 32]].forEach((lens, li) => {
-    let y = 166;
-    lens.forEach((l, wi) => { words.push(word(x0 + li * 40, y, l, li * 7 + wi * 3 + 1)); y -= l + 11; });
+    let y = 14;
+    lens.forEach((l, wi) => { words.push(word(x0 - li * 40, y, l, li * 7 + wi * 3 + 1)); y += l + 11; });
   });
   return words;
 };

@@ -279,6 +279,11 @@ export const ASSETS = [
     id: 'C16', group: 'C', kind: 'edit', base: 'C16o',
     prompt: 'Edit the attached image. Keep EVERYTHING identical, pixel for pixel (room, camera, people, clothes, poses, faces, hair). Change ONLY the dry skin patches on the patient\'s hand: make them much more SUBTLE and matched to her own skin tone - only slightly darker and slightly more matte and ashy than the surrounding skin, low contrast, soft edges, fewer and smaller. They must still be recognisable as dry skin, but calm and respectful, never dominant, never looking like hair or dirt. Nothing else changes.',
   },
+  // Korrekturrunde 6: Eingangstür offen (der Arzt kommt durch die Tür herein)
+  {
+    id: 'B4o', group: 'B', kind: 'edit', base: 'B4c',
+    prompt: 'Edit the attached image (the practice entrance hall). Keep EVERYTHING identical, pixel for pixel (room, camera, walls, floor, clock, plant, coat on the hook, reception counter). Change ONLY the entrance door on the LEFT: it now stands wide open, the door leaf swung inward toward the wall on the far left so we see it edge-on, and the doorway shows soft bright white morning light from outside (a faint blurred street, no people). The door frame stays exactly where it is. Nothing else changes.',
+  },
   // ---------------------------------------------------------------- Gruppe D: Akzente
   {
     id: 'D1', group: 'D', kind: 'accent', refs: [],

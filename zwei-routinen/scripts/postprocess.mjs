@@ -32,10 +32,10 @@ const PLAN = [
   {group: 'C2', base: 'B3', members: ['C2a', 'C2b'], tight: true, dropMagenta: true, maskFile: true, extend: 700}, // Maske: scripts/arm-mask.py
   // Schlüssel und Tasche: dieselbe Greif-Hand zweimal freigestellt – über dem Bild mit Gegenstand (nur Hand, greift zu)
   // und über dem leeren Bild (Hand mit Gegenstand, hebt ab). Beim Umschalten sind die Pixel identisch.
-  {group: 'C17', base: 'B6', members: ['C17a'], tight: true, extend: 300, maskFile: 'C17a-hand', dropGrey: true, despeckle: true},   // Masken: scripts/arm-mask.py
-  {group: 'C17k', base: 'B6e', members: ['C17a'], rename: {C17a: 'C17ak'}, tight: true, extend: 300, maskFile: 'C17a'},
+  {group: 'C17', base: 'B6', members: ['C17a'], tight: true, extend: 300, maskFile: 'C17a-hand', dropGrey: true, despeckle: true, minIsland: 3000},   // Masken: scripts/arm-mask.py
+  {group: 'C17k', base: 'B6e', members: ['C17a'], rename: {C17a: 'C17ak'}, tight: true, extend: 300, maskFile: 'C17a', castShadow: true, despeckle: true, minIsland: 3000},
   {group: 'C18', base: 'B7', members: ['C18a'], tight: true, extend: 300},
-  {group: 'C18k', base: 'B7e', members: ['C18a'], rename: {C18a: 'C18ak'}, tight: true, extend: 300, dropLight: true, despeckle: true},
+  {group: 'C18k', base: 'B7e', members: ['C18a'], rename: {C18a: 'C18ak'}, tight: true, extend: 300, dropLight: true, castShadow: true, despeckle: true},
   {group: 'C4w', base: 'B4', members: ['C4w', 'C4wb'], tight: true, inner: [5, 12], dropGreen: true, dropShadow: 1150},
   {group: 'C4', base: 'B4c', members: ['C4', 'C5']},
   {group: 'C15doc', base: 'C15', members: ['C10', 'C9'], split: [0, 0.5]},
@@ -49,6 +49,8 @@ const PLAN = [
   {group: 'C7d', base: 'C7b', members: ['C7d'], dropPaper: true},   // nicht eng: der abgelegte Stift ist eine eigene Insel   // Stift bewusst abgelegt (S7)
   // Praxis-Halle: digitale Wanduhr (Magenta-Anzeige, Ziffern im Code) und Sprechzeiten-Schild, als Ausschnitt über allen Hallenbildern
   {group: 'HALL', base: 'B4', members: ['B4d']},
+  // offene Eingangstür als Ausschnitt über jedem Hallenbild (der Arzt kommt durch die Tür)
+  {group: 'DOOR', base: 'B4c', members: ['B4o'], split: [0, 0.45]},
   {group: 'C7', base: 'C7p', members: ['C7'], tight: true, maskFile: true, extend: 300}, // Maske: scripts/arm-mask.py
   // rennender Arzt (S2/S4) auf grauem Grund: saubere Kanten auch am weißen Kittel
   {plate: ['C3p', 'C3pb', 'C3q', 'C3qb', 'C3g'], tol: 16, nb: 5, smooth: 6},   // grauer Bart vor grauem Grund: eng und nur glatte Flächen
@@ -330,6 +332,18 @@ async function group(g) {
         if (comp.length < 1500) for (const i of comp) alpha[i] = 0;
       }
     }
+    if (g.castShadow) {
+      // Schlagschatten des Gegenstands auf Wand/Bank: nur abgedunkelter Grund ohne Farbänderung – bleibt nicht an der Ebene
+      alpha = alpha.map((a, i) => {
+        if (a <= 0) return a;
+        const br = base.data[i * 3], bg2 = base.data[i * 3 + 1], bb = base.data[i * 3 + 2];
+        const vr = v.data[i * 3], vg = v.data[i * 3 + 1], vb = v.data[i * 3 + 2];
+        const dl = (br + bg2 + bb - vr - vg - vb) / 3;
+        const ratio = (x, y) => (y > 8 ? x / y : 1);
+        const dc = Math.abs(ratio(vr, br) - ratio(vg, bg2)) + Math.abs(ratio(vg, bg2) - ratio(vb, bb));
+        return dl > 4 && dl < 90 && dc < 0.06 ? 0 : a;
+      });
+    }
     if (g.dropGrey) {
       // grauer Wandschatten neben der Hand wandert sonst als Balken mit
       // nur Haut (warm) und dunkler Ärmel bleiben
@@ -365,6 +379,21 @@ async function group(g) {
         return a * Math.max(skin, sleeve, cuff);
       });
       alpha = await blurMask(alpha, w, h, 0.8);
+    }
+    if (g.minIsland) {
+      // kleine, freistehende Inseln (Krümel vom entfernten Schatten) löschen
+      const seen = new Uint8Array(w * h);
+      for (let s0 = 0; s0 < w * h; s0++) {
+        if (seen[s0] || alpha[s0] < 0.1) continue;
+        const comp = [s0]; seen[s0] = 1;
+        for (let k = 0; k < comp.length; k++) {
+          const i = comp[k], x = i % w;
+          for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i >= w ? i - w : -1, i < w * (h - 1) ? i + w : -1]) {
+            if (j >= 0 && !seen[j] && alpha[j] >= 0.1) { seen[j] = 1; comp.push(j); }
+          }
+        }
+        if (comp.length < g.minIsland) for (const i of comp) alpha[i] = 0;
+      }
     }
     if (g.despeckle) {
       // vereinzelte Krümel (Holzmaserung) an den Kanten entfernen: nur dichte Bereiche bleiben

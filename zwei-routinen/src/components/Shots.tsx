@@ -69,7 +69,7 @@ const MachineDisplay: React.FC<{quad: number[][]; progress: number}> = ({quad, p
 // Schlüssel (B6) und Tasche (B7) in der Wohnung: Die Hand kommt ins Bild und greift (Bild mit Gegenstand, nur Hand),
 // dann hebt sie den Gegenstand ab (leeres Bild, Hand mit Gegenstand – beim Umschalten pixelgleich). Brett und Bank bleiben stehen.
 const GRAB = {
-  key: {full: 'B6', empty: 'B6e', reach: 'C17', lift: 'C17k', from: [1, 0.15], up: [70, -120]},
+  key: {full: 'B6', empty: 'B6e', reach: 'C17', lift: 'C17k', from: [1, 0.15], up: [220, -55]},
   bag: {full: 'B7', empty: 'B7e', reach: 'C18', lift: 'C18k', from: [0.55, -1], up: [40, -170]},
 };
 const poseOf = (g: string) => Object.values(A[g].pose)[0] as any;
@@ -83,13 +83,16 @@ export const GrabShot: React.FC<{kind: 'key' | 'bag'; f: number; dur: number}> =
     return <ParallaxImage id={g.full} cam={cam}><Layer p={poseOf(g.reach)} dx={g.from[0] * d} dy={g.from[1] * d} /></ParallaxImage>;
   }
   const u = lerp(f, [grab + 2, dur], [0, 1], ease.inOut);
-  const dx = g.up[0] * u, dy = g.up[1] * u;
+  // Schlüssel: erst ein Stück anheben (Ring über die Hakenspitze), dann seitlich vom Haken wegziehen; Tasche: gerade hoch
+  const lift = kind === 'key' ? Math.min(1, u / 0.4) : u, away = kind === 'key' ? Math.max(0, (u - 0.4) / 0.6) : 0;
+  const dx = g.up[0] * (kind === 'key' ? away : u), dy = g.up[1] * lift;
   return (
     <ParallaxImage id={g.empty} cam={cam}>
       <Layer p={poseOf(g.lift)} dx={dx} dy={dy} />
       {/* Schlüsselring geschlossen nachzeichnen: am Haken war ein Stück vom Haken verdeckt */}
       {kind === 'key' ? (
-        <svg style={{position: 'absolute', left: KEY_RING[0] - 70 + dx, top: KEY_RING[1] - 70 + dy}} width={140} height={140} viewBox="-70 -70 140 140">
+        // erst geschlossen, wenn der Ring den Haken verlassen hat (vorher steckt der Haken in der Lücke)
+        <svg style={{position: 'absolute', left: KEY_RING[0] - 70 + dx, top: KEY_RING[1] - 70 + dy, opacity: lerp(away, [0.2, 0.45], [0, 1])}} width={140} height={140} viewBox="-70 -70 140 140">
           <circle r={KEY_RING[2]} fill="none" stroke="#8E9296" strokeWidth={13} />
           <circle r={KEY_RING[2]} fill="none" stroke="#C9CCCF" strokeWidth={8} />
         </svg>
@@ -143,8 +146,10 @@ export const approachFinger = (f: number, [a, b]: number[], hoverPx: number): Fi
 };
 
 // ------------------------------------------------------------ Praxis-Eingangshalle
-export const HallShot: React.FC<{clock: string; f?: number; cam?: Cam; plate?: string; children?: React.ReactNode; front?: React.ReactNode}> = ({clock, f = 0, cam = {z: 1}, plate = 'B4c', children, front}) => (
+// door: Eingangstür offen (0..1), Ausschnitt aus B4o über dem Hallenbild
+export const HallShot: React.FC<{clock: string; f?: number; cam?: Cam; plate?: string; door?: number; children?: React.ReactNode; front?: React.ReactNode}> = ({clock, f = 0, cam = {z: 1}, plate = 'B4c', door = 0, children, front}) => (
   <ParallaxImage id={plate} cam={cam}>
+    {door > 0 ? <Layer p={A.DOOR.pose.B4o} opacity={door} /> : null}
     <WallClock time={clock} f={f} />
     {children}
     {front}
@@ -153,7 +158,9 @@ export const HallShot: React.FC<{clock: string; f?: number; cam?: Cam; plate?: s
 export const CLOCK_CAM: Cam = {z: 1.7, fx: CLOCK.cx + 40, fy: CLOCK.cy};
 
 // Gehende Figur (zwei Schrittphasen im Wechsel); feet = Abstand Fußlinie → Unterkante der Ebene
-export const Walker: React.FC<{group: string; f: number; range: number[]; x: number[]; step: number; flip?: boolean; dy?: number[]; scale?: number[]; feet?: number}> = ({group, f, range, x, step, flip, dy = [0, 0], scale = [1, 1], feet = 0}) => {
+export const Walker: React.FC<{group: string; f: number; range: number[]; x: number[]; step: number; flip?: boolean; dy?: number[]; scale?: number[]; feet?: number; fadeIn?: number}> = ({group, f, range, x, step, flip, dy = [0, 0], scale = [1, 1], feet = 0, fadeIn = 0}) => {
+  // fadeIn: Figur tritt aus dem hellen Türlicht heraus (die ersten Frames weich einblenden)
+  const op = fadeIn ? lerp(f, [range[0], range[0] + fadeIn], [0, 1]) : 1;
   const ids = Object.keys(A[group].pose);
   const p = A[group].pose[ids[Math.floor((f - range[0]) / step) % 2 === 0 ? 0 : 1]];
   const cx = lerp(f, range, x);
@@ -161,11 +168,11 @@ export const Walker: React.FC<{group: string; f: number; range: number[]; x: num
   const sc = lerp(f, range, scale), fy = p.y + p.h - feet * sc + lerp(f, range, dy);
   // weicher Bodenschatten (im Code, wandert mit; der KI-Schatten ist aus der Ebene entfernt)
   return (
-    <>
+    <div style={{opacity: op}}>
       <div style={{position: 'absolute', left: cx - 170 * sc, top: fy - 26 * sc, width: 340 * sc, height: 46 * sc, borderRadius: '50%',
         background: 'radial-gradient(closest-side, rgba(37,40,42,0.24), rgba(37,40,42,0))'}} />
       <Layer p={p} flip={flip} dx={cx - (p.x + p.w / 2)} dy={lerp(f, range, dy) + bob} scale={sc} />
-    </>
+    </div>
   );
 };
 
@@ -179,7 +186,7 @@ export const RoomShot: React.FC<{id: string; f: number; dur: number; zoom?: [num
 // (gleiche Kurve wie der Finger in S5). penDown: die Hand legt den Stift bewusst ab (Überblendung zu C7d).
 const PEN_TIP = [1355, 904];                                   // Stiftspitze der Schreibhand C7 in Ruhelage (Quellpixel)
 const [TIP_U] = quadToUnit(PAD, PEN_TIP[0], PEN_TIP[1]);
-const WORDS = LINES(TIP_U * 1000 - 40);
+const WORDS = LINES(TIP_U * 1000 + 30);
 export const NotesShot: React.FC<{f: number; dur: number; write?: number[]; ink?: number; pause?: number[]; penDown?: number[]}> = ({f, dur, write = [0, dur], ink = 0.5, pause, penDown}) => {
   const p = lerp(f, write, [0, ink]);
   const {shown, tip} = inkState(WORDS, p);

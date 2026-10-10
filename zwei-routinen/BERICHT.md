@@ -1,6 +1,6 @@
 # Bericht: „Zwei Routinen“
 
-Stand: 09.10.2026 (Korrekturfassung 5). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
+Stand: 10.10.2026 (Korrekturfassung 6). Bildmodell: `gemini-3-pro-image`. Es unterstützt Referenzbilder und Bildbearbeitung und war das aktuelle Bildmodell in der Modellliste des Schlüssels.
 
 ## Abnahme-Checkliste
 
@@ -131,3 +131,12 @@ Zusätzlich gemessen:
 | Schrift | Um 90° gedreht: Die Zeilen laufen im Bild von unten nach oben (der Block liegt quer vor dem Arzt), die nächste Zeile beginnt rechts daneben. |
 | Endkarte | Das letzte „e“ von „Rethink the Routine“ wird vollständig gezeichnet (die Schreibschrift ragte über die Textbox hinaus und wurde von der Schreib-Maske abgeschnitten). |
 | Gurt | Der weiße Kreis beim Einrasten ist entfernt, der Klick ist weiter zu hören. |
+
+## Korrekturen 10.10.2026 (Korrekturfassung 6)
+
+| Stelle | Korrektur |
+|---|---|
+| 0:04 Schlüssel | Die Hand hebt den Schlüssel erst kurz an und zieht ihn dann seitlich vom Haken weg. Der Ring wird erst geschlossen, wenn er den Haken verlassen hat. Der Schatten des Schlüssels bleibt an der Wand (Schlagschatten aus der Ebene entfernt), Krümel gelöscht. |
+| 0:06 Tasche | Der Schatten der Tasche bleibt auf der Bank, er wird nicht mehr mit angehoben. |
+| 0:14 / 1:05 Tür | Die Eingangstür geht kurz vor dem Eintreten auf (Bearbeitung B4o, als Ausschnitt über der Halle) und fällt hinter dem Arzt wieder zu. Er tritt aus dem hellen Türlicht herein. |
+| ab 0:25 Schrift | Aus Sicht des Arztes von links nach rechts: im Bild von oben (hinten) nach unten (vorne), Oberlängen zeigen von ihm weg, die nächste Zeile liegt näher bei ihm. |
