@@ -207,13 +207,14 @@ function sceneOpen(t) {
   odometer(n, 0, 0, size, col);
   ctx.shadowBlur = 0;
   if (t > C.ticks[9]) {
-    // cyan sheen sweeping over the landed "2026"
-    ctx.save(); ctx.globalCompositeOperation = 'source-atop';
+    // cyan sheen sweeping over the landed "2026" (the gradient is the text fill, so it stays inside the glyphs)
     const sp = prog(t, C.ticks[9], C.ticks[9] + 0.7);
-    const g = ctx.createLinearGradient(lerp(-300, w4 + 300, sp) - 120, 0, lerp(-300, w4 + 300, sp) + 120, 0);
-    g.addColorStop(0, 'rgba(92,230,218,0)'); g.addColorStop(0.5, 'rgba(92,230,218,0.9)'); g.addColorStop(1, 'rgba(92,230,218,0)');
-    ctx.fillStyle = g; ctx.fillRect(-50, -size, w4 + 100, size * 1.2);
-    ctx.restore();
+    if (sp < 1) {
+      const cx = lerp(-300, w4 + 300, sp);
+      const g = ctx.createLinearGradient(cx - 120, 0, cx + 120, 0);
+      g.addColorStop(0, 'rgba(92,230,218,0)'); g.addColorStop(0.5, 'rgba(92,230,218,0.95)'); g.addColorStop(1, 'rgba(92,230,218,0)');
+      odometer(n, 0, 0, size, g);
+    }
   }
   const dot = 1 - ep(t, 4.85, 5.2);
   if (dot > 0) { ctx.globalAlpha = appear * dot; setFont(900, size); ctx.textAlign = 'left'; ctx.fillStyle = P.cyan; ctx.fillText('.', w4 + 6, 0); }

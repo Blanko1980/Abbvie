@@ -9,6 +9,15 @@ const SCENES = [
 const sceneAt = t => { for (const s of SCENES) if (t < s[1]) return s[2]; return sceneEnd; };
 const PAN = 0.25;
 
+// real time -> story time (piecewise linear, see TL.warp)
+function warp(T) {
+  const k = TL.warp;
+  for (let i = 1; i < k.length; i++) {
+    if (T <= k[i][1]) return k[i - 1][0] + (T - k[i - 1][1]) / (k[i][1] - k[i - 1][1]) * (k[i][0] - k[i - 1][0]);
+  }
+  return k[k.length - 1][0] + (T - k[k.length - 1][1]);
+}
+
 // year chip: [time, year, topic, style]  style 0 = 2016 (paper), 1 = 2026 (neon), 2 = muted
 const CHIPS = [
   [8, '2016', 'KOPFHÖRER', 0], [10, '2026', 'KOPFHÖRER', 1],
@@ -24,7 +33,7 @@ const CHIP_STYLE = [
   { fill: '#2A251F', text: '#F6F0E5', topic: '#2A251F' },
   { fill: '#5CE6DA', text: '#0B1233', topic: '#FFFFFF' },
   { fill: '#4A4E57', text: '#E3E5EA', topic: '#C8CBD2' },
-  { fill: '#FFB36E', text: '#2A1608', topic: '#FFFFFF' },
+  { fill: '#FFD100', text: '#25282A', topic: '#FFFFFF' },
 ];
 function chip(t) {
   let i = -1;
@@ -63,7 +72,9 @@ function grainAmount(t) {
   return 0.04;
 }
 
-function drawFrame(t) {
+function drawFrame(T) {
+  REAL_T = T;
+  const t = warp(T);
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   const pan = C.pans.find(b => Math.abs(t - b) < PAN);
@@ -95,7 +106,7 @@ function drawFrame(t) {
 const FONTS = ['900 50px "Inter Display"', '850 50px "Inter Display"', '800 50px "Inter Display"', '750 50px "Inter Display"', '700 50px "Inter Display"',
   '600 50px "Inter Display"', '500 50px "Inter Display"', '200 50px "Inter"', '400 50px "Inter"', '500 50px "Inter"', '600 50px "Inter"',
   '400 50px "Liberation Sans"', '700 50px "Liberation Sans"', '700 50px "Caladea"', '400 50px "Caladea"', '400 50px "Liberation Mono"'];
-window.ready = Promise.all(FONTS.map(f => document.fonts.load(f).catch(() => null))).then(() => true);
+window.ready = Promise.all(FONTS.map(f => document.fonts.load(f).catch(() => null)).concat([LOGO.decode().catch(() => null)])).then(() => true);
 window.renderFrame = t => { drawFrame(t); return true; };
 
 // ---------------------------------------------------------------- live preview (open index.html via a local web server)
@@ -104,7 +115,7 @@ if (!/render/.test(location.search)) {
     const audio = new Audio('out/soundtrack.m4a');
     const hint = document.getElementById('hint');
     let playing = false;
-    const loop = () => { drawFrame(Math.min(TL.duration, audio.currentTime)); if (playing) requestAnimationFrame(loop); };
+    const loop = () => { drawFrame(Math.min(TL.length, audio.currentTime)); if (playing) requestAnimationFrame(loop); };
     const params = new URLSearchParams(location.search);
     drawFrame(parseFloat(params.get('t') || '0.6'));
     document.body.addEventListener('click', () => {

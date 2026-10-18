@@ -8,6 +8,8 @@ const W = 1920, H = 1080, TAU = Math.PI * 2;
 const C = TL.cues;
 const canvas = document.getElementById('c');
 let ctx = canvas.getContext('2d');
+// real (playback) time; scenes run on story time t, ambient motion and grain on REAL_T
+let REAL_T = 0;
 
 const SANS = '"Inter Display", "Inter", "Liberation Sans", sans-serif';
 const TEXT = '"Inter", "Liberation Sans", sans-serif';
@@ -73,6 +75,8 @@ const P = {
   cyan: '#5CE6DA', violet: '#8C7DFF', pink: '#FF7AB8', warm: '#FFB36E', coral: '#FF7E67',
   white: '#FFFFFF', grey: '#9BA1AD', charcoal: '#16181D',
   green16: '#4CD964', blue16: '#007AFF', mint: '#3CF2A6',
+  // RINVOQ brand (primary palette): gold + charcoal, plum only as accent
+  gold: '#FFD100', char: '#25282A', plum: '#90124A', gold70: '#FFDF4D',
 };
 
 // ---------------------------------------------------------------- shapes
@@ -264,15 +268,23 @@ function bgNew(t, warm = 0) {
   g.addColorStop(0, P.navyMid); g.addColorStop(0.55, P.navy); g.addColorStop(1, P.navyEdge);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  glow(W * 0.22 + Math.sin(t * 0.37) * 140, H * 0.25 + Math.cos(t * 0.29) * 90, 720, P.violet, 0.18);
-  glow(W * 0.82 + Math.cos(t * 0.31) * 160, H * 0.7 + Math.sin(t * 0.41) * 80, 760, '#22B8C9', 0.15);
-  glow(W * 0.6 + Math.sin(t * 0.23 + 2) * 200, H * 0.1, 520, P.pink, 0.07);
+  const r = REAL_T;
+  glow(W * 0.22 + Math.sin(r * 0.37) * 140, H * 0.25 + Math.cos(r * 0.29) * 90, 720, P.violet, 0.18);
+  glow(W * 0.82 + Math.cos(r * 0.31) * 160, H * 0.7 + Math.sin(r * 0.41) * 80, 760, '#22B8C9', 0.15);
+  glow(W * 0.6 + Math.sin(r * 0.23 + 2) * 200, H * 0.1, 520, P.pink, 0.07);
   if (warm > 0) glow(W * 0.4, H * 0.45, 900, P.warm, 0.25 * warm);
   ctx.restore();
   // fine dot grid = "digital"
   ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.045)';
   for (let y = 30; y < H; y += 44) for (let x = 30 + ((y / 44) % 2) * 22; x < W; x += 44) ctx.fillRect(x, y, 2, 2);
   ctx.restore();
+}
+// RINVOQ world: bold charcoal, lit with a little gold
+function bgBrand(t, goldX = W * 0.5, goldY = H * 0.45, gold = 0.12) {
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.45, 60, W * 0.5, H * 0.5, 1300);
+  g.addColorStop(0, '#2C3033'); g.addColorStop(0.6, P.char); g.addColorStop(1, '#1A1C1E');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (gold > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(goldX + Math.sin(REAL_T * 0.3) * 40, goldY, 900, P.gold, gold); ctx.restore(); }
 }
 function bgGrey(t) {
   const g = ctx.createRadialGradient(W * 0.45, H * 0.45, 60, W * 0.5, H * 0.5, 1250);
@@ -288,18 +300,58 @@ function bgUpgrade(t, tm, cx, cy, oldFn = bgOld, newFn = bgNew) {
   ctx.save(); circ(cx, cy, E.out3(p) * 2300); ctx.clip(); newFn(t); ctx.restore();
 }
 // Ring + sparkle burst that sells every "upgrade"
-function upgradeFX(t, tm, cx, cy, seed = 1) {
+const FX_NEW = { ring: P.cyan, inner: P.violet, burst: null };
+const FX_BRAND = { ring: P.gold, inner: P.plum, burst: [P.gold, '#FFFFFF', P.gold70, P.gold] };
+function upgradeFX(t, tm, cx, cy, seed = 1, pal = FX_NEW) {
   const p = prog(t, tm, tm + 1.0);
   if (p <= 0 || p >= 1) return;
   const R = E.out3(p) * 2300;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
-  ctx.lineWidth = 70 * (1 - p) + 2; ctx.strokeStyle = rgba(P.cyan, 0.22 * (1 - p)); circ(cx, cy, R); ctx.stroke();
+  ctx.lineWidth = 70 * (1 - p) + 2; ctx.strokeStyle = rgba(pal.ring, 0.22 * (1 - p)); circ(cx, cy, R); ctx.stroke();
   ctx.lineWidth = 5 * (1 - p) + 1; ctx.strokeStyle = rgba('#FFFFFF', 0.85 * (1 - p)); circ(cx, cy, R); ctx.stroke();
-  ctx.lineWidth = 22 * (1 - p); ctx.strokeStyle = rgba(P.violet, 0.3 * (1 - p)); circ(cx, cy, R * 0.93); ctx.stroke();
+  ctx.lineWidth = 22 * (1 - p); ctx.strokeStyle = rgba(pal.inner, 0.3 * (1 - p)); circ(cx, cy, R * 0.93); ctx.stroke();
   glow(cx, cy, 260 + 200 * p, '#FFFFFF', 0.55 * Math.pow(1 - p, 3));
   ctx.restore();
-  burst(t, tm, cx, cy, { n: 34, seed, speed: 1100, life: 0.9, size: 14 });
+  burst(t, tm, cx, cy, { n: 34, seed, speed: 1100, life: 0.9, size: 14, colors: pal.burst || undefined });
+}
+/* Dry-brush stroke along a polyline - the RINVOQ brush element.
+ * p = paint progress 0..1; color may be a CSS colour or a canvas gradient. */
+function brush(pts, w, color, p = 1, seed = 1, o = {}) {
+  if (p <= 0 || pts.length < 2) return;
+  const r = rng(seed), nb = o.bristles || Math.max(12, Math.round(w / 2));
+  const nrm = pts.map((q, i) => {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+    return [-dy / l, dx / l];
+  });
+  const taper = o.taper ?? 0.45;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const a0 = ctx.globalAlpha;
+  for (let k = 0; k < nb; k++) {
+    const off = (k / (nb - 1) - 0.5) * w, edge = Math.abs(off) / (w / 2);
+    const s0 = r() * 0.06 * (0.3 + edge), e0 = 1 - r() * (0.03 + 0.32 * edge * edge);
+    const wob = r() * 1000, alpha = 0.55 + 0.45 * r(), lw = (w / nb) * (1.5 + r() * 1.3);
+    const line = pts.map((q, i) => {
+      const u = i / (pts.length - 1);
+      const tp = lerp(1 - taper, 1, Math.sin(Math.PI * clamp(0.08 + u * 0.92)));
+      const j = noise1(wob + i * 0.4) * w * 0.04;
+      return [q[0] + nrm[i][0] * (off * tp + j), q[1] + nrm[i][1] * (off * tp + j)];
+    });
+    const end = Math.min(e0, p);
+    if (end <= s0) continue;
+    ctx.globalAlpha = a0 * alpha * (o.alpha ?? 1);
+    if (r() < 0.22 * edge + 0.05) {   // dry streak: a gap in this bristle
+      const g0 = 0.35 + r() * 0.4, g1 = g0 + 0.05 + r() * 0.12;
+      if (end > s0) strokePoly(subPoly(line, s0, Math.min(end, g0)), lw, color);
+      if (end > g1) strokePoly(subPoly(line, g1, end), lw, color);
+    } else strokePoly(subPoly(line, s0, end), lw, color);
+  }
+  ctx.globalAlpha = a0;
+  ctx.restore();
+}
+function arcPts(cx, cy, rx, ry, a0, a1, n = 48) {
+  return Array.from({ length: n + 1 }, (_, i) => { const a = lerp(a0, a1, i / n); return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]; });
 }
 function burst(t, t0, cx, cy, o = {}) {
   const n = o.n || 28, life = o.life || 0.8, speed = o.speed || 500, size = o.size || 10;
@@ -333,7 +385,7 @@ const GRAIN = (() => {
 })();
 function grain(t, a) {
   if (a <= 0) return;
-  const f = Math.floor(t * 24), r = rng(f + 11);
+  const f = Math.floor(REAL_T * 24), r = rng(f + 11);
   ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'overlay';
   ctx.fillStyle = ctx.createPattern(GRAIN, 'repeat');
   ctx.translate(-Math.floor(r() * 256), -Math.floor(r() * 256));

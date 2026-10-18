@@ -23,14 +23,14 @@ function sceneFreeze(t) {
   if (ul > 0) {
     const w = tw('Neurodermitis-Therapie?', 76, 700);
     const x1 = W / 2 + tw('Und in der Neurodermitis-Therapie?', 76, 700) / 2 - w;
-    ctx.fillStyle = rgba(P.cyan, 0.9); ctx.fillRect(x1, 586, w * ul, 5);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(x1, 586, w * ul, 5);
   }
 }
 
 // ================================================================ 35–50 s  NEURODERMITIS
 const FIG = { x: 830, gy: 780, s: 1.1 };
 const SK = '#E9B996', SKD = '#C98E6B';
-const COL = { top16: '#666C78', top16d: '#555B66', pants16: '#434955', shirt: '#F3F5FA', shorts: '#2EC4B6', shoe: '#1E2230', hair: '#3B2A22' };
+const COL = { top16: '#666C78', top16d: '#555B66', pants16: '#434955', shirt: '#F3F5FA', shorts: '#FFD100', shoe: '#1E2230', hair: '#3B2A22' };
 const ARM1 = 92, ARM2 = 88, LEG1 = 88, LEG2 = 86;
 
 function ik(S, T, l1, l2, bend) {
@@ -54,7 +54,7 @@ function figure(t) {
   const y17 = ep(t, 40.7, 41.4);
   const hp = prog(t, C.clothes - 0.08, C.clothes + 0.42);
   const hop = Math.sin(Math.PI * hp) * 46;
-  const beat = t > 45 ? Math.abs(Math.sin(TAU * (t - 44))) * 7 : 0;
+  const beat = t > 45 ? Math.abs(Math.sin(TAU * (REAL_T - 58))) * 7 : 0;   // on the music's beat
   const breathe = Math.sin(t * 2.3) * 2.2;
   const hunch = lerp(lerp(16, 10, y17), -4, joy);
   const pelvis = [0, -180 - hop - beat * 0.6 + breathe * 0.3];
@@ -68,7 +68,7 @@ function figure(t) {
   const legL = ik(hipL, footL, LEG1, LEG2, 1), legR = ik(hipR, footR, LEG1, LEG2, -1);
   const [eng, amp, ph] = scratchEnv(t);
   const handA16 = [chest[0] + 34, chest[1] + 108];
-  const sway = Math.sin(TAU * (t - 44) * 0.5) * 14 * joy;
+  const sway = Math.sin(TAU * (REAL_T - 58) * 0.5) * 14 * joy;
   const handA = [lerp(handA16[0], chest[0] - 150 + sway, joy), lerp(handA16[1], chest[1] - 168, joy)];
   const armA = ik(shL, handA, ARM1, ARM2, 1);
   const u = 0.52 + 0.3 * Math.sin(ph) * amp;
@@ -129,7 +129,7 @@ function drawFigure(t, f) {
     // shorts waistband
     const p = f.pelvis; rr(p[0] - 50, p[1] - 14, 100, 30, 10); ctx.fillStyle = COL.shorts; ctx.fill();
     // little logo-free graphic on the shirt
-    ctx.fillStyle = rgba(P.cyan, 0.9); sparkle(f.chest[0] + 22, f.chest[1] + 44, 11, 0); ctx.fill();
+    ctx.fillStyle = P.gold; sparkle(f.chest[0] + 22, f.chest[1] + 44, 11, 0); ctx.fill();
   } else {
     ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(f.chest[0], f.chest[1] + 10); ctx.lineTo(f.pelvis[0], f.pelvis[1] - 10); ctx.stroke();
@@ -223,7 +223,7 @@ function drawJump(t) {
   const gy = FIG.gy, heute = ep(t, C.clothes, C.clothes + 0.5);
   JUMP.xs.forEach(x => {
     const h = (gy - JUMP.top) * grow;
-    rr(x - 40, gy - 10, 80, 14, 7); ctx.fillStyle = mix('#5A5F6B', '#C9D2F0', heute); ctx.fill();
+    rr(x - 40, gy - 10, 80, 14, 7); ctx.fillStyle = mix('#5A5F6B', '#D9DCE0', heute); ctx.fill();
     const g = ctx.createLinearGradient(x - 8, 0, x + 8, 0); g.addColorStop(0, '#8E94A2'); g.addColorStop(0.5, '#F2F4F8'); g.addColorStop(1, '#9AA0AE');
     rr(x - 8, gy - h, 16, h, 5); ctx.fillStyle = g; ctx.fill();
     ctx.fillStyle = 'rgba(30,34,44,0.5)';
@@ -236,19 +236,24 @@ function drawJump(t) {
     const v = ep(t, a, a + 0.3);
     if (v <= 0) return;
     ctx.globalAlpha = v;
-    ctx.fillStyle = i === 2 ? P.warm : 'rgba(255,255,255,0.5)'; ctx.fillRect(JUMP.xs[0] - 36, y - 1.5, 22, 3);
-    txt(s, JUMP.xs[0] - 46, y + 8, { size: 24, weight: 700, align: 'right', color: i === 2 ? P.warm : 'rgba(255,255,255,0.6)' });
+    ctx.fillStyle = i === 2 ? P.gold : 'rgba(255,255,255,0.5)'; ctx.fillRect(JUMP.xs[0] - 36, y - 1.5, 22, 3);
+    txt(s, JUMP.xs[0] - 46, y + 8, { size: 24, weight: 700, align: 'right', color: i === 2 ? P.gold : 'rgba(255,255,255,0.6)' });
     ctx.globalAlpha = 1;
   });
   ctx.save(); ctx.globalAlpha = ba;
   const yy = by - (1 - ba) * 40;
   const x0 = JUMP.xs[0] - 14, len = JUMP.xs[1] - JUMP.xs[0] + 28, n = 10;
+  // the bar is neutral until "heute" - then it is painted over with the gold RINVOQ brush
+  const paint = ep(t, C.barRise2[1] - 0.02, C.barRise2[1] + 0.5, E.out3);
+  ctx.save(); ctx.globalAlpha *= 1 - paint * 0.85;
   for (let k = 0; k < n; k++) {
     rr(x0 + k * len / n, yy - 8, len / n + 0.5, 16, k === 0 ? [8, 0, 0, 8] : k === n - 1 ? [0, 8, 8, 0] : 0);
-    ctx.fillStyle = k % 2 ? '#F5F7FA' : mix('#C0505A', P.cyan, heute); ctx.fill();
+    ctx.fillStyle = k % 2 ? '#F5F7FA' : '#7C828C'; ctx.fill();
   }
+  ctx.restore();
+  if (paint > 0) brush(Array.from({ length: 24 }, (_, i) => [x0 - 16 + (len + 40) * i / 23, yy + Math.sin(i * 0.5) * 1.5]), 30, P.gold, paint, 31);
   const fl = bump(t, C.barRise1[1], 0.5) + bump(t, C.barRise2[1], 0.7);
-  if (fl > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba(heute > 0 ? P.warm : '#FFFFFF', 0.5 * fl); ctx.fillRect(x0 - 10, yy - 18, len + 20, 36); }
+  if (fl > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba(heute > 0 ? P.gold : '#FFFFFF', 0.45 * fl); ctx.fillRect(x0 - 10, yy - 18, len + 20, 36); }
   ctx.globalCompositeOperation = 'source-over';
   txt('MESSLATTE', (JUMP.xs[0] + JUMP.xs[1]) / 2, yy - 22, { size: 16, weight: 700, align: 'center', ls: 4, color: 'rgba(255,255,255,0.55)' });
   ctx.restore();
@@ -258,25 +263,37 @@ function drawJump(t) {
     if (s <= 0) return;
     const cx = (JUMP.xs[0] + JUMP.xs[1]) / 2, cy = 392 + i * 76;
     ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.globalAlpha = clamp((t - c) / 0.15);
-    rr(-195, -30, 390, 60, 30); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill(); ctx.strokeStyle = rgba(P.cyan, 0.55); ctx.lineWidth = 2; ctx.stroke();
-    circ(-160, 0, 19); ctx.fillStyle = P.cyan; ctx.fill();
-    check(-160, 1, 24, 4.5, '#0B1233', E.out3(prog(t, c + 0.05, c + 0.3)));
+    rr(-195, -30, 390, 60, 30); ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2; ctx.stroke();
+    // brand icon style: white line circle + gold brush check
+    circ(-160, 0, 18); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.6; ctx.stroke();
+    brush([[-170, -1], [-162, 9], [-156, 2], [-146, -14], [-140, -24]], 9, P.gold, E.out3(prog(t, c + 0.05, c + 0.35)), 95 + i, { bristles: 9, taper: 0.6 });
     txt(labels[i], -128, 10, { size: 26, weight: 700, color: '#FFFFFF' });
     ctx.restore();
-    burst(t, c, cx - 160, cy, { n: 10, seed: 90 + i, speed: 260, life: 0.6, size: 8 });
+    burst(t, c, cx - 160, cy, { n: 10, seed: 90 + i, speed: 260, life: 0.6, size: 8, colors: [P.gold, '#FFFFFF', P.gold70] });
   });
 }
 function bgHeute(t) {
-  bgNew(t);
+  bgBrand(t, FIG.x, 450, 0.16);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  const fx = FIG.x, fy = 430;
-  glow(fx, fy, 980, P.warm, 0.32); glow(fx, fy, 460, '#FFD9A0', 0.28);
-  ctx.translate(fx, fy); ctx.rotate(t * 0.06);
+  const fx = FIG.x, fy = 450;
+  glow(fx, fy, 520, P.gold, 0.14);
+  ctx.translate(fx, fy); ctx.rotate(REAL_T * 0.05);
   for (let k = 0; k < 14; k++) {
     ctx.rotate(TAU / 14);
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(1500, -70); ctx.lineTo(1500, 70); ctx.closePath();
-    ctx.fillStyle = 'rgba(255,190,120,0.035)'; ctx.fill();
+    ctx.fillStyle = 'rgba(255,209,0,0.022)'; ctx.fill();
   }
+  ctx.restore();
+}
+// big gold brush halo painted around the figure at the "heute" moment
+function brushHalo(t) {
+  const p = ep(t, C.clothes - 0.04, C.clothes + 0.7, E.out3);
+  if (p <= 0) return;
+  const cx = FIG.x, cy = 470, R = 330;
+  const g = ctx.createLinearGradient(0, cy - R, 0, cy + R);
+  g.addColorStop(0, P.gold); g.addColorStop(0.62, P.gold); g.addColorStop(1, P.plum);
+  ctx.save(); ctx.globalAlpha = 0.95;
+  brush(arcPts(cx, cy, R, R * 0.98, -0.32 * Math.PI, -1.62 * Math.PI, 72), 64, g, p, 404, { taper: 0.75 });
   ctx.restore();
 }
 function sceneAD(t) {
@@ -288,11 +305,12 @@ function sceneAD(t) {
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < 46; i++) {
       const sp = 40 + hash(i + 7) * 90, x = hash(i) * W + Math.sin(t * 0.8 + i) * 20;
-      const y = H + 60 - ((t - C.clothes) * sp + hash(i + 3) * (H + 120)) % (H + 120);
-      glow(x, y, 10 + hash(i + 11) * 18, i % 3 ? P.warm : P.cyan, 0.35 * a);
+      const y = H + 60 - ((REAL_T - 58.06) * sp + hash(i + 3) * (H + 120)) % (H + 120);
+      glow(x, y, 10 + hash(i + 11) * 18, i % 3 ? P.gold : '#FFFFFF', 0.3 * a);
     }
     ctx.restore();
   }
+  brushHalo(t);
   drawJump(t);
   const f = figure(t);
   const [sx, sy] = shake(t, C.barRise2[1], 10, 0.4);
@@ -303,7 +321,7 @@ function sceneAD(t) {
   ctx.restore();
   const fl = Math.pow(1 - prog(t, C.clothes, C.clothes + 0.5), 2) * (t >= C.clothes ? 1 : 0);
   if (fl > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(FIG.x, 520, 420, '#FFFFFF', 0.6 * fl); ctx.restore(); }
-  upgradeFX(t, C.barRise2[1], FIG.x, 470, 23);
+  upgradeFX(t, C.barRise2[1], FIG.x, 470, 23, FX_BRAND);
 
   // captions
   const m1 = ep(t, 40.5, 40.95);
@@ -311,8 +329,8 @@ function sceneAD(t) {
   caption('2016: Behandeln, ohne gezielt\nEntzündungssignale zu blockieren.', 0, 0, t, 35.7,
     { size: 56, weight: 700, lh: 64, color: '#E6E8EC', alpha: lerp(1, 0.6, m1), tout: 44.1, accent: { '2016:': '#F09A8A' } });
   ctx.restore();
-  caption('2017: Die Messlatte steigt.', CAP_X, 958, t, 40.6, { size: 64, weight: 750, color: '#FFFFFF', tout: 44.1, accent: { '2017:': '#F5C08A' } });
-  caption('Heute: nahezu vollständige\nKrankheitsinaktivität erreichbar.', CAP_X, 888, t, 44.45, { size: 64, weight: 750, lh: 70, color: '#FFFFFF', tout: 49.75, accent: { 'Heute:': P.warm } });
+  caption('2017: Die Messlatte steigt.', CAP_X, 958, t, 40.6, { size: 64, weight: 750, color: '#FFFFFF', tout: 44.1, accent: { '2017:': '#C9CDD3' } });
+  caption('Heute: nahezu vollständige\nKrankheitsinaktivität erreichbar.', CAP_X, 888, t, 44.45, { size: 64, weight: 750, lh: 70, color: '#FFFFFF', tout: 49.75, accent: { 'Heute:': P.gold } });
 }
 
 // ================================================================ 50–55 s  RASTER
@@ -340,7 +358,7 @@ function icon(i, side, x, y) {
   switch (i) {
     case 0:
       if (old) { rr(-30, -54, 60, 108, 12); ctx.fillStyle = '#1C1C1E'; ctx.fill(); rr(-24, -40, 48, 72, 2); ctx.fillStyle = '#5E7FB8'; ctx.fill(); circ(0, 44, 5); ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.stroke(); }
-      else { rr(-30, -56, 60, 112, 16); ctx.fillStyle = '#20263D'; ctx.fill(); const g = ctx.createLinearGradient(-26, -52, 26, 52); g.addColorStop(0, P.cyan); g.addColorStop(1, P.violet); rr(-26, -52, 52, 104, 13); ctx.fillStyle = g; ctx.fill(); rr(-10, -46, 20, 6, 3); ctx.fillStyle = '#000'; ctx.fill(); }
+      else { rr(-30, -56, 60, 112, 16); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3.5; ctx.stroke(); rr(-10, -46, 20, 6, 3); ctx.fillStyle = '#FFFFFF'; ctx.fill(); brush([[-16, 22], [-2, 10], [16, -10]], 12, P.gold, 1, 71, { bristles: 10 }); }
       break;
     case 1:
       if (old) { ctx.beginPath(); spline([[-40, 40], [-10, 10], [20, 30], [10, -10], [-20, 0], [0, -30], [30, -20], [20, -50]]); ctx.strokeStyle = '#9C9890'; ctx.lineWidth = 7; ctx.stroke(); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4; ctx.stroke(); circ(20, -50, 9); ctx.fillStyle = '#F2F0EB'; ctx.fill(); }
@@ -348,26 +366,26 @@ function icon(i, side, x, y) {
       break;
     case 2:
       if (old) { drawToggle(-50, -42, 0, 0.7); drawCoin(20, 30, 26, 0.6); }
-      else { circ(0, 0, 46); ctx.strokeStyle = P.cyan; ctx.lineWidth = 3; ctx.stroke(); ell(0, 0, 20, 46); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-46, 0); ctx.lineTo(46, 0); ctx.moveTo(-40, -22); ctx.lineTo(40, -22); ctx.moveTo(-40, 22); ctx.lineTo(40, 22); ctx.stroke(); }
+      else { circ(0, 0, 44); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke(); ell(0, 0, 19, 44); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-44, 0); ctx.lineTo(44, 0); ctx.moveTo(-38, -22); ctx.lineTo(38, -22); ctx.moveTo(-38, 22); ctx.lineTo(38, 22); ctx.stroke(); brush(arcPts(0, 0, 54, 54, 0.55 * Math.PI, 1.05 * Math.PI, 16), 10, P.gold, 1, 72, { bristles: 9 }); }
       break;
     case 3:
       if (old) { [0, 1, 2, 3].forEach(k => { coinBand(0, 40 - k * 13, 46, 13, 13); ctx.fillStyle = k % 2 ? '#E8B640' : '#F5C850'; ctx.fill(); }); ell(0, -12, 46, 13); ctx.fillStyle = '#FFE592'; ctx.fill(); }
-      else drawCard(0, 0, -0.15, 0.36);
+      else { ctx.rotate(-0.12); rr(-52, -34, 104, 68, 10); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke(); brush([[-50, -6], [50, -8]], 12, P.gold, 1, 73, { bristles: 10 }); ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(24, 16, 5 + k * 6, -0.8, 0.8); ctx.stroke(); } }
       break;
     case 4:
       if (old) { ctx.fillStyle = '#D9A85E'; ctx.fillRect(-50, -40, 100, 80); drawStone(-14, -6, 16, false); drawStone(16, -6, 16, true); drawStone(2, 20, 16, false); }
-      else { const g = ctx.createLinearGradient(-40, -40, 40, 40); g.addColorStop(0, P.cyan); g.addColorStop(1, P.violet); ctx.fillStyle = g; sparkle(-6, 4, 42, 0); ctx.fill(); sparkle(34, -30, 15, 0); ctx.fill(); }
+      else { sparkle(-6, 4, 42, 0); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke(); ctx.fillStyle = P.gold; sparkle(34, -30, 15, 0); ctx.fill(); }
       break;
     case 5:
       if (old) { ctx.rotate(-0.08); ctx.fillStyle = '#F9DCE2'; ctx.fillRect(-56, -38, 112, 76); txt('Rp.', -48, 6, { size: 18, weight: 700, fam: SERIF, color: '#C9475F' }); strokePoly([[-12, 0], [40, -2]], 2, '#2A3E8F'); strokePoly([[-12, 16], [30, 16]], 2, '#2A3E8F'); }
-      else { rr(-48, -48, 96, 96, 10); ctx.fillStyle = '#FFFFFF'; ctx.fill(); const q = 84 / 25; for (let j = 0; j < 25; j++) for (let k = 0; k < 25; k++) if (QR[j][k]) { ctx.fillStyle = '#0B1233'; ctx.fillRect(-42 + k * q, -42 + j * q, q + 0.3, q + 0.3); } }
+      else { rr(-48, -48, 96, 96, 10); ctx.fillStyle = '#FFFFFF'; ctx.fill(); const q = 84 / 25; for (let j = 0; j < 25; j++) for (let k = 0; k < 25; k++) if (QR[j][k]) { ctx.fillStyle = P.char; ctx.fillRect(-42 + k * q, -42 + j * q, q + 0.3, q + 0.3); } }
       break;
-    case 6: miniFig(0, 6, 1, !old); break;
+    case 6: if (!old) brush([[-44, 60], [0, 57], [44, 60]], 10, P.gold, 1, 74, { bristles: 9 }); miniFig(0, 6, 1, !old); break;
   }
   ctx.restore();
 }
 function sceneGrid(t) {
-  bgNew(t);
+  bgBrand(t, W / 2, 420, 0.07);
   const push = lerp(1, 1.05, ep(t, 54.0, 55.0, E.in3));
   ctx.save(); ctx.translate(W / 2, 420); ctx.scale(push, push); ctx.translate(-W / 2, -420);
   TILES.forEach((name, i) => {
@@ -378,73 +396,84 @@ function sceneGrid(t) {
     const sx = Math.abs(Math.cos(Math.PI * q)), side = q < 0.5 ? 0 : 1, lift = Math.sin(Math.PI * q);
     const last = i === 6;
     ctx.save(); ctx.translate(x, y - lift * 16); ctx.scale(s * (1 + 0.06 * lift) * Math.max(0.02, sx), s * (1 + 0.06 * lift));
-    if (side === 1 && last) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(0, 0, 330, P.warm, 0.4 * (0.6 + 0.4 * bump(t, f + 0.2, 0.8))); ctx.restore(); }
+    if (side === 1 && last) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(0, 0, 330, P.gold, 0.32 * (0.6 + 0.4 * bump(t, f + 0.2, 0.8))); ctx.restore(); }
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18 + lift * 20;
-    rr(-165, -115, 330, 230, 24); ctx.fillStyle = side ? '#1D2660' : P.cream; ctx.fill(); ctx.restore();
+    rr(-165, -115, 330, 230, 24); ctx.fillStyle = side ? '#33373B' : P.cream; ctx.fill(); ctx.restore();
     if (side) {
-      const g = ctx.createLinearGradient(-165, -115, 165, 115); g.addColorStop(0, rgba(last ? P.warm : P.cyan, 0.9)); g.addColorStop(1, rgba(P.violet, 0.9));
-      rr(-165, -115, 330, 230, 24); ctx.strokeStyle = g; ctx.lineWidth = 2.5; ctx.stroke();
+      rr(-165, -115, 330, 230, 24); ctx.strokeStyle = last ? P.gold : 'rgba(255,255,255,0.22)'; ctx.lineWidth = last ? 4 : 2; ctx.stroke();
     }
     // shading across the flip
     icon(i, side, 0, -14);
-    txt(side ? (last ? 'HEUTE' : '2026') : '2016', -140, -82, { size: 20, weight: 800, color: side ? (last ? P.warm : P.cyan) : P.ink, ls: 2 });
+    txt(side ? (last ? 'HEUTE' : '2026') : '2016', -140, -82, { size: 20, weight: 800, color: side ? (last ? P.gold : 'rgba(255,255,255,0.8)') : P.ink, ls: 2 });
     txt(name, 0, 96, { size: 20, weight: 600, align: 'center', color: side ? 'rgba(255,255,255,0.85)' : P.inkSoft });
     if (sx < 0.9) { ctx.fillStyle = `rgba(0,0,0,${0.35 * (1 - sx)})`; rr(-165, -115, 330, 230, 24); ctx.fill(); }
     ctx.restore();
-    if (p > 0.45 && p < 1) burst(t, f + 0.15, x, y, { n: 12, seed: 200 + i, speed: 420, life: 0.55, size: 8, colors: last ? [P.warm, '#FFFFFF', P.coral] : undefined });
+    if (p > 0.45 && p < 1) burst(t, f + 0.15, x, y, { n: 12, seed: 200 + i, speed: 420, life: 0.55, size: 8, colors: last ? [P.gold, '#FFFFFF', P.gold70, P.plum] : [P.gold, '#FFFFFF', P.gold70] });
   });
   ctx.restore();
   const m = ep(t, C.flips[6] - 0.1, C.flips[6] + 0.35);
   ctx.save(); ctx.translate(CAP_X, lerp(CAP_Y, CAP_Y - 92, m)); const s = lerp(1, 0.6, m); ctx.scale(s, s);
-  caption('Was 2016 Standard war, ist heute überholt.', 0, 0, t, 50.3, { size: 64, weight: 750, color: '#FFFFFF', alpha: lerp(1, 0.7, m), accent: { '2016': P.cyan } });
+  caption('Was 2016 Standard war, ist heute überholt.', 0, 0, t, 50.3, { size: 64, weight: 750, color: '#FFFFFF', alpha: lerp(1, 0.7, m), accent: { '2016': P.gold } });
   ctx.restore();
-  caption('Auch in der Therapie.', CAP_X, CAP_Y, t, C.flips[6] + 0.12, { size: 68, weight: 800, color: '#FFFFFF', accent: { 'Therapie.': P.warm } });
+  caption('Auch in der Therapie.', CAP_X, CAP_Y, t, C.flips[6] + 0.12, { size: 68, weight: 800, color: '#FFFFFF', accent: { 'Therapie.': P.gold } });
 }
 
-// ================================================================ 55–60 s  ENDCARD
+// ================================================================ 55–60 s  ENDCARD (RINVOQ)
+const LOGO = (() => { const im = new Image(); im.src = window.RINVOQ_LOGO; return im; })();
+const LOGO_ICON_W = 124;   // width of the brush icon inside the logo image (px)
+function drawLogo(t, cx, cy, sc, t0) {
+  if (!LOGO.complete || !LOGO.naturalWidth) return;
+  const w = LOGO.naturalWidth, h = LOGO.naturalHeight;
+  const x0 = cx - w * sc / 2, y0 = cy - h * sc / 2;
+  // the icon is revealed like a brush being swept round, the wordmark wipes in after it
+  const pi = ep(t, t0, t0 + 0.75, E.io3);
+  if (pi > 0) {
+    const icx = x0 + 60 * sc, icy = y0 + 80 * sc, a0 = -0.38 * Math.PI;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(icx, icy); ctx.arc(icx, icy, 140 * sc, a0, a0 - TAU * pi, true); ctx.closePath(); ctx.clip();
+    ctx.drawImage(LOGO, 0, 0, LOGO_ICON_W, h, x0, y0, LOGO_ICON_W * sc, h * sc);
+    ctx.restore();
+  }
+  const pw = ep(t, t0 + 0.35, t0 + 1.0, E.out3);
+  if (pw > 0) {
+    const ww = (w - LOGO_ICON_W) * sc;
+    ctx.save(); ctx.beginPath(); ctx.rect(x0 + LOGO_ICON_W * sc, y0 - 10, ww * pw + 2, h * sc + 20); ctx.clip();
+    ctx.globalAlpha = pw;
+    ctx.drawImage(LOGO, LOGO_ICON_W, 0, w - LOGO_ICON_W, h, x0 + LOGO_ICON_W * sc + (1 - pw) * 30, y0, ww, h * sc);
+    ctx.restore();
+  }
+}
 function sceneEnd(t) {
-  bgNew(t);
-  ctx.save(); ctx.translate(0, 100);
+  bgBrand(t, 1500, 560, 0.09);
   const h = C.endHit;
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  glow(1400, 470, 700, P.violet, 0.22 + 0.1 * Math.sin(t * 1.3));
-  glow(400, 820, 600, P.cyan, 0.12);
-  ctx.restore();
+  ctx.save(); ctx.translate(0, 100);
   // giant faded year in the back
-  ctx.save(); ctx.globalAlpha = 0.04 * ep(t, h, h + 1); setFont(900, 520); ctx.textAlign = 'right'; ctx.fillStyle = '#FFFFFF';
-  ctx.fillText('2026', W + 30 - (t - h) * 12, 760); ctx.restore();
-  txt('ROUTE', 156, 352, { size: 24, weight: 800, ls: 8, color: P.cyan, alpha: ep(t, h + 0.1, h + 0.5) });
-  const rl = ep(t, h + 0.12, h + 0.6, E.out3);
-  ctx.fillStyle = P.cyan; ctx.fillRect(156, 368, 70 * rl, 4);
+  ctx.save(); ctx.globalAlpha = 0.035 * ep(t, h, h + 1); setFont(900, 520); ctx.textAlign = 'right'; ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('2026', W + 30 - (REAL_T - 72) * 12, 760); ctx.restore();
+  txt('ROUTE', 156, 352, { size: 24, weight: 800, ls: 8, color: P.gold, alpha: ep(t, h + 0.1, h + 0.5) });
+  brush([[154, 374], [196, 372], [238, 373]], 8, P.gold, ep(t, h + 0.12, h + 0.6, E.out3), 61, { bristles: 9 });
   caption('10 Jahre Alltag.', 150, 500, t, h + 0.2, { size: 136, weight: 850, color: '#FFFFFF', stagger: 0.08, dur: 0.8 });
-  caption('Warum bei 2016 stehen bleiben?', 154, 600, t, h + 0.85, { size: 58, weight: 500, color: 'rgba(255,255,255,0.85)', accent: { '2016': P.warm } });
+  caption('Warum bei 2016 stehen bleiben?', 154, 600, t, h + 0.85, { size: 58, weight: 500, color: 'rgba(255,255,255,0.88)', accent: { '2016': P.gold } });
   const ul = ep(t, h + 1.5, h + 2.0, E.io3);
-  if (ul > 0) { const x = 154 + tw('Warum bei ', 58, 500); ctx.fillStyle = P.warm; ctx.fillRect(x, 616, tw('2016', 58, 500) * ul, 4); }
+  if (ul > 0) {
+    const x = 154 + tw('Warum bei ', 58, 500), w = tw('2016', 58, 500);
+    brush([[x - 4, 624], [x + w / 2, 621], [x + w + 8, 623]], 11, P.gold, ul, 62, { bristles: 11 });
+  }
   // ten-year timeline recap
   const ty = 760, x0 = 156, x1 = 1100, lp = ep(t, h + 1.0, h + 2.2, E.io3);
-  ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(x0, ty - 1, (x1 - x0) * lp, 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(x0, ty - 1, (x1 - x0) * lp, 2);
   txt('2016', x0, ty + 40, { size: 20, weight: 700, color: 'rgba(255,255,255,0.55)', alpha: lp });
-  txt('2026', x1, ty + 40, { size: 20, weight: 700, align: 'right', color: P.cyan, alpha: ep(t, h + 2.0, h + 2.4) });
+  txt('2026', x1, ty + 40, { size: 20, weight: 700, align: 'right', color: P.gold, alpha: ep(t, h + 2.0, h + 2.4) });
   for (let i = 0; i < 7; i++) {
     const x = lerp(x0 + 40, x1 - 40, i / 6), a = h + 1.2 + i * 0.14, s = spring(t - a, 1.6, 6);
     if (s <= 0) continue;
-    ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(x, ty, 26 * s, i === 6 ? P.warm : P.cyan, 0.6); ctx.restore();
-    circ(x, ty, 6 * s); ctx.fillStyle = i === 6 ? P.warm : '#FFFFFF'; ctx.fill();
+    if (i === 6) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(x, ty, 34 * s, P.gold, 0.55); ctx.restore(); }
+    circ(x, ty, (i === 6 ? 8 : 5.5) * s); ctx.fillStyle = i === 6 ? P.gold : '#FFFFFF'; ctx.fill();
   }
   const dp = ep(t, h + 1.2, h + 2.3, E.io3);
-  if (dp > 0 && dp < 1) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(lerp(x0, x1, dp), ty, 40, '#FFFFFF', 0.8); ctx.restore(); }
-  // logo placeholder
-  const lg = spring(t - (h + 1.6), 1.2, 6);
-  if (lg > 0) {
-    ctx.save(); ctx.translate(1500, 470); ctx.scale(lg, lg); ctx.globalAlpha = clamp((t - h - 1.6) / 0.2);
-    rr(-220, -110, 440, 220, 28); ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
-    ctx.setLineDash([12, 10]); ctx.lineDashOffset = -t * 20; ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.setLineDash([]);
-    txt('LOGO', 0, 6, { size: 40, weight: 800, align: 'center', ls: 10, color: 'rgba(255,255,255,0.75)' });
-    txt('Platzhalter', 0, 46, { size: 20, weight: 500, align: 'center', color: 'rgba(255,255,255,0.45)' });
-    ctx.restore();
-  }
+  if (dp > 0 && dp < 1) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(lerp(x0, x1, dp), ty, 40, P.gold, 0.6); ctx.restore(); }
+  drawLogo(t, 1530, 470, 1.3, h + 1.5);
   ctx.restore();
   // hit flash
   const fl = Math.pow(1 - prog(t, h, h + 0.45), 3);
-  if (fl > 0 && t >= h) { ctx.fillStyle = `rgba(255,255,255,${0.5 * fl})`; ctx.fillRect(0, 0, W, H); }
+  if (fl > 0 && t >= h) { ctx.fillStyle = `rgba(255,255,255,${0.45 * fl})`; ctx.fillRect(0, 0, W, H); }
 }

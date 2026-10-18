@@ -23,7 +23,8 @@ const ROOT = __dirname;
 const OUT = path.join(ROOT, 'out');
 const FPS = parseInt(arg('fps', '60'), 10);
 const WORKERS = parseInt(arg('workers', '3'), 10);
-const DURATION = parseFloat(arg('duration', '60'));
+const TLJ = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'timeline.js'), 'utf8').split('window.TL =').pop().trim().replace(/;$/, ''));
+const DURATION = parseFloat(arg('duration', String(TLJ.length)));
 const URL = 'file://' + path.join(ROOT, 'index.html') + '?render=1';
 
 async function openPage(browser) {

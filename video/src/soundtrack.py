@@ -20,11 +20,27 @@ from scipy.ndimage import maximum_filter1d
 from scipy.io import wavfile
 
 SR = 48000
-DUR = 60.0
-N = int(SR * DUR)
 HERE = os.path.dirname(os.path.abspath(__file__))
 TL = json.loads(open(os.path.join(HERE, 'timeline.js'), encoding='utf-8').read().rsplit('window.TL =', 1)[1].strip().rstrip(';'))
-C = TL['cues']
+DUR = float(TL['length'])
+N = int(SR * DUR)
+# cues are written in story time; the picture stretches calm moments (TL.warp),
+# so every cue is mapped to real time here. The music is written in real time.
+_KS, _KR = np.array([k[0] for k in TL['warp']], float), np.array([k[1] for k in TL['warp']], float)
+
+
+def to_real(x):
+    return float(np.interp(x, _KS, _KR))
+
+
+def to_story(x):
+    return np.interp(x, _KR, _KS)
+
+
+C_STORY = TL['cues']
+C = {k: ([[to_real(a), to_real(b), g] for a, b, g in v] if k == 'scratch' else
+         v if k == 'scratchFreq' else
+         [to_real(x) for x in v] if isinstance(v, list) else to_real(v)) for k, v in C_STORY.items()}
 BEAT = 60.0 / TL['bpm']
 S16 = BEAT / 4
 
@@ -448,6 +464,7 @@ CHORDS_A = {  # name: (bass root, pad voicing)
     'Gm': (43, (55, 58, 62, 67)),
 }
 PROG_A = ['Dm', 'Bb', 'F', 'C']
+DROP = None  # set in music_intro_and_drop
 MEL_A = {
     'Dm': {0: 69, 3: 74, 6: 77, 8: 76, 10: 74, 12: 69, 14: 72},
     'Bb': {0: 70, 3: 74, 6: 77, 8: 74, 10: 72, 12: 70, 14: 69},
@@ -460,7 +477,7 @@ kicks = []
 
 
 def bar_chord(b):
-    return PROG_A[b % 4]
+    return PROG_A[(b - 1) % 4]
 
 
 def kick_at(t, gain=1.0, **kw):
@@ -474,42 +491,45 @@ def music_intro_and_drop():
     for t, (a, b) in zip(C['notifs'], [(81, 86), (77, 81), (86, 89), (84, 89)]):
         SFX.add(bell(a, 1.2, 1.4), t, 0.33, -0.2, [(ROOM, 0.3), (HALL, 0.3)])
         SFX.add(bell(b, 1.4, 1.4), t + 0.085, 0.3, 0.2, [(ROOM, 0.3), (HALL, 0.3)])
-    # 2016 pluck beat 2.0 - 7.75
-    for b in range(1, 4):
+    drop = C['shatter']
+    stop = drop - 0.25
+    # 2016 pluck beat from bar 1 until just before the drop
+    for b in range(1, int(drop // 2)):
         ch = bar_chord(b)
         tones = CHORDS_A[ch][1]
         for i, s in enumerate(TROP):
             t = b * 2 + s * S16
-            if t >= 7.75:
+            if t >= stop:
                 continue
             m = tones[(i + b) % 4] + (12 if i % 3 == 2 else 0)
             MUSIC.add(marimba(m), t, 0.34, (-0.3, 0.3)[i % 2], hs)
         for k in range(16):
             t = b * 2 + k * S16
-            if t < 7.75 and t >= 2.5:
+            if stop > t >= 2.5:
                 DRUMS.add(shaker(), t, 0.10 * (1.0 if k % 2 else 0.6), 0.35)
         for k in (1, 3):
             t = b * 2 + k * BEAT
-            if t < 7.75:
+            if t < stop:
                 DRUMS.add(snap(), t, 0.33, -0.1, [(HALL, 0.2)])
-    for k in range(int(4.0 / BEAT), int(7.5 / BEAT)):
+    for k in range(int(4.0 / BEAT), int((drop - 0.5) / BEAT)):
         kick_at(k * BEAT, 0.5, decay=9, click=0.15)
-    for k in range(8, 15):
-        t = 4.0 + k * S16 * 2
-        if t < 7.75:
-            PUMP.add(pluck_bass(CHORDS_A[bar_chord(int(t // 2))][0] + 12), t, 0.28)
-    # build: snare roll + riser
-    for k in range(16):
-        t = 6.0 + k * S16 * (1 if k < 8 else 0.5) + (0 if k < 8 else 0.5)
-        if t < 7.75:
-            DRUMS.add(snare(), t, 0.08 + 0.25 * k / 16, 0, [(HALL, 0.2)])
-    SFX.add(riser(1.9, seed=21), 5.85, 0.22)
+    t = 4.0
+    while t < stop:
+        PUMP.add(pluck_bass(CHORDS_A[bar_chord(int(t // 2))][0] + 12), t, 0.28)
+        t += BEAT
+    # build under "Ist aber zehn Jahre her.": snare roll 8ths -> 16ths -> 32nds + riser
+    rs = drop - 2.0
+    t, k = rs, 0
+    while t < stop:
+        DRUMS.add(snare(), t, 0.06 + 0.27 * (t - rs) / 2.0, 0, [(HALL, 0.2)])
+        t += BEAT / 2 if t < rs + 1.0 else (S16 if t < rs + 1.5 else S16 / 2)
+    SFX.add(riser(2.0, seed=21), drop - 2.25, 0.22)
 
 
 def music_upgrades():
     hs = [(HALL, 0.22)]
     end = C['freeze']
-    for b in range(4, 16):
+    for b in range(int(C['shatter'] // 2), int(end // 2)):
         t0 = b * 2
         ch = bar_chord(b)
         root, voicing = CHORDS_A[ch]
@@ -518,7 +538,7 @@ def music_upgrades():
             kick_at(t0 + k * BEAT, 0.95)
         for k in (1, 3):
             DRUMS.add(clap(), t0 + k * BEAT, 0.45, 0, [(HALL, 0.25)])
-            if t0 < 20:
+            if t0 < C['morphs'][2]:
                 DRUMS.add(snap(), t0 + k * BEAT + 0.004, 0.25, 0.15)
         for k in range(16):
             t = t0 + k * S16
@@ -559,49 +579,53 @@ def music_upgrades():
                 PUMP.add(supersaw(tuple(v + 12 for v in voicing), 0.12, 5, 28.0, 5000.0, 0.003, 0.08, seed=7), t0 + k * BEAT + BEAT / 2, 0.07)
     # future-bass wobble after the last everyday upgrade
     tm = C['morphs'][4]
-    for b0, ch in ((tm, 'F'), (tm + 1.0, 'C')):
+    for b0, ch in ((tm, 'F'), (tm + 1.0, 'C'), (tm + 2.0, 'Dm')):
+        if b0 >= end:
+            break
         v = CHORDS_A[ch][1]
         pad = supersaw(tuple(x + 12 for x in v), 1.0, 7, 30.0, 6000.0, 0.005, 0.05, seed=3)
         tt = T(pad.shape[1])
         lfo = 0.35 + 0.65 * (0.5 + 0.5 * np.cos(2 * np.pi * tt / (BEAT / 3)))
         PUMP.add(pad * lfo, b0, 0.12, 0, [(HALL, 0.25)])
     # crashes on the drop and every upgrade
-    for t in [8.0] + C['morphs']:
-        DRUMS.add(crash(), t, 0.16 if t != 8.0 else 0.24, 0, [(HALL, 0.2)])
+    for t in [C['shatter']] + C['morphs']:
+        DRUMS.add(crash(), t, 0.16 if t != C['shatter'] else 0.24, 0, [(HALL, 0.2)])
     return end
 
 
 def music_therapy():
-    """35-44: muffled, sad piano; 40-44 the filter opens and the build starts."""
-    seq = [(35.5, 'Dm'), (36.0, 'Dm'), (38.0, 'Bb'), (40.0, 'Gm'), (42.0, 'C')]
+    """muffled, sad piano after the freeze; the filter opens and the build starts with the bar"""
+    a0, hit = C['adIn'], C['barRise2'][1]          # 48 / 58 s real time
+    seq = [(a0 + 0.5, 'Dm'), (a0 + 1.0, 'Dm'), (a0 + 3.5, 'Bb'), (hit - 4.0, 'Gm'), (hit - 2.0, 'C')]
     arps = {'Dm': (62, 69, 65, 69), 'Bb': (58, 65, 62, 65), 'Gm': (55, 62, 58, 62), 'C': (55, 64, 60, 67)}
     for i, (t0, ch) in enumerate(seq):
-        dur = (seq[i + 1][0] if i + 1 < len(seq) else 44.0) - t0
+        dur = (seq[i + 1][0] if i + 1 < len(seq) else hit) - t0
         root, voicing = CHORDS_A[ch]
         MUFF.add(piano(root + 12, 3.0, 0.6), t0, 0.5, -0.1)
-        step = BEAT if t0 < 42.0 else BEAT / 2
+        step = BEAT if t0 < hit - 2.0 else BEAT / 2
         k = 0
         while t0 + k * step < t0 + dur - 0.01:
-            m = arps[ch][k % 4] + (12 if (t0 >= 42.0 and k >= 4) else 0)
+            m = arps[ch][k % 4] + (12 if (t0 >= hit - 2.0 and k >= 4) else 0)
             MUFF.add(piano(m, 2.0, 0.55), t0 + k * step, 0.36, (-0.25, 0.25)[k % 2])
             k += 1
         pad = supersaw(tuple(voicing), dur, 5, 14.0, 1800.0, 0.6, 0.6, seed=11)
         MUFF.add(pad, t0, 0.13)
-    MUFF.add(sub(38, 9.5, 1.0), 34.6, 0.2)
+    MUFF.add(sub(38, hit - a0 + 0.4, 1.0), a0 - 0.4, 0.2)
     # heartbeat-like soft kicks under the 2017 part, then a proper build
-    for k in range(int((44 - 40) / BEAT)):
-        t = 40.0 + k * BEAT
-        g = 0.25 + 0.5 * (t - 40) / 4
-        kick_at(t, g, decay=9, click=0.1)
+    k0 = hit - 4.0
+    for k in range(int(4.0 / BEAT)):
+        t = k0 + k * BEAT
+        kick_at(t, 0.25 + 0.5 * (t - k0) / 4, decay=9, click=0.1)
     roll = []
-    t = 42.0
-    while t < 43.98:
+    t = hit - 2.0
+    while t < hit - 0.02:
         roll.append(t)
-        t += S16 * 2 if t < 43 else (S16 if t < 43.5 else S16 / 2)
+        t += S16 * 2 if t < hit - 1.0 else (S16 if t < hit - 0.5 else S16 / 2)
     for t in roll:
-        DRUMS.add(snare(seed=31, tone=0.6), t, 0.05 + 0.3 * ((t - 42) / 2) ** 1.5, 0, [(HALL, 0.25)])
-    SFX.add(riser(2.0, 150, 10000, seed=33), 42.0, 0.42)
-    DRUMS.add(rev_crash(1.0), 43.0, 0.3)
+        DRUMS.add(snare(seed=31, tone=0.6), t, 0.05 + 0.3 * ((t - hit + 2) / 2) ** 1.5, 0, [(HALL, 0.25)])
+    a, b = C['riser']
+    SFX.add(riser(b - a, 150, 10000, seed=33), a, 0.42)
+    DRUMS.add(rev_crash(1.0), hit - 1.0, 0.3)
 
 
 LEAD_D = [  # (chord, {8th-step: midi})
@@ -610,14 +634,19 @@ LEAD_D = [  # (chord, {8th-step: midi})
     ('Dm', {0: 74, 2: 77, 3: 79, 4: 81, 6: 84}),
     ('Bb', {0: 82, 2: 81, 3: 79, 4: 77, 6: 74}),
     ('F', {0: 72, 2: 77, 3: 79, 4: 81, 5: 84, 6: 81, 7: 79}),
+    ('C', {0: 79, 2: 76, 3: 74, 4: 76, 5: 79, 6: 84}),
 ]
 
 
 def music_finale():
     hs = [(HALL, 0.25)]
     t_end = C['endHit']
+    start = C['barRise2'][1]
+    build = t_end - 2.0
     for i, (ch, mel) in enumerate(LEAD_D):
-        t0 = 44.0 + 2 * i
+        t0 = start + 2 * i
+        if t0 >= build:
+            break
         root, voicing = CHORDS_A[ch]
         for k in range(4):
             kick_at(t0 + k * BEAT, 1.0)
@@ -630,7 +659,7 @@ def music_finale():
             if k % 4 == 2:
                 DRUMS.add(hat(True), t, 0.08, 0.3)
         big = supersaw(tuple(voicing) + (voicing[0] + 12,), 2.0, 7, 32.0, 5500.0, 0.01, 0.2, seed=20 + i)
-        PUMP.add(big, t0, 0.2 if t0 < 50 else 0.16, 0, [(HALL, 0.35)])
+        PUMP.add(big, t0, 0.2 if t0 < C['gridIn'] else 0.16, 0, [(HALL, 0.35)])
         for s, d in ((0, 0.7), (6, 0.45), (10, 0.9)):
             PUMP.add(bass808(root, d, 5.0 if s == 0 else 0.0), t0 + s * S16, 0.4)
         for s, m in mel.items():
@@ -643,16 +672,19 @@ def music_finale():
         arp = [voicing[j % 4] + 12 * (1 + (j // 4) % 2) for j in (0, 1, 2, 3, 2, 1, 4, 5, 6, 7, 6, 5, 2, 3, 1, 2)]
         for k, m in enumerate(arp):
             PUMP.add(pluck(m, 0.25, 2.2), t0 + k * S16, 0.06, (-0.6, 0.6)[k % 2], [(HALL, 0.3)])
-    # last half-bar: C build into the final hit
-    t0 = 54.0
-    PUMP.add(supersaw((55, 60, 64, 67, 72), 1.0, 7, 30.0, 6500.0, 0.3, 0.05, seed=50), t0, 0.18, 0, [(HALL, 0.35)])
-    for k in range(2):
+    # last bar: C build into the final hit
+    t0 = build
+    PUMP.add(supersaw((55, 60, 64, 67, 72), 2.0, 7, 30.0, 6500.0, 0.5, 0.05, seed=50), t0, 0.18, 0, [(HALL, 0.35)])
+    for k in range(3):
         kick_at(t0 + k * BEAT, 0.9)
-    for k in range(8):
-        DRUMS.add(snare(seed=51), t0 + 0.5 + k * S16 / 1.0 if k < 4 else t0 + 0.5 + 4 * S16 + (k - 4) * S16 / 2, 0.15 + 0.05 * k, 0, [(HALL, 0.2)])
-    PUMP.add(bass808(36, 0.95, 7.0), t0, 0.45)
-    DRUMS.add(rev_crash(1.0), C['revCymbal'][0], 0.42)
-    SFX.add(riser(1.0, 400, 12000, seed=52), 54.0, 0.3)
+    t, k = t0 + 1.0, 0
+    while t < t_end - 0.02:
+        DRUMS.add(snare(seed=51), t, 0.12 + 0.3 * (t - t0 - 1.0), 0, [(HALL, 0.2)])
+        t += S16 if t < t_end - 0.5 else S16 / 2
+    PUMP.add(bass808(36, 1.9, 7.0), t0, 0.4)
+    a, b = C['revCymbal']
+    DRUMS.add(rev_crash(b - a), a, 0.42)
+    SFX.add(riser(b - a, 400, 12000, seed=52), a, 0.3)
     # final chord
     for m in (41, 53, 57, 60, 65, 69, 72, 77):
         MUSIC.add(piano(m, 4.5, 0.85), t_end, 0.32 if m > 50 else 0.5, (m - 60) / 30, [(HALL, 0.45)])
@@ -795,7 +827,7 @@ def sound_design():
     tt = T(n)
     shimmer = sum(np.sin(2 * np.pi * f * tt + i) for i, f in enumerate((2637, 3136, 3951, 5274))) * np.exp(-tt * 1.4) * 0.07
     SFX.add(pan2(shimmer, 0), t, 1.0, sends=[(HALL, 0.4)])
-    n = secs(3.4)
+    n = secs(C['adIn'] - t + 0.4)
     tt = T(n)
     room = lp(noise(n, 361), 700) * 0.03 + 0.004 * np.sin(2 * np.pi * 50 * tt)
     SFX.add(fade(np.vstack([room, lp(noise(n, 362), 700) * 0.03]), 0.05, 0.8), t, 1.0)
@@ -804,7 +836,8 @@ def sound_design():
     for a, b, g in C['scratch']:
         n = secs(b - a + 0.4)
         tt = T(n) + a - 0.2
-        ph = 2 * np.pi * C['scratchFreq'] * (tt - C['scratch'][0][0])
+        st = to_story(tt)                       # the hand moves in story time
+        ph = 2 * np.pi * C['scratchFreq'] * (st - C_STORY['scratch'][0][0])
         env = np.clip((tt - (a - 0.2)) / 0.3, 0, 1) * np.clip((b + 0.2 - tt) / 0.3, 0, 1)
         vel = np.abs(np.cos(ph)) ** 1.6
         grit = bp(noise(n, 400), 1800, 6500) * (0.7 + 0.6 * (np.abs(noise(n, 401)) > 1.6))
@@ -937,18 +970,23 @@ def main(out):
     music = PUMP.x * pump + MUSIC.x + DRUMS.x
     # the 2016 therapy part is heard through a wall; the wall opens with the rising bar
     t = T(N)
-    fc_of = lambda TT: np.where(TT < 40.0 - 34.0, 650.0, 650.0 * (14000 / 650.0) ** np.clip((TT - 6.0) / 4.0, 0, 1) ** 2)
-    muff = np.vstack([stft_mask(np.concatenate([np.zeros(0), MUFF.x[c, secs(34.0):]]), lambda F, TT: 1 / np.sqrt(1 + (F / fc_of(TT)) ** 4)) for c in range(2)])
-    music[:, secs(34.0):] += muff * 1.1
+    m0, hit = C['adIn'] - 1.0, C['barRise2'][1]
+    open0 = hit - 4.0 - m0
+    fc_of = lambda TT: np.where(TT < open0, 650.0, 650.0 * (14000 / 650.0) ** np.clip((TT - open0) / 4.0, 0, 1) ** 2)
+    muff = np.vstack([stft_mask(MUFF.x[c, secs(m0):], lambda F, TT: 1 / np.sqrt(1 + (F / fc_of(TT)) ** 4)) for c in range(2)])
+    music[:, secs(m0):] += muff * 1.1
     # dead stop at the freeze
-    cut = 1 - time_mask([(C['freeze'], 34.6)], 0.006)
+    back = C['adIn'] - 0.4
+    cut = 1 - time_mask([(C['freeze'], back)], 0.006)
     music *= cut
-    HALL.x[:, :] *= np.where(t < C['freeze'], 1.0, np.where(t < 34.6, 0.0, 1.0))
+    HALL.x[:, :] *= np.where(t < C['freeze'], 1.0, np.where(t < back, 0.0, 1.0))
     rv = convolve(HALL.x, hall) * 0.55
-    rv *= np.where((t >= C['freeze']) & (t < 34.6), np.exp(-np.maximum(0, t - C['freeze']) / 0.18), 1.0)
+    rv *= np.where((t >= C['freeze']) & (t < back), np.exp(-np.maximum(0, t - C['freeze']) / 0.18), 1.0)
     rv += convolve(ROOM.x, room) * 0.35
     # musical arc: every upgrade makes the track a little bigger
-    arc = np.interp(t, [0, 8, 9.9, 10.1, 15.9, 16.1, 19.9, 20.1, 25.9, 26.1, 32, 44, 55, 60],
+    mo = C['morphs']
+    arc = np.interp(t, [0, C['shatter'], mo[0] - 0.1, mo[0] + 0.1, mo[1] - 0.1, mo[1] + 0.1, mo[2] - 0.1, mo[2] + 0.1, mo[3] - 0.1, mo[3] + 0.1,
+                        C['freeze'], C['barRise2'][1], C['endHit'], DUR],
                     [1, 0.78, 0.78, 0.84, 0.84, 0.9, 0.9, 0.95, 0.95, 1.0, 1.0, 1.06, 1.06, 1.06])
     # sound design ducks the music (trailer-style sidechain)
     sfx = SFX.x * 1.8

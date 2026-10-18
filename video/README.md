@@ -1,6 +1,6 @@
 # 10 Jahre Alltag – Route-Explainer (AbbVie · Rinvoq AD, intern)
 
-Animationsfilm, ca. 60 s, 1920×1080 bei 60 fps, Stereo-Ton (AAC). Kein Voice-over: Die Geschichte läuft über On-Screen-Text, Sound und Musik.
+Animationsfilm, 77 s, 1920×1080 bei 60 fps, Stereo-Ton (AAC). Kein Voice-over: Die Geschichte läuft über On-Screen-Text, Sound und Musik.
 
 **Ergebnis:** `out/10-jahre-alltag.mp4`
 
@@ -9,10 +9,12 @@ Alles ist Code, es gibt keine Stock-Assets, Samples oder Bilddateien:
 - **Bild:** Canvas-2D-Animation (`src/*.js`). Jedes Frame ist eine reine Funktion der Zeit `t` und wird in headless Chromium Frame für Frame gerendert.
 - **Ton:** Musik und Sounddesign werden in `src/soundtrack.py` mit NumPy/SciPy synthetisiert. Dazu gehören Marimba, Plucks, Supersaws, 808, Drums, Vocal-Chops, Klavier sowie Glasbruch, Münzen, Stempel, Scanner-Beep, Kratzen usw. Hall und Mastering sind ebenfalls Code.
 - **Sync:** Bild und Ton lesen dieselbe Cue-Liste `src/timeline.js`. Wenn ein Timing dort verschoben wird, passen sich Animation und Sound automatisch an.
+- **Lesezeit:** Die Cues sind in „Story-Zeit“ geschrieben. `TL.warp` dehnt gezielt die ruhigen Momente jeder Szene, also vor und nach jedem Wandel, damit die Texte gelesen werden können. Die Musik ist in echter Zeit komponiert und bleibt taktgenau (120 BPM). Mehr oder weniger Lesezeit stellt man direkt in den Warp-Knoten ein.
+- **Logo:** `assets/rinvoq-logo-on-charcoal.png` ist aus dem Brand-Guide-Screenshot freigestellt und in `src/logo.js` eingebettet. Für die finale Version sollte es durch die offizielle Logo-Datei ersetzt werden.
 
 ## Ablauf
 
-| Zeit | Bild | Text | Sound |
+| Zeit (Story) | Bild | Text | Sound |
 |---|---|---|---|
 | 0–5 s | 2016er-Smartphone, Lockscreen 20:16, Benachrichtigungen (EM-Viertelfinale, „Public Viewing?“) | **2016.** Fühlt sich an wie gestern. | In D-Moll gestimmte Notification-Plings, Tropical-House-Marimba setzt ein |
 | 5–8 s | Die Jahreszahl wird zum Zählwerk 2016 → 2026, Display bekommt Risse und zerspringt | Ist aber zehn Jahre her. | Zählwerk-Ticks, Snare-Roll, Riser, Glas-Risse, Glasbruch und Impact zum Drop |
@@ -28,7 +30,11 @@ Alles ist Code, es gibt keine Stock-Assets, Samples oder Bilddateien:
 | 50–55 s | Raster aus 7 Kacheln, die im Takt von 2016 auf 2026 kippen | Was 2016 Standard war, ist heute überholt. → Auch in der Therapie. | Flip-Klicks auf jedem Beat |
 | 55–60 s | Endcard mit Zeitstrahl 2016–2026 und Logo-Platzhalter | Route: 10 Jahre Alltag. Warum bei 2016 stehen bleiben? | Final Hit, Schlussakkord, Ausklang |
 
-**Bildsprache.** Jede Szene startet in einer „2016-Welt“: Papier-Creme, flache UI, Filmkorn. Beim Upgrade breitet sich die „2026-Welt“ als Ring vom Objekt aus: Dark Mode, Glow, Glas. Die Jahres-Pille oben links rollt dabei mit.
+Die Zeiten in der Tabelle sind Story-Zeit. Im fertigen Film dauern die Szenen durch die Lesepausen länger: Freeze bei 0:44, „Heute“ bei 0:58, Endcard bei 1:12.
+
+**Bildsprache.** Jede Alltagsszene startet in einer „2016-Welt“: Papier-Creme, flache UI, Filmkorn. Beim Upgrade breitet sich eine neutrale „2026-Welt“ als Ring vom Objekt aus: Dark Mode, Glow, Glas. Die Jahres-Pille oben links rollt dabei mit.
+
+**RINVOQ-Markenwelt am Ende.** Ab „Heute“ wechselt der Film in die Primärpalette aus dem Brand Guide: RINVOQ Charcoal `#25282A` als Hintergrund, RINVOQ Gold `#FFD100` als kräftiger Akzent, HUMIRA Plum `#90124A` nur als Akzent im Pinselverlauf. Dazu kommen das Pinselstrich-Element (Halo um die Figur, gold übermalte Messlatte, Unterstreichungen) und der Iconstil (weiße Linie mit goldenem Pinselakzent, z. B. die Check-Icons). Raster und Endcard bleiben in dieser Welt, die Endcard zeigt das RINVOQ-Logo in der Charcoal-Variante. Bewusst nicht verwendet wird die Sekundärpalette: Navy und Teal sind dort Wettbewerbern zugeordnet.
 
 **Musik.** 120 BPM, D-Moll/F-Dur. Sie startet als 2016-Tropical-House (Marimba, Snaps, Shaker). Mit jedem Upgrade kommt eine modernere Ebene dazu: Hi-Hats, 808, Arpeggio, Supersaw-Stabs, Vocal-Chops, Future-Bass-Wobble. Beim Freeze bricht die Musik ab, im AD-Teil ist sie gedämpft, ab der Messlatte folgen Build-up und großer Swell.
 
