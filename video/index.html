@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10 Jahre Alltag</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { position: absolute; inset: 0; margin: auto; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; }
+  #hint { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); font: 600 15px system-ui, sans-serif;
+          color: #fff; background: rgba(0,0,0,.55); padding: 10px 16px; border-radius: 999px; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="hint">Klicken zum Abspielen / Pausieren</div>
+<script src="src/timeline.js"></script>
+<script src="src/core.js"></script>
+<script src="src/scenes1.js"></script>
+<script src="src/scenes2.js"></script>
+<script src="src/scenes3.js"></script>
+<script src="src/main.js"></script>
+<script>if (/render/.test(location.search)) document.getElementById('hint').remove();</script>
+</body>
+</html>
